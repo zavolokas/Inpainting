@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Zavolokas;
+using Zavolokas.Structures;
 
 namespace SeamCarving
 {

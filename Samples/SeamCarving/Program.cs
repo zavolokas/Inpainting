@@ -1,9 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
-using Zavolokas;
-using Zavolokas.ImageProcessing;
+using Zavolokas.Structures;
 
 namespace SeamCarving
 {

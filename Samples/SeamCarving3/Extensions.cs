@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Zavolokas;
 using Zavolokas.Arrays;
-using Zavolokas.ImageProcessing;
+using Zavolokas.Structures;
 
 namespace SeamCarving2
 {

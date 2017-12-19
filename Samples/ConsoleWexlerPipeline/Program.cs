@@ -5,11 +5,11 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using Grapute;
-using Zavolokas;
 using Zavolokas.GdiExtensions;
 using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.ImageProcessing.PatchMatch;
 using Zavolokas.Structures;
+using Zavolokas.Utils.Processes;
 
 namespace ConsoleWexlerPipeline
 {

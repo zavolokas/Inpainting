@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grapute;
-using Zavolokas.Math;
+using Zavolokas.Math.Combinatorics;
 using Zavolokas.Structures;
 
 namespace ConsoleWexlerPipeline

@@ -6,4 +6,6 @@
 **/bin
 **/obj
 **/*.user
+**/*.png
+**/*.bmp
 **/packages

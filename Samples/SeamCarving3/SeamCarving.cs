@@ -4,8 +4,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 //using BenchmarkDotNet.Attributes;
-using Zavolokas;
-using Zavolokas.ImageProcessing;
+using Zavolokas.GdiExtensions;
+using Zavolokas.Structures;
+using Zavolokas.Utils.Processes;
 
 namespace SeamCarving2
 {
@@ -15,11 +16,11 @@ namespace SeamCarving2
         public static void Remove()
         {
 
-            //using (var imageBitmap = new Bitmap(@"..\..\..\..\images\Valve_original.png"))
-            using (var imageBitmap = new Bitmap(@"..\..\..\..\images\t009.jpg"))
-            using (var protectBitmap = new Bitmap(@"..\..\..\..\images\p009.png"))
-            using (var removeBitmap = new Bitmap(@"..\..\..\..\images\m009.png"))
-            //using (var imageBitmap = new Bitmap(@"..\..\..\..\images\sc1.png"))
+            //using (var imageBitmap = new Bitmap(@"..\..\..\images\Valve_original.png"))
+            using (var imageBitmap = new Bitmap(@"..\..\..\images\t009.jpg"))
+            using (var protectBitmap = new Bitmap(@"..\..\..\images\p009.png"))
+            using (var removeBitmap = new Bitmap(@"..\..\..\images\m009.png"))
+            //using (var imageBitmap = new Bitmap(@"..\..\..\images\sc1.png"))
             {
                 var imageArea = Area2D.Create(0, 0, imageBitmap.Width, imageBitmap.Height);
                 var protectArea = protectBitmap.ToArea();
