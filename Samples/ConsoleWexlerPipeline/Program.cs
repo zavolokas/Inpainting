@@ -31,7 +31,7 @@ namespace ConsoleWexlerPipeline
             //var imageName = "t102.jpg";
             //var markupImageName = "m102.png";
 
-            //////colors smashed bug
+            ////colors smashed bug
             //var imageName = "t003.jpg";
             //var markupImageName = "m003.png";
 
@@ -200,9 +200,12 @@ namespace ConsoleWexlerPipeline
                         }
                         else
                         {
-                            task.ForEachOutput(new SplitNnfAndMap())
-                                .ForEachOutput(new NnfInit()); // random init
+                            task.ForEachOutput(new SplitNnfAndMap());
                         }
+
+                        // NNF random init
+                        task = task.ForEachOutput(new NnfInit()); 
+
                         // A number of forward and backward neighbours check and random search
                         for (var i = 0; i < input.PatchMatchSettings.IterationsAmount; i++)
                         {
