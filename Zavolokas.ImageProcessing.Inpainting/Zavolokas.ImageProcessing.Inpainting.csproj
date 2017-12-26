@@ -48,6 +48,9 @@
     <Reference Include="Accord.Statistics, Version=3.7.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
       <HintPath>..\packages\Accord.Statistics.3.7.0\lib\net462\Accord.Statistics.dll</HintPath>
     </Reference>
+    <Reference Include="Grapute, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Grapute.1.0.0\lib\net462\Grapute.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -67,18 +70,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColorResolver.cs" />
+    <Compile Include="ColorResolvers\ColorResolver.cs" />
     <Compile Include="InpaintAreaIsNotSetException.cs" />
     <Compile Include="InpaintMapBuilder.cs" />
-    <Compile Include="MeanShiftColorResolver.cs" />
+    <Compile Include="ColorResolvers\MeanShiftColorResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleColorResolver.cs" />
+    <Compile Include="ColorResolvers\SimpleColorResolver.cs" />
     <Compile Include="WexlerAlgorithmSettings.cs" />
     <Compile Include="WexlerInpainter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Accord.3.7.0\build\Accord.targets" Condition="Exists('..\packages\Accord.3.7.0\build\Accord.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
