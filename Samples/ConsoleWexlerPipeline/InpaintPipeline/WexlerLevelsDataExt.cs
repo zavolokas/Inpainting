@@ -19,11 +19,11 @@ namespace ConsoleWexlerPipeline
             input.SaveResult(iteration, true, true, true, true, true, true, true, true, true);
         }
 
-        public static void SaveResult(this WexlerLevelsData input, int iteration, 
-            bool currentPicture = false, 
+        public static void SaveResult(this WexlerLevelsData input, int iteration,
+            bool currentPicture = false,
             bool removeArea = false,
             bool nnf = false,
-            bool normalizedNnf = false, 
+            bool normalizedNnf = false,
             bool inpaintedOriginal = false,
             bool confidenceMap = false,
             bool restored = false,

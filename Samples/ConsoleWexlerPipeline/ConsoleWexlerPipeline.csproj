@@ -66,17 +66,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Inpaint.cs" />
-    <Compile Include="MergeNnfsAndMaps.cs" />
-    <Compile Include="PmNnfBuildIteration.cs" />
-    <Compile Include="NnfInit.cs" />
-    <Compile Include="SplitNnfAndMap.cs" />
-    <Compile Include="NormalizeNnf.cs" />
+    <Compile Include="InpaintPipeline\Inpaint.cs" />
+    <Compile Include="InpaintPipeline\Inpainter.cs" />
+    <Compile Include="InpaintPipeline\MergeNnfsAndMaps.cs" />
+    <Compile Include="InpaintPipeline\NnfInit.cs" />
+    <Compile Include="InpaintPipeline\NormalizeNnf.cs" />
+    <Compile Include="InpaintPipeline\PmNnfBuildIteration.cs" />
+    <Compile Include="InpaintPipeline\ScaleUpNnf.cs" />
+    <Compile Include="InpaintPipeline\SplitNnfAndMap.cs" />
+    <Compile Include="InpaintPipeline\WexlerLevelsData.cs" />
+    <Compile Include="InpaintPipeline\WexlerLevelsDataExt.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScaleUpNnf.cs" />
-    <Compile Include="WexlerLevelsData.cs" />
-    <Compile Include="WexlerLevelsDataExt.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
