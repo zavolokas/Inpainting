@@ -26,10 +26,8 @@ namespace Zavolokas.ImageProcessing.Inpainting
         /// </summary>
         public byte[] MaxIterations = new byte[] { 7 };
 
-        public double MinKValue = 0.2;
-        public bool AutoDk = true;
-        public double Dk = 0.01;
-        public double K = 3.0;
+        public double MinKValue = 0.003;
+        public double K = 0.03;
 
         public int ProgressUpdateFrequencyMs = 500;
         //internal Image OriginalImage;
@@ -54,8 +52,6 @@ namespace Zavolokas.ImageProcessing.Inpainting
                 clone.MaxIterations[i] = MaxIterations[i];
             }
             clone.MinKValue = MinKValue;
-            clone.AutoDk = AutoDk;
-            clone.Dk = Dk;
             clone.K = K;
             clone.ProgressUpdateFrequencyMs = ProgressUpdateFrequencyMs;
             clone.IsFullyDonored = IsFullyDonored;

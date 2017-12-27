@@ -12,8 +12,8 @@ namespace ConsoleWexlerPipeline
         public static ZsImage Inpaint(ZsImage rgbImage, ZsImage markupRgbImage)
         {
             // TODO: that should be verifyed or smartly calculated
-            const byte levelsAmount = 6;
-            const double InitK = 3.0;
+            const byte levelsAmount = 5;
+            const double InitK = 0.05;
             const bool needBlur = true;
 
             Area2D markupArea = markupRgbImage.FromArgbToArea2D();
@@ -82,12 +82,13 @@ namespace ConsoleWexlerPipeline
             input.Settings.StartLevel = 0;
             input.Settings.MaxPointsPerProcess = 4500;
             //input.Settings.Iterations = new byte[] { 20, 45, 30, 1, 2, 1 };
-            //input.Settings.Iterations = new byte[] { 20, 30, 20, 16, 10, 10 };
-            input.Settings.Iterations = new byte[] {3, 3, 3, 3, 3, 3};
-            input.Settings.PatchDistanceCalculator = ImagePatchDistance.Cie76;
-            input.Settings.ColorResolveMethod = ColorResolver.Simple;
-            input.PatchMatchSettingsQueue.Enqueue(new PatchMatchSettings {PatchSize = 5});
-            input.PatchMatchSettings.IterationsAmount = 3;
+            input.Settings.Iterations = new byte[] { 30, 25, 35, 16, 10, 10 };
+            //input.Settings.Iterations = new byte[] { 50, 40, 20, 16, 10, 10 };
+            //input.Settings.Iterations = new byte[] {100, 3, 3, 3, 3, 3};
+            input.Settings.PatchDistanceCalculator = ImagePatchDistance.Cie2000;
+            input.Settings.ColorResolveMethod = ColorResolver.MeanShift;
+            input.PatchMatchSettingsQueue.Enqueue(new PatchMatchSettings {PatchSize = 11});
+            input.PatchMatchSettings.IterationsAmount = 5;
 
             // Input is ready, now we can create a pipeline.
             Node<WexlerLevelsData, WexlerLevelsData> pipeline = null;
@@ -113,7 +114,7 @@ namespace ConsoleWexlerPipeline
 
                 if (levelIndex > 0)
                 {
-                    if (levelIndex > 0) ps = 9;
+                    if (levelIndex > 0) ps = 11;
                     if (levelIndex > 1) ps = 11;
                     input.PatchMatchSettingsQueue.Enqueue(new PatchMatchSettings {PatchSize = ps});
                 }

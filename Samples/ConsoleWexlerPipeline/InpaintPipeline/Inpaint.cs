@@ -15,7 +15,7 @@ namespace ConsoleWexlerPipeline
             WexlerInpainter.Inpaint(input.CurrentPicture, input.CurrentRemoveArea, input.NormalizedNnf, input.PatchMatchSettings.PatchSize, input.Settings.ColorResolveMethod, input.K);
 
             //input.SaveAll(_iteration);
-            input.SaveResult(_iteration, currentPicture:true);//, nnf:true, normalizedNnf:true, restored:true, removeArea:true, destArea: true);//, removeArea: true, confidenceMap:true);
+            input.SaveResult(_iteration, currentPicture:true, removeArea:false, destArea:false);//, restored:true);//, nnf:true, normalizedNnf:true, restored:true, removeArea:true, destArea: true);//, removeArea: true, confidenceMap:true);
 
             input.Maps.Dequeue();
             input.KQueue.Dequeue();
