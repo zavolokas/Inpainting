@@ -46,8 +46,8 @@
     <Reference Include="Zavolokas.GdiExtensions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Zavolokas.GdiExtensions.1.0.0\lib\net462\Zavolokas.GdiExtensions.dll</HintPath>
     </Reference>
-    <Reference Include="Zavolokas.ImageProcessing.PatchMatch, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Zavolokas.ImageProcessing.PatchMatch.1.0.0\lib\net462\Zavolokas.ImageProcessing.PatchMatch.dll</HintPath>
+    <Reference Include="Zavolokas.ImageProcessing.PatchMatch, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Zavolokas.ImageProcessing.PatchMatch.1.0.2\lib\net462\Zavolokas.ImageProcessing.PatchMatch.dll</HintPath>
     </Reference>
     <Reference Include="Zavolokas.Math, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Zavolokas.Math.1.0.0\lib\net452\Zavolokas.Math.dll</HintPath>

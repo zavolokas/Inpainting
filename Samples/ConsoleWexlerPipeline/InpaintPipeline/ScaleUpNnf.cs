@@ -13,8 +13,7 @@ namespace ConsoleWexlerPipeline
             input.ConfidenceMaps.Dequeue();
             input.PatchMatchSettingsQueue.Dequeue();
             input.PixelsAreas.Dequeue();
-
-            input.Nnf = PatchMatchNnfBuilder.ScaleNnf2X(input.Nnf, input.CurrentMap, input.CurrentPicture, input.CurrentPicture, input.CurrentPixelsArea, input.Settings.PatchDistanceCalculator, input.PatchMatchSettings);
+            input.Nnf = input.Nnf.CloneAndScale2XWithUpdate(input.CurrentPicture, input.CurrentPicture, input.PatchMatchSettings, input.CurrentMap, input.Settings.PatchDistanceCalculator, input.CurrentPixelsArea);
 
             Console.WriteLine($"ScaleUpNnf:\t{input.GetInfo()}");
             return new[] {input};

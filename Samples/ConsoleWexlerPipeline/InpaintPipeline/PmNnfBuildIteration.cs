@@ -16,7 +16,10 @@ namespace ConsoleWexlerPipeline
         protected override WexlerLevelsData[] Process(WexlerLevelsData input)
         {
             Console.WriteLine($"NeighboursCheck:\t{input.GetInfo()}");
-            PatchMatchNnfBuilder.RunBuildNnfIteration(input.Nnf, input.CurrentMap, input.CurrentPicture, input.CurrentPicture, input.CurrentPixelsArea, input.Settings.PatchDistanceCalculator, _direction, input.PatchMatchSettings);
+
+            var pmBuilder = new PatchMatchNnfBuilder();
+
+            pmBuilder.RunBuildNnfIteration(input.Nnf, input.CurrentPicture, input.CurrentPicture, _direction, input.PatchMatchSettings, input.Settings.PatchDistanceCalculator, input.CurrentMap, input.CurrentPixelsArea);
             
             return new[] {input};
         }

@@ -74,17 +74,19 @@ namespace ColorsCalculation
                 .SetInpaintArea(removeArea)
                 .Build();
 
-            PatchMatchNnfBuilder.RunRandomNnfInitIteration(nnf, map, image, image, imagePixelsArea, calculator, settings);
+            var pmBuilder = new PatchMatchNnfBuilder();
+
+            pmBuilder.RunRandomNnfInitIteration(nnf, image, image, settings, calculator, map, imagePixelsArea);
             for (int i = 0; i < 5; i++)
             {
-                PatchMatchNnfBuilder.RunBuildNnfIteration(nnf, map, image, image, imagePixelsArea, calculator, NeighboursCheckDirection.Forward, settings);
-                PatchMatchNnfBuilder.RunBuildNnfIteration(nnf, map, image, image, imagePixelsArea, calculator, NeighboursCheckDirection.Backward, settings);
+                pmBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward,  settings, calculator, map, imagePixelsArea);
+                pmBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward,  settings, calculator, map, imagePixelsArea);
             }
 
             // Note: the normalization should be done not only for the 
             // remove area, but for the whole dest area since this information
             // will be used in the colors calculation.
-            PatchMatchNnfBuilder.NormalizeNnf(nnf, destArea, settings);
+            nnf.Normalize(destArea);
 
             WexlerInpainter.Inpaint(image, removeArea, nnf, patchSize, ColorResolver.MeanShift, 3.0);
 

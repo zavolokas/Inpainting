@@ -18,15 +18,17 @@ namespace ConsoleWexlerPipeline
                 var maps = inputs.Select(i => i.CurrentMap).ToArray();
 
                 // Merge NNFs and set it to the output.
-                var mergedNnf = PatchMatchNnfBuilder.MergeNnfs(nnfs, maps, nnfs[0].DstWidth, nnfs[0].SourceWidth, inputs[0].PatchMatchSettings).Item1;
-                output.Nnf = mergedNnf;
+                for (int i = 1; i < nnfs.Length; i++)
+                {
+                    output.Nnf.Merge(nnfs[i], output.CurrentMap, maps[i], inputs[0].PatchMatchSettings);
 
-                // Merge maps and set it to the output.
-                var mergedMap = maps.Aggregate((m1, m2) => new Area2DMapBuilder()
-                    .InitNewMap(m1)
-                    .AddMapping(m2)
-                    .Build());
-                output.SubstituteMap(mergedMap);
+                    var mergedMap = new Area2DMapBuilder()
+                        .InitNewMap(output.CurrentMap)
+                        .AddMapping(maps[i])
+                        .Build();
+
+                    output.SubstituteMap(mergedMap);
+                }
             }
 
             Console.WriteLine($"MergeToOneNnf:\t\tinputs:{inputs.Length}");

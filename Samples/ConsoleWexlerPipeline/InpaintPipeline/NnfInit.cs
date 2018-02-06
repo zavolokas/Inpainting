@@ -9,8 +9,8 @@ namespace ConsoleWexlerPipeline
         protected override WexlerLevelsData[] Process(WexlerLevelsData input)
         {
             Console.WriteLine($"NnfInit:\t{input.GetInfo()}");
-
-            PatchMatchNnfBuilder.RunRandomNnfInitIteration(input.Nnf, input.CurrentMap, input.CurrentPicture, input.CurrentPicture, input.CurrentPixelsArea, input.Settings.PatchDistanceCalculator, input.PatchMatchSettings);
+            var pmBuilder = new PatchMatchNnfBuilder();
+            pmBuilder.RunRandomNnfInitIteration(input.Nnf, input.CurrentPicture, input.CurrentPicture, input.PatchMatchSettings, input.Settings.PatchDistanceCalculator, input.CurrentMap, input.CurrentPixelsArea);
 
             return new[] {input};
         }

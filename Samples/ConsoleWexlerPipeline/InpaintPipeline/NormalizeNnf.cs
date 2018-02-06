@@ -15,7 +15,7 @@ namespace ConsoleWexlerPipeline
             // will be used in the colors calculation.
             var destArea = (input.CurrentMap as IAreasMapping).DestArea;
 
-            PatchMatchNnfBuilder.NormalizeNnf(nnf, destArea, input.PatchMatchSettings);
+            nnf.Normalize(destArea);
             input.NormalizedNnf = nnf;
 
             Console.WriteLine($"NormalizeNnf:\t{input.GetInfo()}");
