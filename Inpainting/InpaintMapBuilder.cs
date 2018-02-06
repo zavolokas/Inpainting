@@ -22,7 +22,6 @@ namespace Zavolokas.ImageProcessing.Inpainting
         /// Initializes a new instance of the <see cref="InpaintMapBuilder" /> class.
         /// </summary>
         /// <param name="mapBuilder">The map builder.</param>
-        /// <param name="areaFactory">The area factory.</param>
         /// <exception cref="System.ArgumentNullException">
         /// </exception>
         /// <exception cref="System.NotImplementedException"></exception>
