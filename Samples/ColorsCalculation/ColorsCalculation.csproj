@@ -71,7 +71,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Zavolokas.ImageProcessing.Inpainting\Inpainting.csproj">
+    <ProjectReference Include="..\..\Inpainting\Inpainting.csproj">
       <Project>{de1e1f2a-3446-4267-8f76-518f29de58a0}</Project>
       <Name>Inpainting</Name>
     </ProjectReference>
