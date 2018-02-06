@@ -71,9 +71,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Zavolokas.ImageProcessing.Inpainting\Zavolokas.ImageProcessing.Inpainting.csproj">
+    <ProjectReference Include="..\..\Zavolokas.ImageProcessing.Inpainting\Inpainting.csproj">
       <Project>{de1e1f2a-3446-4267-8f76-518f29de58a0}</Project>
-      <Name>Zavolokas.ImageProcessing.Inpainting</Name>
+      <Name>Inpainting</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
