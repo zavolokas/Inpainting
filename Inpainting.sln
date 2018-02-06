@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeamCarving3", "Samples\Sea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inpainting.UnitTests", "Inpainting.UnitTests\Inpainting.UnitTests.csproj", "{7A507467-F683-44BD-A27C-615ED8BE18FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inpaint", "Samples\Inpaint\Inpaint.csproj", "{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{7A507467-F683-44BD-A27C-615ED8BE18FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A507467-F683-44BD-A27C-615ED8BE18FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A507467-F683-44BD-A27C-615ED8BE18FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -70,6 +76,7 @@ Global
 		{AAB0FA09-F7F0-47D7-9E51-2CEEBEFEA7B1} = {10E9F6F4-4AEA-4C61-8A09-88D623E1EB97}
 		{3E6F4CD5-6D83-4B94-81DB-FBC8689B8AA7} = {10E9F6F4-4AEA-4C61-8A09-88D623E1EB97}
 		{91F954DD-DB98-4BA0-8B8C-2B2B7CAA0F1F} = {10E9F6F4-4AEA-4C61-8A09-88D623E1EB97}
+		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB} = {10E9F6F4-4AEA-4C61-8A09-88D623E1EB97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DFFB98D7-F1D5-4B78-88EC-A639FD00DC56}
