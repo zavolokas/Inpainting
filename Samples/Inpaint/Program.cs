@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zavolokas.Structures;
 
 namespace Inpaint
 {
@@ -10,7 +12,11 @@ namespace Inpaint
     {
         static void Main(string[] args)
         {
-            // TODO: open an image and an image with a marked area to inpaint
+            // open an image and an image with a marked area to inpaint
+            var image = OpenArgbImage("@../../../images/t009.jpg")
+                .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 });
+
+            var markup = OpenArgbImage("@../../../images/m009.png");
 
             // TODO: build pyramids by downscaling the image and the markup
             // TODO: we should also apply a smoothing filter to the scaled images 
@@ -46,6 +52,16 @@ namespace Inpaint
             }
 
             // TODO: convert image to a bitmap and save it
+        }
+
+        private static ZsImage OpenArgbImage(string path)
+        {
+            ZsImage image;
+            using (var imageBitmap = new Bitmap(path))
+            {
+                image = imageBitmap.ToArgbImage();
+            }
+            return image;
         }
     }
 }
