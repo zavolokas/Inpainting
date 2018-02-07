@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,15 +13,42 @@ namespace Inpaint
     {
         static void Main(string[] args)
         {
-            // open an image and an image with a marked area to inpaint
-            var image = OpenArgbImage("@../../../images/t009.jpg")
-                .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 });
+            const string imagesPath = @"../../../images";
+            const string imageName = "t009.jpg";
+            const string markupName = "m009.png";
 
-            var markup = OpenArgbImage("@../../../images/m009.png");
+            // TODO: should be calculated based on image and markup size
+            const byte levelsAmount = 5;
+            const bool isPyramidBlured = true;
+
+            // open an image and an image with a marked area to inpaint
+            var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
+            var markupArgb = OpenArgbImage(Path.Combine(imagesPath, markupName));
 
             // TODO: build pyramids by downscaling the image and the markup
             // TODO: we should also apply a smoothing filter to the scaled images 
             // to reduce high spatial ferquency introduced by scaling.
+            var images = new Stack<ZsImage>();
+            var markups = new Stack<Area2DMap>();
+            for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
+            {
+                // convert image to Lab color space and store it
+                var imageCopy = imageArgb.Clone()
+                    .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
+                    .FromRgbToLab();
+                images.Push(imageCopy);
+
+                // TODO: create a mapping for the level
+                var area = markupArgb.FromArgbToArea2D();
+
+                if (levelIndex < levelsAmount - 1)
+                {
+                    // downscale for the next level
+                    imageArgb.PyramidDownArgb(isPyramidBlured);
+                    markupArgb.PyramidDownArgb(isPyramidBlured);
+                }
+            }
+
 
             // TODO: go thru all the pyramid levels starting from the top one
             {
