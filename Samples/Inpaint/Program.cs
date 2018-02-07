@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zavolokas.GdiExtensions;
 using Zavolokas.Structures;
 
 namespace Inpaint
@@ -18,18 +21,30 @@ namespace Inpaint
             const string markupName = "m009.png";
 
             // TODO: should be calculated based on image and markup size
-            const byte levelsAmount = 5;
-            const bool isPyramidBlured = true;
+            const byte levelsAmount = 6;
+            const byte patchSize = 11;
 
             // open an image and an image with a marked area to inpaint
             var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
             var markupArgb = OpenArgbImage(Path.Combine(imagesPath, markupName));
 
-            // TODO: build pyramids by downscaling the image and the markup
-            // TODO: we should also apply a smoothing filter to the scaled images 
-            // to reduce high spatial ferquency introduced by scaling.
+            // TODO: extract a part of the image that can be scaled down required
+            // amount of times (levels)
+
+            var originalWidth = imageArgb.Width;
+            var originalHeight = imageArgb.Height;
+
+            // Build pyramids by downscaling the image and the markup.
+            // We also apply a smoothing filter to the scaled images 
+            // to reduce high spatial ferquency introduced by scaling
+            // (the filter is not applied to the inoainted area to avoid
+            // inpainted object propagation out of its boundaries)
             var images = new Stack<ZsImage>();
-            var markups = new Stack<Area2DMap>();
+            var mappings = new Stack<Area2DMap>();
+            var markups = new Stack<Area2D>();
+
+            var mapBuilder = new Area2DMapBuilder();
+
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
                 // convert image to Lab color space and store it
@@ -39,13 +54,47 @@ namespace Inpaint
                 images.Push(imageCopy);
 
                 // TODO: create a mapping for the level
-                var area = markupArgb.FromArgbToArea2D();
+                // TODO: for the top level, the target area should be
+                // TODO: for the rest levels, the target area should be
+                // slightly bigger then the inpaint area.
+                var inpaintArea = markupArgb.FromArgbToArea2D();
+                var imageArea = Area2D.Create(0, 0, imageArgb.Width, imageArgb.Height);
+                var nnfTargetArea = inpaintArea
+                    .Dilation(patchSize)
+                    .Intersect(imageArea);
+                var sourceArea = imageArea.Substract(inpaintArea);
+                var mapping = mapBuilder.InitNewMap(nnfTargetArea, sourceArea)
+                    .Build();
+
+                mappings.Push(mapping);
+                markups.Push(inpaintArea);
+
+                #region Save data for debugging
+#if DEBUG
+                imageCopy
+                    .FromLabToRgb()
+                    .FromRgbToBitmap()
+                    //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
+                    .SaveTo($"..//..//t{levelIndex}.png", ImageFormat.Png);
+
+                nnfTargetArea
+                    .ToBitmap(Color.Red, imageArgb.Width, imageArgb.Height)
+                    //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
+                    .SaveTo($"..//..//m{levelIndex}t.png", ImageFormat.Png);
+
+                sourceArea
+                    .ToBitmap(Color.Green, imageArgb.Width, imageArgb.Height)
+                    //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
+                    .SaveTo($"..//..//m{levelIndex}s.png", ImageFormat.Png);
+#endif
+                #endregion
 
                 if (levelIndex < levelsAmount - 1)
                 {
                     // downscale for the next level
-                    imageArgb.PyramidDownArgb(isPyramidBlured);
-                    markupArgb.PyramidDownArgb(isPyramidBlured);
+                    // NOTE: we shouldn't blur out the inpainted area so it is not getting bigger!!
+                    imageArgb.PyramidDownArgb(sourceArea);
+                    markupArgb.PyramidDownArgb(false);
                 }
             }
 
@@ -79,6 +128,7 @@ namespace Inpaint
                 }
             }
 
+            // TODO: paste result in the original bitmap where it was extracted from
             // TODO: convert image to a bitmap and save it
         }
 
