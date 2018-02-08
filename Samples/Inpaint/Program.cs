@@ -45,6 +45,7 @@ namespace Inpaint
 
             var mapBuilder = new Area2DMapBuilder();
 
+            // Build pyramids
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
                 // convert image to Lab color space and store it
@@ -53,17 +54,28 @@ namespace Inpaint
                     .FromRgbToLab();
                 images.Push(imageCopy);
 
-                // TODO: create a mapping for the level
-                // TODO: for the top level, the target area should be
-                // TODO: for the rest levels, the target area should be
-                // slightly bigger then the inpaint area.
                 var inpaintArea = markupArgb.FromArgbToArea2D();
                 var imageArea = Area2D.Create(0, 0, imageArgb.Width, imageArgb.Height);
-                var nnfTargetArea = inpaintArea
-                    .Dilation(patchSize)
-                    .Intersect(imageArea);
-                var sourceArea = imageArea.Substract(inpaintArea);
-                var mapping = mapBuilder.InitNewMap(nnfTargetArea, sourceArea)
+                var nnfSourceArea = imageArea.Substract(inpaintArea);
+                Area2D nnfTargetArea;
+
+                // Obtain target area for the NNF building based on the level
+                if (levelIndex == levelsAmount - 1)
+                {
+                    // For the top level, the target area should be the whole image area
+                    nnfTargetArea = imageArea;
+                }
+                else
+                {
+                    // For the rest levels, the target area should be
+                    // slightly bigger then the inpaint area.
+                    nnfTargetArea = inpaintArea
+                        .Dilation(patchSize)
+                        .Intersect(imageArea);
+                }
+
+                // Create a mapping for the level.
+                var mapping = mapBuilder.InitNewMap(nnfTargetArea, nnfSourceArea)
                     .Build();
 
                 mappings.Push(mapping);
@@ -82,7 +94,7 @@ namespace Inpaint
                     //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
                     .SaveTo($"..//..//m{levelIndex}t.png", ImageFormat.Png);
 
-                sourceArea
+                nnfSourceArea
                     .ToBitmap(Color.Green, imageArgb.Width, imageArgb.Height)
                     //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
                     .SaveTo($"..//..//m{levelIndex}s.png", ImageFormat.Png);
@@ -93,11 +105,10 @@ namespace Inpaint
                 {
                     // downscale for the next level
                     // NOTE: we shouldn't blur out the inpainted area so it is not getting bigger!!
-                    imageArgb.PyramidDownArgb(sourceArea);
+                    imageArgb.PyramidDownArgb(nnfSourceArea);
                     markupArgb.PyramidDownArgb(false);
                 }
             }
-
 
             // TODO: go thru all the pyramid levels starting from the top one
             {
