@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zavolokas.GdiExtensions;
+using Zavolokas.ImageProcessing.PatchMatch;
 using Zavolokas.Structures;
 
 namespace Inpaint
@@ -21,8 +22,10 @@ namespace Inpaint
             const string markupName = "m009.png";
 
             // TODO: should be calculated based on image and markup size
-            const byte levelsAmount = 6;
+            const byte levelsAmount = 5;
             const byte patchSize = 11;
+
+            var calculator = ImagePatchDistance.Cie2000;
 
             // open an image and an image with a marked area to inpaint
             var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
@@ -44,6 +47,7 @@ namespace Inpaint
             var markups = new Stack<Area2D>();
 
             var mapBuilder = new Area2DMapBuilder();
+            var nnfBuilder = new PatchMatchNnfBuilder();
 
             // Build pyramids
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
@@ -110,27 +114,65 @@ namespace Inpaint
                 }
             }
 
-            // TODO: go thru all the pyramid levels starting from the top one
+            // go thru all the pyramid levels starting from the top one
+            Nnf nnf = null;
+            var nnfSettings = new PatchMatchSettings { PatchSize = 5 };
+            for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
-                // TODO: build a mapping that will define a source 
-                // area (to get patches from) and related target area for which we need 
-                // to calculate its pixels values.
+                var image = images.Pop();
+                var mapping = mappings.Pop();
+                var inpaintArea = markups.Pop();
+
+                var imageArea = Area2D.Create(0, 0, image.Width, image.Height);
 
                 // TODO: if there is a NNF built on the prev level
-                // scale it up 
+                // scale it up
+                if (nnf != null)
+                {
+                    
+                }
+                else
+                {
+                    nnf = new Nnf(image.Width, image.Height, image.Width, image.Height, nnfSettings.PatchSize);
+                }
 
                 // TODO: start inpaint iterations
+                var inpaintIteration = 0;
                 {
-                    // TODO: skip building NNF for the first iteration in the level
-                    // unless it is top level (for the top one we don't have built 
-                    // NNF yet)
+                    // TODO: Obtain pixels area.
+                    // Pixels area defines which pixels are allowed to be used
+                    // for the patches distance calculation. We must avoid pixels
+                    // that we want to inpaint. That is why before the area is not
+                    // inpainted - we should exclude this area.
+                    var pixelsArea = imageArea;
+                    if (levelIndex == 0 && nnf == null)
+                    {
+                        pixelsArea = imageArea.Substract(inpaintArea);
+                    }
 
-                    // TODO: in order to find best mathes for the inpainted area,
-                    // we build NNF for this image as a dest and a source 
-                    // but excluding the inpainted area from the source area
-                    // (our mapping already takes care of it)
+                    // skip building NNF for the first iteration in the level
+                    // unless it is top level (for the top one we haven't built NNF yet)
+                    if (levelIndex == 0 || inpaintIteration > 0)
+                    {
+                        // in order to find best matches for the inpainted area,
+                        // we build NNF for this image as a dest and a source 
+                        // but excluding the inpainted area from the source area
+                        // (our mapping already takes care of it)
+                        nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                    }
 
-                    // TODO: after NNF is built we calculate the values of the
+                    nnf
+                        .ToRgbImage()
+                        .FromRgbToBitmap()
+                        .SaveTo($"..//..//n{levelIndex}.png", ImageFormat.Png);
+
+
+                    // TODO: after we have the NNF - we calculate the values of the
                     // pixels in the inpainted area
 
                     // TODO: we also calculate the percent of pixels change during the iteration
