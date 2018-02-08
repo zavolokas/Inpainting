@@ -66,5 +66,11 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Inpainting\Inpainting.csproj">
+      <Project>{DE1E1F2A-3446-4267-8F76-518F29DE58A0}</Project>
+      <Name>Inpainting</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
