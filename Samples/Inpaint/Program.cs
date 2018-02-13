@@ -5,8 +5,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zavolokas.GdiExtensions;
 using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.ImageProcessing.PatchMatch;
@@ -18,16 +16,30 @@ namespace Inpaint
     {
         static void Main(string[] args)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
             const string imagesPath = @"../../../images";
-            //const string imageName = "t009.jpg";
-            //const string markupName = "m009.png";
+            const string imageName = "t009.jpg";
+            const string markupName = "m009.png";
+
+            //const string imageName = "t097.png";
+            //const string markupName = "m097.png";
+
+            //const string imageName = "t096.png";
+            //const string markupName = "m099.png";
+
+            //const string imageName = "t090.png";
+            //const string markupName = "m090.png";
+
+            //const string imageName = "t097.png";
+            //const string markupName = "m097.png";
 
             //const string imageName = "t023.jpg";
             //const string markupName = "m023.png";
 
             //const string imageName = "t058.jpg";
-            //const string markupName = "m058_2.png";
-            ////const string markupName = "m058_1.png";
+            ////const string markupName = "m058_2.png";
+            //const string markupName = "m058_1.png";
 
             //const string imageName = "t102.jpg";
             //const string markupName = "m102.png";
@@ -44,8 +56,8 @@ namespace Inpaint
             //const string imageName = "t101.jpg";
             //const string markupName = "m101.png";
 
-            const string imageName = "t027.jpg";
-            const string markupName = "m027.png";
+            //const string imageName = "t027.jpg";
+            //const string markupName = "m027.png";
 
             // TODO: should be calculated based on image and markup size
             const byte levelsAmount = 5;
@@ -143,9 +155,10 @@ namespace Inpaint
             // go thru all the pyramid levels starting from the top one
             Nnf nnf = null;
             var nnfSettings = new PatchMatchSettings { PatchSize = patchSize };
+            ZsImage image = null;
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
-                var image = images.Pop();
+                image = images.Pop();
                 var mapping = mappings.Pop();
                 var inpaintArea = markups.Pop();
 
@@ -156,6 +169,8 @@ namespace Inpaint
                 if (nnf != null)
                 {
                     nnf = nnf.CloneAndScale2XWithUpdate(image, image, nnfSettings, mapping, calculator);
+                    //nnf = nnf.CloneAndScaleNnf2X(image, image, nnfSettings, mapping);
+                    //SaveNnf(nnf, image.Width, levelIndex, 0);
                 }
                 else
                 {
@@ -192,16 +207,22 @@ namespace Inpaint
                         nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
                     }
 
-                    nnf.Normalize();
-                    nnf
-                        .ToRgbImage()
-                        .FromRgbToBitmap()
-                        .CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
-                        .SaveTo($"..//..//n{levelIndex}_{inpaintIteration}.png", ImageFormat.Png);
+                    var nnf2 = nnf.Clone();
+                    nnf2.Normalize();
+                    //nnf
+                    //    .ToRgbImage()
+                    //    .FromRgbToBitmap()
+                    //    //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
+                    //    .SaveTo($"..//..//n{levelIndex}_{inpaintIteration}.png", ImageFormat.Png);
+
+                    //if (levelIndex == 0 && inpaintIteration == 4)
+                    //{
+                    //    SaveNnf(nnf, image.Width, levelIndex, inpaintIteration);
+                    //}
 
                     // TODO: after we have the NNF - we calculate the values of the
                     // pixels in the inpainted area
-                    WexlerInpainter.Inpaint(image, inpaintArea, nnf, nnfSettings.PatchSize, ColorResolver.MeanShift, 0.1);
+                    WexlerInpainter.Inpaint(image, inpaintArea, nnf2, nnfSettings.PatchSize, ColorResolver.MeanShift, 0.1);
                     image
                         .Clone()
                         .FromLabToRgb()
@@ -215,8 +236,41 @@ namespace Inpaint
                 }
             }
 
+            //image
+            //    .Clone()
+            //    .FromLabToRgb()
+            //    .FromRgbToBitmap()
+            //    .CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
+            //    .SaveTo($"..//..//result.png", ImageFormat.Png);
+
             // TODO: paste result in the original bitmap where it was extracted from
             // TODO: convert image to a bitmap and save it
+
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+
+            Console.WriteLine($"Done in {elapsedMs}ms");
+        }
+
+        private static void SaveNnf(Nnf nnf, int width, byte levelIndex, int inpaintIteration)
+        {
+            var nnfdata = nnf
+                .GetNnfItems()
+                .Where((d, i) => i % 2 == 0)
+                .Select((d, ind) =>
+                {
+                    var i = ind + 1;
+                    var x = d % width;
+                    var y = d / width;
+
+                    var line = $"{x:00}:{y:00} ";
+                    if (i % width == 0)
+                        line += "\n";
+                    return line;
+                })
+                .Aggregate("", (s1, s2) => s1 + s2);
+
+            File.AppendAllText($"..//..//n{levelIndex}_{inpaintIteration}.txt", nnfdata);
         }
 
         private static ZsImage OpenArgbImage(string path)
