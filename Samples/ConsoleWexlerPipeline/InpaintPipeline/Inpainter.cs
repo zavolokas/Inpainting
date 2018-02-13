@@ -17,7 +17,7 @@ namespace ConsoleWexlerPipeline
             const bool needBlur = true;
 
             Area2D markupArea = markupRgbImage.FromArgbToArea2D();
-            ZsImage image = rgbImage.FromRgbToLab();
+            ZsImage image = rgbImage;
 
             var input = new WexlerLevelsData();
             input.OriginalImageWidth = image.Width;
@@ -35,8 +35,14 @@ namespace ConsoleWexlerPipeline
                 var pixelsArea = Area2D.Create(0, 0, image.Width, image.Height);
                 var areaToRemove = markupRgbImage.FromArgbToArea2D();
                 //input.Pictures.Push(image);
-                images.Push(image);
                 markups.Push(areaToRemove);
+
+                var labImage = image
+                    .Clone()
+                    .FromRgbToLab();
+                images.Push(labImage);
+
+                var filterArea = pixelsArea.Substract(areaToRemove);
 
                 // TODO: make a research on the strange effect that occur when
                 // we remove area on the each level (even when we do not perform bluring)
@@ -70,10 +76,10 @@ namespace ConsoleWexlerPipeline
 
                 // Resize the image and all the markups for the next levels.
                 image = image
-                    .Clone()
-                    .PyramidDownLab(needBlur);
+                    .PyramidDownArgb(filterArea, true);
                 markupRgbImage = markupRgbImage
-                    .PyramidDownArgb(needBlur);
+                    .PyramidDownArgb(false);
+
                 // TODO: perform the same for the donors if any
             }
 
