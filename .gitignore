@@ -6,6 +6,10 @@
 **/bin
 **/obj
 **/*.user
-**/*.png
-**/*.bmp
 **/packages
+**/Inpainting.UnitTests/images/**/*.png
+**/output/*.*
+**/Samples/ColorsCalculation/**/*.png
+**/Samples/ConsoleWexlerPipeline/**/*.png
+**/Samples/Inpaint/**/*.png
+**/Samples/SeamCarving3/**/*.png
