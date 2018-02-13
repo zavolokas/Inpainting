@@ -46,8 +46,8 @@
     <Reference Include="Zavolokas.Math, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Zavolokas.Math.1.0.0\lib\net452\Zavolokas.Math.dll</HintPath>
     </Reference>
-    <Reference Include="Zavolokas.Structures, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Zavolokas.Structures.1.0.1\lib\net462\Zavolokas.Structures.dll</HintPath>
+    <Reference Include="Zavolokas.Structures, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Zavolokas.Structures.1.0.2\lib\net462\Zavolokas.Structures.dll</HintPath>
     </Reference>
     <Reference Include="Zavolokas.Structures.Gdi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Zavolokas.Structures.Gdi.1.0.0\lib\net462\Zavolokas.Structures.Gdi.dll</HintPath>
