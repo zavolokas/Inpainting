@@ -163,6 +163,7 @@ namespace Inpaint
             ZsImage image = null;
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
+                Console.WriteLine($"Level: {levelIndex}");
                 image = images.Pop();
                 var mapping = mappings.Pop();
                 var inpaintArea = markups.Pop();
@@ -245,6 +246,9 @@ namespace Inpaint
                         .SaveTo($"..//..//out//r{levelIndex}_{inpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
 
                     // TODO: we also calculate the percent of pixels change during the iteration
+
+                    Console.WriteLine($"Changed pix%:{inpaintResult.ChangedPixelsPercent:F8}, ChangedPixels: {inpaintResult.PixelsChangedAmount}, PixDiff: {inpaintResult.ChangedPixelsDifference}");
+                    File.AppendAllLines($"../../out/{levelIndex}.txt", new[] { $"{inpaintResult.ChangedPixelsPercent:F8}" });
 
                     // if the change is smaller then a treshold, we quit
                     if (inpaintResult.PixelsChangedAmount < 1) break;
