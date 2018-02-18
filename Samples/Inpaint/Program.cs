@@ -20,8 +20,11 @@ namespace Inpaint
 
             const string imagesPath = @"../../../images";
 
-            const string imageName = "t009.jpg";
-            const string markupName = "m009.png";
+            //const string imageName = "t009.jpg";
+            //const string markupName = "m009.png";
+
+            const string imageName = "t048.png";
+            const string markupName = "m048.png";
 
             //const string imageName = "t023.jpg";
             //const string markupName = "m023.png";
@@ -60,6 +63,20 @@ namespace Inpaint
             //const string imageName = "t027.jpg";
             //const string markupName = "m027.png";
 
+            // open an image and an image with a marked area to inpaint
+            var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
+            var markupArgb = OpenArgbImage(Path.Combine(imagesPath, markupName));
+
+            var result = Inpaint(imageArgb, markupArgb);
+
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+
+            Console.WriteLine($"Done in {elapsedMs}ms");
+        }
+
+        private static ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb)
+        {
             // TODO: should be calculated based on image and markup size
             const byte levelsAmount = 5;
             const byte patchSize = 11;
@@ -69,10 +86,6 @@ namespace Inpaint
             var calculator = ImagePatchDistance.Cie2000;
             var K = InitK;
             var dk = 0.001;
-
-            // open an image and an image with a marked area to inpaint
-            var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
-            var markupArgb = OpenArgbImage(Path.Combine(imagesPath, markupName));
 
             // TODO: extract a part of the image that can be scaled down required
             // amount of times (levels)
@@ -185,9 +198,9 @@ namespace Inpaint
 
                 // TODO: start inpaint iterations
                 K = InitK;
-                int inpaintIteration = 0;
-                //for (int inpaintIteration = 0; inpaintIteration < 100; inpaintIteration++)
-                while (true)
+                //int inpaintIteration = 0;
+                //while (true)
+                for (int inpaintIteration = 0; inpaintIteration < 50; inpaintIteration++)
                 {
                     // TODO: Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
@@ -236,7 +249,6 @@ namespace Inpaint
                     //{
                     //    K -= dk;
                     //}
-                    inpaintIteration++;
 
                     image
                         .Clone()
@@ -250,8 +262,9 @@ namespace Inpaint
                     Console.WriteLine($"Changed pix%:{inpaintResult.ChangedPixelsPercent:F8}, ChangedPixels: {inpaintResult.PixelsChangedAmount}, PixDiff: {inpaintResult.ChangedPixelsDifference}");
                     File.AppendAllLines($"../../out/{levelIndex}.txt", new[] { $"{inpaintResult.ChangedPixelsPercent:F8}" });
 
+                    inpaintIteration++;
                     // if the change is smaller then a treshold, we quit
-                    if (inpaintResult.PixelsChangedAmount < 1) break;
+                    if (inpaintResult.ChangedPixelsPercent < 0.005) break;
                 }
             }
 
@@ -265,10 +278,9 @@ namespace Inpaint
             // TODO: paste result in the original bitmap where it was extracted from
             // TODO: convert image to a bitmap and save it
 
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-
-            Console.WriteLine($"Done in {elapsedMs}ms");
+            return image
+                .FromLabToRgb()
+                .FromRgbToArgb(Area2D.Create(0, 0, image.Width, image.Height));
         }
 
         private static void SaveNnf(Nnf nnf, int width, byte levelIndex, int inpaintIteration)
