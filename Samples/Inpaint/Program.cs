@@ -68,6 +68,9 @@ namespace Inpaint
             var markupArgb = OpenArgbImage(Path.Combine(imagesPath, markupName));
 
             var result = Inpaint(imageArgb, markupArgb);
+            result
+                .FromArgbToBitmap()
+                .SaveTo($"..//..//out//result.png", ImageFormat.Png);
 
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
@@ -80,15 +83,18 @@ namespace Inpaint
             // TODO: should be calculated based on image and markup size
             const byte levelsAmount = 5;
             const byte patchSize = 11;
+            const double changedPixelsPercentTreshold = 0.005;
+
             const double InitK = 3.0;
             const double MinK = 3.0;
+            const double dk = 0.001;
 
             var calculator = ImagePatchDistance.Cie2000;
-            var K = InitK;
-            var dk = 0.001;
 
-            // TODO: extract a part of the image that can be scaled down required
-            // amount of times (levels)
+            var K = InitK;
+
+            // TODO: extract a part of the image that can be scaled down 
+            // required amount of times (levels)
 
             var originalWidth = imageArgb.Width;
             var originalHeight = imageArgb.Height;
@@ -183,26 +189,19 @@ namespace Inpaint
 
                 var imageArea = Area2D.Create(0, 0, image.Width, image.Height);
 
-                // TODO: if there is a NNF built on the prev level
+                // if there is a NNF built on the prev level
                 // scale it up
-                if (nnf != null)
-                {
-                    nnf = nnf.CloneAndScale2XWithUpdate(image, image, nnfSettings, mapping, calculator);
-                    //nnf = nnf.CloneAndScaleNnf2X(image, image, nnfSettings, mapping);
-                    //SaveNnf(nnf, image.Width, levelIndex, 0);
-                }
-                else
-                {
-                    nnf = new Nnf(image.Width, image.Height, image.Width, image.Height, nnfSettings.PatchSize);
-                }
+                nnf = nnf == null 
+                    ? new Nnf(image.Width, image.Height, image.Width, image.Height, nnfSettings.PatchSize)
+                    : nnf.CloneAndScale2XWithUpdate(image, image, nnfSettings, mapping, calculator) ;
 
-                // TODO: start inpaint iterations
+                // start inpaint iterations
                 K = InitK;
                 //int inpaintIteration = 0;
                 //while (true)
                 for (int inpaintIteration = 0; inpaintIteration < 50; inpaintIteration++)
                 {
-                    // TODO: Obtain pixels area.
+                    // Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
                     // for the patches distance calculation. We must avoid pixels
                     // that we want to inpaint. That is why before the area is not
@@ -242,8 +241,7 @@ namespace Inpaint
                     //    SaveNnf(nnf, image.Width, levelIndex, inpaintIteration);
                     //}
 
-                    // TODO: after we have the NNF - we calculate the values of the
-                    // pixels in the inpainted area
+                    // after we have the NNF - we calculate the values of the pixels in the inpainted area
                     var inpaintResult = WexlerInpainter.Inpaint(image, inpaintArea, nnf2, nnfSettings.PatchSize, ColorResolver.MeanShift, K);
                     //if (K > MinK)
                     //{
@@ -264,19 +262,11 @@ namespace Inpaint
 
                     inpaintIteration++;
                     // if the change is smaller then a treshold, we quit
-                    if (inpaintResult.ChangedPixelsPercent < 0.005) break;
+                    if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
                 }
             }
 
-            //image
-            //    .Clone()
-            //    .FromLabToRgb()
-            //    .FromRgbToBitmap()
-            //    .CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
-            //    .SaveTo($"..//..//result.png", ImageFormat.Png);
-
             // TODO: paste result in the original bitmap where it was extracted from
-            // TODO: convert image to a bitmap and save it
 
             return image
                 .FromLabToRgb()
