@@ -163,7 +163,6 @@ namespace Inpaint
             ZsImage image = null;
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
-                Console.WriteLine($"Level: {levelIndex}");
                 image = images.Pop();
                 var mapping = mappings.Pop();
                 var inpaintArea = markups.Pop();
@@ -185,9 +184,9 @@ namespace Inpaint
 
                 // TODO: start inpaint iterations
                 K = InitK;
-                //int inpaintIteration = 0;
-                for (int inpaintIteration = 0; inpaintIteration < 100; inpaintIteration++)
-                //while (true)
+                int inpaintIteration = 0;
+                //for (int inpaintIteration = 0; inpaintIteration < 100; inpaintIteration++)
+                while (true)
                 {
                     // TODO: Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
@@ -246,9 +245,9 @@ namespace Inpaint
                         .SaveTo($"..//..//out//r{levelIndex}_{inpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
 
                     // TODO: we also calculate the percent of pixels change during the iteration
-                    // TODO: if the change is smaller then a treshold, we quit
 
-                    //if (inpaintResult.PixelsChangedAmount < 1) break;
+                    // if the change is smaller then a treshold, we quit
+                    if (inpaintResult.PixelsChangedAmount < 1) break;
                 }
             }
 
