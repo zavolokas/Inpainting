@@ -17,6 +17,10 @@ namespace Zavolokas.ImageProcessing.Inpainting
 
             const double pixelChangeTreshold = 0.00003;
             const double maxSquareDistanceInLab = 32668.1151;
+            // Gamma is used for calculation of alpha in markup. The confidence.
+            const double gamma = 1.3;
+            // The value of confidence in non marked areas.
+            const double confidentValue = 1.50;
 
             // Get points' indexes that that needs to be inpainted.
             var pointIndexes = new int[removeArea.ElementsCount];
@@ -35,7 +39,7 @@ namespace Zavolokas.ImageProcessing.Inpainting
 
             // Weighted color is color's components values + weight of the color.
             var weightedColors = new double[patchSize * patchSize * (cmpts + 1)];
-            var confidence = removeArea.CalculatePointsConfidence(1.5, 1.3);
+            var confidence = removeArea.CalculatePointsConfidence(confidentValue, gamma);
             var resolvedColor = new double[cmpts];
 
             var totalDifference = 0.0;
@@ -91,12 +95,12 @@ namespace Zavolokas.ImageProcessing.Inpainting
                 var labL = resolvedColor[0] - image.PixelsData[pointIndex * cmpts + 0];
                 var labA = resolvedColor[1] - image.PixelsData[pointIndex * cmpts + 1];
                 var labB = resolvedColor[2] - image.PixelsData[pointIndex * cmpts + 2];
-                var pixelsDiff = (labL*labL + labA*labA + labB*labB) / maxSquareDistanceInLab;
+                var pixelsDiff = (labL * labL + labA * labA + labB * labB) / maxSquareDistanceInLab;
                 totalDifference += pixelsDiff;
 
                 if (pixelsDiff > pixelChangeTreshold)
                 {
-                    changedPixelsAmount ++;
+                    changedPixelsAmount++;
                     changedPixelsDifference += pixelsDiff;
                 }
 
