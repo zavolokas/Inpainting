@@ -19,8 +19,12 @@ namespace Inpaint
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             const string imagesPath = @"../../../images";
+
             const string imageName = "t009.jpg";
             const string markupName = "m009.png";
+
+            //const string imageName = "t023.jpg";
+            //const string markupName = "m023.png";
 
             //const string imageName = "t097.png";
             //const string markupName = "m097.png";
@@ -33,9 +37,6 @@ namespace Inpaint
 
             //const string imageName = "t097.png";
             //const string markupName = "m097.png";
-
-            //const string imageName = "t023.jpg";
-            //const string markupName = "m023.png";
 
             //const string imageName = "t058.jpg";
             ////const string markupName = "m058_2.png";
@@ -62,8 +63,12 @@ namespace Inpaint
             // TODO: should be calculated based on image and markup size
             const byte levelsAmount = 5;
             const byte patchSize = 11;
+            const double InitK = 3.0;
+            const double MinK = 3.0;
 
             var calculator = ImagePatchDistance.Cie2000;
+            var K = InitK;
+            var dk = 0.001;
 
             // open an image and an image with a marked area to inpaint
             var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
@@ -158,6 +163,7 @@ namespace Inpaint
             ZsImage image = null;
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
+                Console.WriteLine($"Level: {levelIndex}");
                 image = images.Pop();
                 var mapping = mappings.Pop();
                 var inpaintArea = markups.Pop();
@@ -178,7 +184,10 @@ namespace Inpaint
                 }
 
                 // TODO: start inpaint iterations
-                for (int inpaintIteration = 0; inpaintIteration < 5; inpaintIteration++)
+                K = InitK;
+                //int inpaintIteration = 0;
+                for (int inpaintIteration = 0; inpaintIteration < 100; inpaintIteration++)
+                //while (true)
                 {
                     // TODO: Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
@@ -222,17 +231,24 @@ namespace Inpaint
 
                     // TODO: after we have the NNF - we calculate the values of the
                     // pixels in the inpainted area
-                    WexlerInpainter.Inpaint(image, inpaintArea, nnf2, nnfSettings.PatchSize, ColorResolver.MeanShift, 0.1);
+                    var inpaintResult = WexlerInpainter.Inpaint(image, inpaintArea, nnf2, nnfSettings.PatchSize, ColorResolver.MeanShift, K);
+                    //if (K > MinK)
+                    //{
+                    //    K -= dk;
+                    //}
+                    inpaintIteration++;
+
                     image
                         .Clone()
                         .FromLabToRgb()
                         .FromRgbToBitmap()
                         .CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
-                        .SaveTo($"..//..//r{levelIndex}_{inpaintIteration}.png", ImageFormat.Png);
+                        .SaveTo($"..//..//out//r{levelIndex}_{inpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
 
                     // TODO: we also calculate the percent of pixels change during the iteration
-
                     // TODO: if the change is smaller then a treshold, we quit
+
+                    //if (inpaintResult.PixelsChangedAmount < 1) break;
                 }
             }
 
