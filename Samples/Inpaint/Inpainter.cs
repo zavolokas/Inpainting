@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.IO;
-using Zavolokas.GdiExtensions;
 using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.ImageProcessing.PatchMatch;
 using Zavolokas.Structures;
@@ -12,10 +8,13 @@ namespace Inpaint
 {
     public class Inpainter
     {
+        public event EventHandler<InpaintIterationFinishedEventArgs> IterationFinished;
+
         private InpaintingResult _inpaintingResult;
 
         public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb)
         {
+            // TODO: move settings to a separate entity
             // TODO: should be calculated based on image and markup size
             const byte levelsAmount = 5;
             const byte patchSize = 11;
@@ -26,14 +25,12 @@ namespace Inpaint
             const double dk = 0.001;
 
             var calculator = ImagePatchDistance.Cie2000;
+            var backgroundColor = new [] { 0.0, 0.0, 0.0 };
 
             var K = InitK;
 
             // TODO: extract a part of the image that can be scaled down 
             // required amount of times (levels)
-
-            var originalWidth = imageArgb.Width;
-            var originalHeight = imageArgb.Height;
 
             // Build pyramids by downscaling the image and the markup.
             // We also apply a smoothing filter to the scaled images 
@@ -47,12 +44,13 @@ namespace Inpaint
             var mapBuilder = new Area2DMapBuilder();
             var nnfBuilder = new PatchMatchNnfBuilder();
 
+            // TODO: extract method
             // Build pyramids
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
                 // convert image to Lab color space and store it
                 var imageCopy = imageArgb.Clone()
-                    .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
+                    .FromArgbToRgb(backgroundColor)
                     .FromRgbToLab();
                 images.Push(imageCopy);
 
@@ -83,26 +81,6 @@ namespace Inpaint
                 mappings.Push(mapping);
                 markups.Push(inpaintArea);
 
-                #region Save data for debugging
-#if DEBUG
-                //imageCopy
-                //    .FromLabToRgb()
-                //    .FromRgbToBitmap()
-                //    //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
-                //    .SaveTo($"..//..//t{levelIndex}.png", ImageFormat.Png);
-
-                //nnfTargetArea
-                //    .ToBitmap(Color.Red, imageArgb.Width, imageArgb.Height)
-                //    //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
-                //    .SaveTo($"..//..//m{levelIndex}t.png", ImageFormat.Png);
-
-                //nnfSourceArea
-                //    .ToBitmap(Color.Green, imageArgb.Width, imageArgb.Height)
-                //    //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
-                //    .SaveTo($"..//..//m{levelIndex}s.png", ImageFormat.Png);
-#endif
-                #endregion
-
                 if (levelIndex < levelsAmount - 1)
                 {
                     // downscale for the next level
@@ -114,11 +92,12 @@ namespace Inpaint
 
             // go thru all the pyramid levels starting from the top one
             Nnf nnf = null;
-            var nnfSettings = new PatchMatchSettings { PatchSize = patchSize };
             ZsImage image = null;
+
+            var nnfSettings = new PatchMatchSettings { PatchSize = patchSize };
+            
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
-                Console.WriteLine($"Level: {levelIndex}");
                 image = images.Pop();
                 var mapping = mappings.Pop();
                 var inpaintArea = markups.Pop();
@@ -133,9 +112,8 @@ namespace Inpaint
 
                 // start inpaint iterations
                 K = InitK;
-                //int inpaintIteration = 0;
-                //while (true)
-                for (int inpaintIteration = 0; inpaintIteration < 50; inpaintIteration++)
+                int inpaintIteration = 0;
+                while (inpaintIteration < 50)
                 {
                     // Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
@@ -164,37 +142,27 @@ namespace Inpaint
                         nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
                     }
 
-                    var nnf2 = nnf.Clone();
-                    nnf2.Normalize();
-                    //nnf
-                    //    .ToRgbImage()
-                    //    .FromRgbToBitmap()
-                    //    //.CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
-                    //    .SaveTo($"..//..//n{levelIndex}_{inpaintIteration}.png", ImageFormat.Png);
-
-                    //if (levelIndex == 0 && inpaintIteration == 4)
-                    //{
-                    //    SaveNnf(nnf, image.Width, levelIndex, inpaintIteration);
-                    //}
+                    var nnfNormalized = nnf.Clone();
+                    nnfNormalized.Normalize();
 
                     // after we have the NNF - we calculate the values of the pixels in the inpainted area
-                    var inpaintResult = Inpaint(image, inpaintArea, nnf2, nnfSettings.PatchSize, ColorResolver.MeanShift, K);
+                    var inpaintResult = Inpaint(image, inpaintArea, nnfNormalized, nnfSettings.PatchSize, ColorResolver.MeanShift, K);
                     //if (K > MinK)
                     //{
                     //    K -= dk;
                     //}
 
-                    image
-                        .Clone()
-                        .FromLabToRgb()
-                        .FromRgbToBitmap()
-                        .CloneWithScaleTo(originalWidth, originalHeight, InterpolationMode.HighQualityBilinear)
-                        .SaveTo($"..//..//out//r{levelIndex}_{inpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
-
-                    // TODO: we also calculate the percent of pixels change during the iteration
-
-                    Console.WriteLine($"Changed pix%:{inpaintResult.ChangedPixelsPercent:F8}, ChangedPixels: {inpaintResult.PixelsChangedAmount}, PixDiff: {inpaintResult.ChangedPixelsDifference}");
-                    File.AppendAllLines($"../../out/{levelIndex}.txt", new[] { $"{inpaintResult.ChangedPixelsPercent:F8}" });
+                    if (IterationFinished != null)
+                    {
+                        var eventArgs = new InpaintIterationFinishedEventArgs
+                        {
+                            InpaintedLabImage = image.Clone(),
+                            InpaintResult = inpaintResult,
+                            LevelIndex = levelIndex,
+                            InpaintIteration = inpaintIteration
+                        };
+                        IterationFinished(this, eventArgs);
+                    }
 
                     inpaintIteration++;
                     // if the change is smaller then a treshold, we quit

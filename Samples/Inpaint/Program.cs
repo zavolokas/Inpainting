@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -16,11 +17,11 @@ namespace Inpaint
 
             const string imagesPath = @"../../../images";
 
-            //const string imageName = "t009.jpg";
-            //const string markupName = "m009.png";
+            const string imageName = "t009.jpg";
+            const string markupName = "m009.png";
 
-            const string imageName = "t048.png";
-            const string markupName = "m048.png";
+            //const string imageName = "t048.png";
+            //const string markupName = "m048.png";
 
             //const string imageName = "t023.jpg";
             //const string markupName = "m023.png";
@@ -63,6 +64,19 @@ namespace Inpaint
             var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
             var markupArgb = OpenArgbImage(Path.Combine(imagesPath, markupName));
             var inpainter = new Inpainter();
+
+            inpainter.IterationFinished += (sender, eventArgs) =>
+            {
+                var inpaintResult = eventArgs.InpaintResult;
+                Console.WriteLine($"Changed pix%:{inpaintResult.ChangedPixelsPercent:F8}, ChangedPixels: {inpaintResult.PixelsChangedAmount}, PixDiff: {inpaintResult.ChangedPixelsDifference}");
+                File.AppendAllLines($"../../out/{eventArgs.LevelIndex}.txt", new[] { $"{inpaintResult.ChangedPixelsPercent:F8}" });
+
+                eventArgs.InpaintedLabImage
+                    .FromLabToRgb()
+                    .FromRgbToBitmap()
+                    .CloneWithScaleTo(imageArgb.Width, imageArgb.Height, InterpolationMode.HighQualityBilinear)
+                    .SaveTo($"..//..//out//r{eventArgs.LevelIndex}_{eventArgs.InpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
+            };
 
             var result = inpainter.Inpaint(imageArgb, markupArgb);
             result
