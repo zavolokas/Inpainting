@@ -8,8 +8,8 @@
     <ProjectGuid>{7A507467-F683-44BD-A27C-615ED8BE18FF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Zavolokas.ImageProcessing.UnitTests</RootNamespace>
-    <AssemblyName>Zavolokas.ImageProcessing.UnitTests</AssemblyName>
+    <RootNamespace>Zavolokas.Inpainting.UnitTests</RootNamespace>
+    <AssemblyName>Inpainting.UnitTests</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
