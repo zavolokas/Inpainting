@@ -62,6 +62,8 @@ namespace Inpaint
 
             // open an image and an image with a marked area to inpaint
             var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
+            var w = imageArgb.Width;
+            var h = imageArgb.Height;
             var markupArgb = OpenArgbImage(Path.Combine(imagesPath, markupName));
             var inpainter = new Inpainter();
 
@@ -74,10 +76,11 @@ namespace Inpaint
                 eventArgs.InpaintedLabImage
                     .FromLabToRgb()
                     .FromRgbToBitmap()
-                    .CloneWithScaleTo(imageArgb.Width, imageArgb.Height, InterpolationMode.HighQualityBilinear)
+                    .CloneWithScaleTo(w,h, InterpolationMode.HighQualityBilinear)
                     .SaveTo($"..//..//out//r{eventArgs.LevelIndex}_{eventArgs.InpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
             };
 
+            //TODO: make sure the inputs are got cloned inside.
             var result = inpainter.Inpaint(imageArgb, markupArgb);
             result
                 .FromArgbToBitmap()

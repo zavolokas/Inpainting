@@ -113,7 +113,7 @@ namespace Inpaint
                 // start inpaint iterations
                 K = InitK;
                 int inpaintIteration = 0;
-                while (inpaintIteration < 50)
+                while (inpaintIteration < 10)
                 {
                     // Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
