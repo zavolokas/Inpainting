@@ -61,10 +61,8 @@
   <ItemGroup>
     <Compile Include="Inpainter.cs" />
     <Compile Include="InpaintIterationFinishedEventArgs.cs" />
-    <Compile Include="IPyramid.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PyramidBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

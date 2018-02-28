@@ -1,7 +1,7 @@
 using System;
 using Zavolokas.Structures;
 
-namespace Inpaint
+namespace Zavolokas.ImageProcessing.Inpainting
 {
     public class PyramidBuilder
     {

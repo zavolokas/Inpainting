@@ -1,6 +1,6 @@
 using Zavolokas.Structures;
 
-namespace Inpaint
+namespace Zavolokas.ImageProcessing.Inpainting
 {
     public interface IPyramid
     {
