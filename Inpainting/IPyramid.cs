@@ -7,5 +7,6 @@ namespace Zavolokas.ImageProcessing.Inpainting
         ZsImage GetNextImage();
         Area2DMap GetNextMapping();
         Area2D GetNextInpaintArea();
+        byte LevelsAmount { get; }
     }
 }

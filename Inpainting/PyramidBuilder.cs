@@ -5,12 +5,12 @@ namespace Zavolokas.ImageProcessing.Inpainting
 {
     public class PyramidBuilder
     {
-        public void AddImage(ZsImage image)
+        public void SetImage(ZsImage image)
         {
 
         }
 
-        public void AddRemoveMarkup(ZsImage markup)
+        public void SetRemoveMarkup(ZsImage markup)
         {
 
         }
@@ -20,7 +20,12 @@ namespace Zavolokas.ImageProcessing.Inpainting
 
         }
 
-        public IPyramid Build()
+        /// <summary>
+        /// Builds an image pyramid with the specified levels amount.
+        /// </summary>
+        /// <param name="levelsAmount">The levels amount.</param>
+        /// <returns></returns>
+        public IPyramid Build(byte levelsAmount)
         {
             throw new NotImplementedException();
         }
