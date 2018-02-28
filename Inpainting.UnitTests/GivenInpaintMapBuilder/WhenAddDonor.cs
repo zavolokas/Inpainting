@@ -1,10 +1,9 @@
 ﻿using System;
 using NUnit.Framework;
 using Rhino.Mocks;
-using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.Structures;
 
-namespace Zavolokas.ImageProcessing.UnitTests.Inpainting.InpaintMapBuilderTests
+namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 {
     [TestFixture]
     public class WhenAddDonor

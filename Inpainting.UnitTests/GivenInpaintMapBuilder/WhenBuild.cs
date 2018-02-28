@@ -1,14 +1,12 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using NUnit.Framework;
 using Rhino.Mocks;
-using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.Structures;
 
-namespace Zavolokas.ImageProcessing.UnitTests.Inpainting.InpaintMapBuilderTests
+namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 {
     [TestFixture]
     public class WhenBuild

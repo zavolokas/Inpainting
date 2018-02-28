@@ -8,7 +8,7 @@
     <ProjectGuid>{7A507467-F683-44BD-A27C-615ED8BE18FF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Zavolokas.Inpainting.UnitTests</RootNamespace>
+    <RootNamespace>Zavolokas.ImageProcessing.Inpainting.UnitTests</RootNamespace>
     <AssemblyName>Inpainting.UnitTests</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -66,12 +66,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InpaintMapBuilderTests\TestSet.cs" />
-    <Compile Include="InpaintMapBuilderTests\WhenInitNewMap.cs" />
-    <Compile Include="InpaintMapBuilderTests\WhenAddDonor.cs" />
-    <Compile Include="InpaintMapBuilderTests\WhenBuild.cs" />
-    <Compile Include="InpaintMapBuilderTests\WhenSetInpaintArea.cs" />
-    <Compile Include="InpaintMapBuilderTests\WhenReduceDestArea.cs" />
+    <Compile Include="GivenInpaintMapBuilder\TestSet.cs" />
+    <Compile Include="GivenInpaintMapBuilder\WhenInitNewMap.cs" />
+    <Compile Include="GivenInpaintMapBuilder\WhenAddDonor.cs" />
+    <Compile Include="GivenInpaintMapBuilder\WhenBuild.cs" />
+    <Compile Include="GivenInpaintMapBuilder\WhenSetInpaintArea.cs" />
+    <Compile Include="GivenInpaintMapBuilder\WhenReduceDestArea.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

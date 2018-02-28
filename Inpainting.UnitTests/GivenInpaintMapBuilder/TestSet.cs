@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace Zavolokas.ImageProcessing.UnitTests.Inpainting.InpaintMapBuilderTests
+namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 {
     internal class TestSet
     {
