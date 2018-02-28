@@ -12,4 +12,5 @@
 **/Samples/ColorsCalculation/**/*.png
 **/Samples/ConsoleWexlerPipeline/**/*.png
 **/Samples/Inpaint/**/*.png
+**/Samples/Inpaint/**/out/*.*
 **/Samples/SeamCarving3/**/*.png
