@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ColorResolvers\ColorResolver.cs" />
+    <Compile Include="ImageNotProvidedException.cs" />
     <Compile Include="InpaintAreaIsNotSetException.cs" />
     <Compile Include="InpaintingResult.cs" />
     <Compile Include="InpaintMapBuilder.cs" />

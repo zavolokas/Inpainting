@@ -88,6 +88,7 @@
     <Compile Include="GivenInpaintMapBuilder\WhenBuild.cs" />
     <Compile Include="GivenInpaintMapBuilder\WhenSetInpaintArea.cs" />
     <Compile Include="GivenInpaintMapBuilder\WhenReduceDestArea.cs" />
+    <Compile Include="GivenPyramidBuilder\WhenBuild.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
