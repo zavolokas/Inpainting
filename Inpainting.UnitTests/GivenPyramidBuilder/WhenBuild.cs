@@ -38,7 +38,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         [TestCase(256, 127, 2)]
         [TestCase(256, 128, 9)]
         [TestCase(256, 128, 9)]
-        public void Should_Throw_WrongImageSizeException_When_Cant_Be_Divided_Levels_Amount_Times(byte width, byte height, byte levelsAmount)
+        public void Should_Throw_WrongImageSizeException_When_Cant_Be_Divided_Levels_Amount_Times(int width, int height, byte levelsAmount)
         {
             // Arrange
             var image = CreateImage(width, height, 1);
@@ -55,7 +55,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         [TestCase(20, 20, 2)]
         [TestCase(500, 400, 3)]
         [TestCase(256, 128, 8)]
-        public void Should_Build_Pyramid_Of_Required_Level_High(byte width, byte height, byte levelsAmount)
+        public void Should_Build_Pyramid_Of_Required_Level_High(int width, int height, byte levelsAmount)
         {
             // Arrange
             var image = CreateImage(width, height, 1);
@@ -71,7 +71,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
 
         [TestCase(500, 400, 256, 400, 5)]
         [TestCase(256, 127, 400, 130, 2)]
-        public void Should_Use_Last_Set_Image(byte width1, byte height1, byte width2, byte height2, byte levelsAmount)
+        public void Should_Use_Last_Set_Image(int width1, int height1, int width2, int height2, byte levelsAmount)
         {
             // Arrange
             var image1 = CreateImage(width1, height1, 1);
@@ -87,7 +87,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             pyramid.LevelsAmount.ShouldBe<byte>(levelsAmount);
         }
 
-        public ZsImage CreateImage(byte width, byte height, byte numberOfComponents)
+        public ZsImage CreateImage(int width, int height, byte numberOfComponents)
         {
             var pixels = Enumerable.Repeat(0.0, width * height * numberOfComponents).ToArray();
             return new ZsImage(pixels, width, height, numberOfComponents);
