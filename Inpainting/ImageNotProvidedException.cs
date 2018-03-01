@@ -11,11 +11,24 @@ namespace Zavolokas.ImageProcessing.Inpainting
     }
 
     /// <summary>
+    /// Thrown when Init method was not called.
+    /// </summary>
+    /// <seealso cref="System.Exception" />
+    public class InitializationException: Exception
+    {}
+
+    /// <summary>
     /// Thrown when image has unappropriate size.
     /// </summary>
     /// <seealso cref="System.Exception" />
     public class WrongImageSizeException: Exception
     { }
+
+    /// <summary>
+    /// Thrown when area to inpaint on Image is empty.
+    /// </summary>
+    /// <seealso cref="System.Exception" />
+    public class NoAreaToInpaintException: Exception { }
 
     /// <summary>
     /// Thrown when images supposed to have same size but they don't.

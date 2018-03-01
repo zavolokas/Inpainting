@@ -10,14 +10,14 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
     public class WhenBuild
     {
         [Test]
-        public void Should_Throw_ImageNotProvidedException_When_No_Image_Was_Added()
+        public void Should_Throw_InitializationException_When_No_Image_Was_Added()
         {
             // Arrange
             var pyramidBuilder = new PyramidBuilder();
             Action act = () => pyramidBuilder.Build(2);
 
             // Act & Assert
-            act.ShouldThrow<ImageNotProvidedException>();
+            act.ShouldThrow<InitializationException>();
         }
 
         [TestCase(0)]
@@ -42,8 +42,9 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         {
             // Arrange
             var image = CreateImage(width, height);
+            var markup = CreateImage(width, height);
             var pyramidBuilder = new PyramidBuilder();
-            pyramidBuilder.SetImage(image);
+            pyramidBuilder.Init(image, markup);
             Action act = () => pyramidBuilder.Build(levelsAmount);
 
             // Act & Assert
@@ -59,8 +60,9 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         {
             // Arrange
             var image = CreateImage(width, height);
+            var markup = CreateImage(width, height);
             var pyramidBuilder = new PyramidBuilder();
-            pyramidBuilder.SetImage(image);
+            pyramidBuilder.Init(image, markup);
 
             // Act 
             var pyramid = pyramidBuilder.Build(levelsAmount);
@@ -76,9 +78,11 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             // Arrange
             var image1 = CreateImage(width1, height1);
             var image2 = CreateImage(width2, height2);
+            var markup1 = CreateImage(width1, height1);
+            var markup2 = CreateImage(width2, height2);
             var pyramidBuilder = new PyramidBuilder();
-            pyramidBuilder.SetImage(image1);
-            pyramidBuilder.SetImage(image2);
+            pyramidBuilder.Init(image1, markup1);
+            pyramidBuilder.Init(image2, markup2);
 
             // Act 
             var pyramid = pyramidBuilder.Build(levelsAmount);
@@ -87,30 +91,74 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             pyramid.LevelsAmount.ShouldBe<byte>(levelsAmount);
         }
 
-        [TestCase(500, 400, 256, 400)]
-        [TestCase(256, 128, 400, 130)]
-        public void Should_Throw_ImageSizeNotMatchException_When_Markup_And_Image_Have_Different_Sizes(int width1, int height1, int width2, int height2)
+        [Test]
+        public void Should_Throw_NoAreaToInpaintException_When_Markup_In_Image_Area_Empty()
         {
             // Arrange
-            var image = CreateImage(width1, height1);
-            var markupImage = CreateImage(width2, height2);
+            int width = 128;
+            int height = 128;
+            byte levelsAmount = 3;
+
+            var image = CreateImage(width, height);
+            int mw = width + 3;
+            int mh = height + 3;
+            var pixels = Enumerable.Repeat<double>(0.0, mw * mh).ToArray();
+            pixels[(height + 0) * mw * 4 + width * 4 + 0] = 1.0;
+            pixels[(height + 0) * mw * 4 + width * 4 + 1] = 1.0;
+            pixels[(height + 0) * mw * 4 + width * 4 + 2] = 1.0;
+            pixels[(height + 1) * mw * 4 + width * 4 + 0] = 1.0;
+            pixels[(height + 1) * mw * 4 + width * 4 + 1] = 1.0;
+            pixels[(height + 1) * mw * 4 + width * 4 + 2] = 1.0;
+            pixels[(height + 2) * mw * 4 + width * 4 + 0] = 1.0;
+            pixels[(height + 2) * mw * 4 + width * 4 + 1] = 1.0;
+            pixels[(height + 2) * mw * 4 + width * 4 + 2] = 1.0;
+            var markup = new ZsImage(pixels, mw, mh, 4);
             var pyramidBuilder = new PyramidBuilder();
-            pyramidBuilder.SetImage(image);
-            pyramidBuilder.SetRemoveMarkup(markupImage);
-            Action act = () => pyramidBuilder.Build(2);
+            pyramidBuilder.Init(image, markup);
+            Action act = () => pyramidBuilder.Build(levelsAmount);
 
             // Act & Assert
-            act.ShouldThrow<ImageSizeNotMatchException>();
+            act.ShouldThrow<NoAreaToInpaintException>();
         }
 
+        [Test]
         public void Should_Use_Last_Set_Markup()
         {
+            // Arrange
+            int width = 128;
+            int height = 128;
+            byte levelsAmount = 3;
 
+            var image = CreateImage(width, height);
+            int mw = width + 3;
+            int mh = height + 3;
+            var pixels = Enumerable.Repeat<double>(0.0, mw * mh).ToArray();
+            pixels[(height + 0) * mw * 4 + width * 4 + 0] = 1.0;
+            pixels[(height + 0) * mw * 4 + width * 4 + 1] = 1.0;
+            pixels[(height + 0) * mw * 4 + width * 4 + 2] = 1.0;
+            pixels[(height + 1) * mw * 4 + width * 4 + 0] = 1.0;
+            pixels[(height + 1) * mw * 4 + width * 4 + 1] = 1.0;
+            pixels[(height + 1) * mw * 4 + width * 4 + 2] = 1.0;
+            pixels[(height + 2) * mw * 4 + width * 4 + 0] = 1.0;
+            pixels[(height + 2) * mw * 4 + width * 4 + 1] = 1.0;
+            pixels[(height + 2) * mw * 4 + width * 4 + 2] = 1.0;
+            var markup1 = new ZsImage(pixels, mw, mh, 4);
+            var pyramidBuilder = new PyramidBuilder();
+
+            var markup2 = CreateImage(width, height);
+
+            // Act 
+            pyramidBuilder.Init(image, markup1);
+            pyramidBuilder.Init(image, markup2);
+            var pyramid = pyramidBuilder.Build(levelsAmount);
+
+            // Assert
+            pyramid.LevelsAmount.ShouldBe(levelsAmount);
         }
 
-        public ZsImage CreateImage(int width, int height)
+        public ZsImage CreateImage(int width, int height, double val = 1.0)
         {
-            var pixels = Enumerable.Repeat(0.0, width * height * 4).ToArray();
+            var pixels = Enumerable.Repeat(val, width * height * 4).ToArray();
             return new ZsImage(pixels, width, height, 4);
         }
     }

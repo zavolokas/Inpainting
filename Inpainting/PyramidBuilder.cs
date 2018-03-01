@@ -5,19 +5,12 @@ namespace Zavolokas.ImageProcessing.Inpainting
 {
     public class PyramidBuilder
     {
-        public void SetImage(ZsImage image)
+        public void Init(ZsImage image, ZsImage markup)
         {
-
-        }
-
-        public void SetRemoveMarkup(ZsImage markup)
-        {
-
         }
 
         public void AddDonorMarkup(ZsImage donor)
         {
-
         }
 
         /// <summary>
