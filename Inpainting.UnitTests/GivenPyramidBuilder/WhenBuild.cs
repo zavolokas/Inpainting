@@ -41,7 +41,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         public void Should_Throw_WrongImageSizeException_When_Cant_Be_Divided_Levels_Amount_Times(int width, int height, byte levelsAmount)
         {
             // Arrange
-            var image = CreateImage(width, height, 1);
+            var image = CreateImage(width, height);
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.SetImage(image);
             Action act = () => pyramidBuilder.Build(levelsAmount);
@@ -58,7 +58,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         public void Should_Build_Pyramid_Of_Required_Level_High(int width, int height, byte levelsAmount)
         {
             // Arrange
-            var image = CreateImage(width, height, 1);
+            var image = CreateImage(width, height);
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.SetImage(image);
 
@@ -74,8 +74,8 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         public void Should_Use_Last_Set_Image(int width1, int height1, int width2, int height2, byte levelsAmount)
         {
             // Arrange
-            var image1 = CreateImage(width1, height1, 1);
-            var image2 = CreateImage(width2, height2, 1);
+            var image1 = CreateImage(width1, height1);
+            var image2 = CreateImage(width2, height2);
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.SetImage(image1);
             pyramidBuilder.SetImage(image2);
@@ -87,10 +87,31 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             pyramid.LevelsAmount.ShouldBe<byte>(levelsAmount);
         }
 
-        public ZsImage CreateImage(int width, int height, byte numberOfComponents)
+        [TestCase(500, 400, 256, 400)]
+        [TestCase(256, 128, 400, 130)]
+        public void Should_Throw_ImageSizeNotMatchException_When_Markup_And_Image_Have_Different_Sizes(int width1, int height1, int width2, int height2)
         {
-            var pixels = Enumerable.Repeat(0.0, width * height * numberOfComponents).ToArray();
-            return new ZsImage(pixels, width, height, numberOfComponents);
+            // Arrange
+            var image = CreateImage(width1, height1);
+            var markupImage = CreateImage(width2, height2);
+            var pyramidBuilder = new PyramidBuilder();
+            pyramidBuilder.SetImage(image);
+            pyramidBuilder.SetRemoveMarkup(markupImage);
+            Action act = () => pyramidBuilder.Build(2);
+
+            // Act & Assert
+            act.ShouldThrow<ImageSizeNotMatchException>();
+        }
+
+        public void Should_Use_Last_Set_Markup()
+        {
+
+        }
+
+        public ZsImage CreateImage(int width, int height)
+        {
+            var pixels = Enumerable.Repeat(0.0, width * height * 4).ToArray();
+            return new ZsImage(pixels, width, height, 4);
         }
     }
 }

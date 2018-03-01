@@ -25,7 +25,7 @@ namespace Zavolokas.ImageProcessing.Inpainting
         /// </summary>
         /// <param name="levelsAmount">The levels amount.</param>
         /// <returns></returns>
-        public IPyramid Build(byte levelsAmount)
+        public Pyramid Build(byte levelsAmount)
         {
             throw new NotImplementedException();
         }

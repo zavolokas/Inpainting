@@ -16,4 +16,25 @@ namespace Zavolokas.ImageProcessing.Inpainting
     /// <seealso cref="System.Exception" />
     public class WrongImageSizeException: Exception
     { }
+
+    /// <summary>
+    /// Thrown when images supposed to have same size but they don't.
+    /// </summary>
+    /// <seealso cref="System.Exception" />
+    public class ImageSizeNotMatchException: Exception
+    { }
+
+    /// <summary>
+    /// Thrown when mapping supposed to have different size.
+    /// </summary>
+    /// <seealso cref="System.Exception" />
+    public class WrongMappingSizeException : Exception
+    {
+    }
+
+    /// <summary>
+    /// Thrown when inpaint area exceeds an image size.
+    /// </summary>
+    /// <seealso cref="System.Exception" />
+    public class WrongInpaintAreaSizeException: Exception { }
 }
