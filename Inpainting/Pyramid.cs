@@ -10,16 +10,16 @@ namespace Zavolokas.ImageProcessing.Inpainting
         {
         }
 
-        public ZsImage GetImage(byte level)
+        public ZsImage GetImage(byte levelIndex)
         {
             throw new NotImplementedException();
         }
 
-        public Area2DMap GetMapping(byte level)
+        public Area2DMap GetMapping(byte levelIndex)
         {
             throw new NotImplementedException();
         }
-        public Area2D GetInpaintArea(byte level)
+        public Area2D GetInpaintArea(byte levelIndex)
         {
             throw new NotImplementedException();
         }

@@ -6,6 +6,18 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
 {
     public class PyramidTestBase
     {
+        protected Pyramid CreatePyramid(int width, int height, byte levelsAmount)
+        {
+            IList<ZsImage> images = new List<ZsImage>();
+            PopulateImages(images, levelsAmount, width, height);
+            IList<Area2D> areas = new List<Area2D>();
+            PopulateAreas(areas, levelsAmount, width, height);
+            IList<Area2DMap> mappings = new List<Area2DMap>();
+            PopulateMappings(mappings, levelsAmount, width, height);
+            var pyramid = new Pyramid(images, areas, mappings);
+            return pyramid;
+        }
+
         protected void PopulateImages(IList<ZsImage> images, byte levels, int w, int h)
         {
             for (int i = 0; i < levels; i++)
