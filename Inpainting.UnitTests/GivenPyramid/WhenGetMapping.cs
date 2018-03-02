@@ -7,7 +7,7 @@ using Zavolokas.Structures;
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
 {
     [TestFixture]
-    public class WhenGetGetInpaintArea : PyramidTestBase
+    public class WhenGetMapping : PyramidTestBase
     {
         [TestCase(-5)]
         [TestCase(-2)]
@@ -20,7 +20,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             const byte levelsAmount = 3;
             var pyramid = CreatePyramid(imageSize, imageSize, levelsAmount);
 
-            Action act = () => pyramid.GetInpaintArea(levelIndex);
+            Action act = () => pyramid.GetMapping(levelIndex);
 
             // Act & Assert
             act.ShouldThrow<ArgumentOutOfRangeException>();
@@ -39,7 +39,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             const int imageSize = 64;
             var pyramid = CreatePyramid(imageSize, imageSize, levelsAmount);
 
-            Action act = () => pyramid.GetInpaintArea(levelIndex);
+            Action act = () => pyramid.GetMapping(levelIndex);
 
             // Act & Assert
             act.ShouldThrow<ArgumentOutOfRangeException>();
@@ -53,7 +53,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
         [TestCase(1, 0)]
         [TestCase(5, 4)]
         [TestCase(5, 3)]
-        public void Should_Return_Area2D_From_Proper_Level(byte levelsAmount, byte levelIndex)
+        public void Should_Return_Mapping_From_Proper_Level(byte levelsAmount, byte levelIndex)
         {
             // Arrange
             const int size = 128;
@@ -67,10 +67,10 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             var pyramid = new Pyramid(images, areas, mappings);
 
             // Act
-            var inpaintArea = pyramid.GetInpaintArea(levelIndex);
+            var mapping = pyramid.GetMapping(levelIndex);
 
             // Assert
-            inpaintArea.ShouldBe(areas[levelIndex]);
+            mapping.ShouldBe(mappings[levelIndex]);
         }
     }
 }
