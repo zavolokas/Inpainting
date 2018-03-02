@@ -9,23 +9,6 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
     [TestFixture]
     public class WhenGetImage : PyramidTestBase
     {
-        [TestCase(-5)]
-        [TestCase(-2)]
-        [TestCase(-10)]
-        [TestCase(-1)]
-        public void Should_Throw_ArgumentOutOfRangeException_When_LevelIndex_Less_Then_0(byte levelIndex)
-        {
-            // Arrange
-            const int imageSize = 64;
-            const byte levelsAmount = 3;
-            var pyramid = CreatePyramid(imageSize, imageSize, levelsAmount);
-
-            Action act = () => pyramid.GetImage(levelIndex);
-
-            // Act & Assert
-            act.ShouldThrow<ArgumentOutOfRangeException>();
-        }
-
         [TestCase(1, 1)]
         [TestCase(1, 2)]
         [TestCase(2, 2)]
