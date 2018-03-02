@@ -92,6 +92,7 @@
     <Compile Include="GivenPyramidBuilder\WhenInit.cs" />
     <Compile Include="GivenPyramid\PyramidTestBase.cs" />
     <Compile Include="GivenPyramid\WhenCtor.cs" />
+    <Compile Include="GivenPyramid\WhenGetLevelsAmount.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -7,7 +7,7 @@ using Zavolokas.Structures;
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
 {
     [TestFixture]
-    public class WhenCtor: PyramidTestBase
+    public class WhenCtor : PyramidTestBase
     {
         [Test]
         public void Should_Throw_ArgumentNullException_When_Images_Null()
