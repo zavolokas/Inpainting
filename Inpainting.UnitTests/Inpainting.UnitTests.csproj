@@ -90,6 +90,7 @@
     <Compile Include="GivenInpaintMapBuilder\WhenReduceDestArea.cs" />
     <Compile Include="GivenPyramidBuilder\WhenBuild.cs" />
     <Compile Include="GivenPyramidBuilder\WhenInit.cs" />
+    <Compile Include="GivenPyramid\PyramidTestBase.cs" />
     <Compile Include="GivenPyramid\WhenCtor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
