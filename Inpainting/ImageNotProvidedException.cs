@@ -50,4 +50,10 @@ namespace Zavolokas.ImageProcessing.Inpainting
     /// </summary>
     /// <seealso cref="System.Exception" />
     public class WrongInpaintAreaSizeException: Exception { }
+
+    /// <summary>
+    /// Thrown when image expected to be in a different format.
+    /// </summary>
+    /// <seealso cref="System.Exception" />
+    public class WrongImageFormatException : Exception { }
 }
