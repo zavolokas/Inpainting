@@ -100,8 +100,7 @@ namespace Zavolokas.ImageProcessing.Inpainting
             var mappings = new List<Area2DMap>(levelsAmount);
             var markups = new List<Area2D>(levelsAmount);
 
-            //var mapBuilder = new InpaintMapBuilder(new Area2DMapBuilder());
-            var mapBuilder = new Area2DMapBuilder();
+            var mapBuilder = new InpaintMapBuilder(new Area2DMapBuilder());
 
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
@@ -132,12 +131,10 @@ namespace Zavolokas.ImageProcessing.Inpainting
                 }
 
                 // Create a mapping for the level.
-                //var mapping = mapBuilder.InitNewMap(nnfTargetArea)
-                //    .SetInpaintArea(inpaintArea)
-                //    .Build();
-                var mapping = mapBuilder.InitNewMap(nnfTargetArea, nnfSourceArea)
+                var mapping = mapBuilder.InitNewMap(imageArea)
+                    .SetInpaintArea(inpaintArea)
+                    .ReduceDestArea(nnfTargetArea)
                     .Build();
-
 
                 mappings.Add(mapping);
                 markups.Add(inpaintArea);
