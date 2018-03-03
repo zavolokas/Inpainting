@@ -44,10 +44,9 @@ namespace Inpaint
             
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
-                byte i = (byte)(levelsAmount - 1 - levelIndex);
-                image = pyramid.GetImage(i);
-                var mapping = pyramid.GetMapping(i);
-                var inpaintArea = pyramid.GetInpaintArea(i);
+                image = pyramid.GetImage(levelIndex);
+                var mapping = pyramid.GetMapping(levelIndex);
+                var inpaintArea = pyramid.GetInpaintArea(levelIndex);
 
                 var imageArea = Area2D.Create(0, 0, image.Width, image.Height);
 
@@ -60,7 +59,7 @@ namespace Inpaint
                 // start inpaint iterations
                 K = InitK;
                 int inpaintIteration = 0;
-                while (inpaintIteration < 20)
+                while (inpaintIteration < 50)
                 {
                     // Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
@@ -113,7 +112,7 @@ namespace Inpaint
 
                     inpaintIteration++;
                     // if the change is smaller then a treshold, we quit
-                    //if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
+                    if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
                 }
             }
 
