@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.ImageProcessing.PatchMatch;
 using Zavolokas.Structures;
@@ -11,7 +13,7 @@ namespace Inpaint
 
         private InpaintingResult _inpaintingResult;
 
-        public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb)
+        public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb)
         {
             // TODO: move settings to a separate entity
             // TODO: should be calculated based on image and markup size
@@ -32,7 +34,11 @@ namespace Inpaint
 
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.Init(imageArgb, markupArgb);
-            var pyramid = pyramidBuilder.Build(levelsAmount);
+            foreach (var donorArgb in donorsArgb)
+            {
+                pyramidBuilder.AddDonorMarkup(donorArgb);
+            }
+            var pyramid = pyramidBuilder.Build(levelsAmount, patchSize);
 
             var nnfBuilder = new PatchMatchNnfBuilder();
 

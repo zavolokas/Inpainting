@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using Zavolokas.GdiExtensions;
+using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.Structures;
 
 namespace Inpaint
@@ -17,8 +19,14 @@ namespace Inpaint
 
             const string imagesPath = @"../../../images";
 
-            const string imageName = "t009.jpg";
-            const string markupName = "m009.png";
+            var donorNames = new string[0];
+
+            //const string imageName = "t009.jpg";
+            //const string markupName = "m009.png";
+
+            const string imageName = "t061.jpg";
+            const string markupName = "m061.png";
+            donorNames = new[] {"d0611.png", "d0612.png"};
 
             //const string imageName = "t048.png";
             //const string markupName = "m048.png";
@@ -65,7 +73,13 @@ namespace Inpaint
             var w = imageArgb.Width;
             var h = imageArgb.Height;
             var markupArgb = OpenArgbImage(Path.Combine(imagesPath, markupName));
+            var donors = new List<ZsImage>();
+            if (donorNames.Any())
+            {
+                donors.AddRange(donorNames.Select(donorName => OpenArgbImage(Path.Combine(imagesPath, donorName))));
+            }
             var inpainter = new Inpainter();
+            
 
             inpainter.IterationFinished += (sender, eventArgs) =>
             {
@@ -76,15 +90,45 @@ namespace Inpaint
                 eventArgs.InpaintedLabImage
                     .FromLabToRgb()
                     .FromRgbToBitmap()
-                    .CloneWithScaleTo(w,h, InterpolationMode.HighQualityBilinear)
+                    .CloneWithScaleTo(w, h, InterpolationMode.HighQualityBilinear)
                     .SaveTo($"..//..//out//r{eventArgs.LevelIndex}_{eventArgs.InpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
             };
 
             //TODO: make sure the inputs are got cloned inside.
-            var result = inpainter.Inpaint(imageArgb, markupArgb);
+            var result = inpainter.Inpaint(imageArgb, markupArgb, donors);
             result
                 .FromArgbToBitmap()
                 .SaveTo($"..//..//out//result.png", ImageFormat.Png);
+
+            //var pyramidBuilder = new PyramidBuilder();
+            //pyramidBuilder.Init(imageArgb, markupArgb);
+            //var pyramid = pyramidBuilder.Build(5);
+
+            //for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
+            //{
+            //    pyramid
+            //        .GetImage(levelIndex)
+            //        .FromLabToRgb()
+            //        .FromRgbToBitmap()
+            //        .SaveTo($"..//..//out//image{levelIndex}.png", ImageFormat.Png);
+
+            //    pyramid
+            //        .GetInpaintArea(levelIndex)
+            //        .ToBitmap(Color.Blue)
+            //        .SaveTo($"..//..//out//inpaint{levelIndex}.png", ImageFormat.Png);
+
+            //    var mapping = (IAreasMapping)pyramid.GetMapping(levelIndex);
+            //    mapping
+            //        .DestArea
+            //        .ToBitmap(Color.Blue)
+            //        .SaveTo($"..//..//out//dest{levelIndex}.png", ImageFormat.Png);
+
+            //    mapping
+            //        .SourceArea
+            //        .ToBitmap(Color.Red)
+            //        .SaveTo($"..//..//out//src{levelIndex}.png", ImageFormat.Png);
+            //}
+
 
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
