@@ -20,12 +20,11 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<InitializationException>();
         }
 
-        [TestCase(0)]
-        [TestCase(-1)]
-        [TestCase(-2)]
-        public void Should_Throw_ArgumentOutOfRangeException_When_Levels_Amount_Less_Then_1(byte levelsAmount)
+        [Test]
+        public void Should_Throw_ArgumentOutOfRangeException_When_Levels_Amount_Less_Then_1()
         {
             // Arrange
+            byte levelsAmount = 0;
             var pyramidBuilder = new PyramidBuilder();
             Action act = () => pyramidBuilder.Build(levelsAmount);
 
@@ -49,6 +48,23 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
 
             // Act & Assert
             act.ShouldThrow<WrongImageSizeException>();
+        }
+
+        [TestCase(500, 400, 3)]
+        [TestCase(256, 127, 1)]
+        [TestCase(257, 127, 1)]
+        [TestCase(256, 128, 8)]
+        public void Should_Not_Throw_When_Can_Be_Divided_Levels_Amount_Times(int width, int height, byte levelsAmount)
+        {
+            // Arrange
+            var image = CreateImage(width, height);
+            var markup = CreateImage(width, height);
+            var pyramidBuilder = new PyramidBuilder();
+            pyramidBuilder.Init(image, markup);
+            Action act = () => pyramidBuilder.Build(levelsAmount);
+
+            // Act & Assert
+            act.ShouldNotThrow();
         }
 
         [TestCase(2, 2, 1)]
