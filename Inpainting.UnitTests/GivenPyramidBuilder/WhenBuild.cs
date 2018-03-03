@@ -50,15 +50,31 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<WrongImageSizeException>();
         }
 
+        [TestCase(500, 1, 1)]
+        [TestCase(1, 127, 1)]
+        [TestCase(256, 128, 8)]
+        public void Should_Throw_WrongImageSizeException_When_Image_Downscaled_To_1px_On_Any_Side(int width, int height, byte levelsAmount)
+        {
+            // Arrange
+            var image = CreateImage(width, height);
+            var markup = CreateImage(width/2, height);
+            var pyramidBuilder = new PyramidBuilder();
+            pyramidBuilder.Init(image, markup);
+            Action act = () => pyramidBuilder.Build(levelsAmount);
+
+            // Act & Assert
+            act.ShouldThrow<WrongImageSizeException>();
+        }
+
         [TestCase(500, 400, 3)]
         [TestCase(256, 127, 1)]
         [TestCase(257, 127, 1)]
-        [TestCase(256, 128, 8)]
+        [TestCase(256, 128, 7)]
         public void Should_Not_Throw_When_Can_Be_Divided_Levels_Amount_Times(int width, int height, byte levelsAmount)
         {
             // Arrange
             var image = CreateImage(width, height);
-            var markup = CreateImage(width, height);
+            var markup = CreateImage(width / 2, height / 2);
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.Init(image, markup);
             Action act = () => pyramidBuilder.Build(levelsAmount);
@@ -71,12 +87,11 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         [TestCase(11, 11, 1)]
         [TestCase(20, 20, 2)]
         [TestCase(500, 400, 3)]
-        [TestCase(256, 128, 8)]
         public void Should_Build_Pyramid_Of_Required_Level_High(int width, int height, byte levelsAmount)
         {
             // Arrange
             var image = CreateImage(width, height);
-            var markup = CreateImage(width, height);
+            var markup = CreateImage(width / 2, height / 2);
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.Init(image, markup);
 
@@ -94,8 +109,8 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             // Arrange
             var image1 = CreateImage(width1, height1);
             var image2 = CreateImage(width2, height2);
-            var markup1 = CreateImage(width1, height1);
-            var markup2 = CreateImage(width2, height2);
+            var markup1 = CreateImage(width1 / 2, height1 / 2);
+            var markup2 = CreateImage(width2 / 2, height2 / 2);
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.Init(image1, markup1);
             pyramidBuilder.Init(image2, markup2);
@@ -116,34 +131,31 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             byte levelsAmount = 3;
 
             var image = CreateImage(width, height);
-            int mw = width + 3;
-            int mh = height + 3;
-            var pixels = Enumerable.Repeat<double>(0.0, mw * mh * 4).ToArray();
-            var x1 = width + 0;
-            var y1 = height + 0;
-
-            var x2 = width + 1;
-            var y2 = height + 1;
-
-            var x3 = width + 2;
-            var y3 = height + 2;
-
-            pixels[(y1 * mw + x1) * 4 + 0] = 1.0;
-            pixels[(y1 * mw + x1) * 4 + 1] = 1.0;
-            pixels[(y1 * mw + x1) * 4 + 2] = 1.0;
-            pixels[(y2 * mw + x2) * 4 + 0] = 1.0;
-            pixels[(y2 * mw + x2) * 4 + 1] = 1.0;
-            pixels[(y2 * mw + x2) * 4 + 2] = 1.0;
-            pixels[(y3 * mw + x3) * 4 + 0] = 1.0;
-            pixels[(y3 * mw + x3) * 4 + 1] = 1.0;
-            pixels[(y3 * mw + x3) * 4 + 2] = 1.0;
-            var markup = new ZsImage(pixels, mw, mh, 4);
+            var markup = Create3pixBiggerMarkupNotEmptyOutsideOfTheImage(width, height);
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.Init(image, markup);
             Action act = () => pyramidBuilder.Build(levelsAmount);
 
             // Act & Assert
             act.ShouldThrow<NoAreaToInpaintException>();
+        }
+
+        [Test]
+        public void Should_Throw_AreaRemovedException_When_Markup_Covers_Whole_Image()
+        {
+            // Arrange
+            int width = 128;
+            int height = 128;
+            byte levelsAmount = 3;
+
+            var image = CreateImage(width, height);
+            var markup = CreateImage(width, height);
+            var pyramidBuilder = new PyramidBuilder();
+            pyramidBuilder.Init(image, markup);
+            Action act = () => pyramidBuilder.Build(levelsAmount);
+
+            // Act & Assert
+            act.ShouldThrow<AreaRemovedException>();
         }
 
         [Test]
@@ -155,22 +167,10 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             byte levelsAmount = 3;
 
             var image = CreateImage(width, height);
-            int mw = width + 3;
-            int mh = height + 3;
-            var pixels = Enumerable.Repeat<double>(0.0, mw * mh).ToArray();
-            pixels[(height + 0) * mw * 4 + width * 4 + 0] = 1.0;
-            pixels[(height + 0) * mw * 4 + width * 4 + 1] = 1.0;
-            pixels[(height + 0) * mw * 4 + width * 4 + 2] = 1.0;
-            pixels[(height + 1) * mw * 4 + width * 4 + 0] = 1.0;
-            pixels[(height + 1) * mw * 4 + width * 4 + 1] = 1.0;
-            pixels[(height + 1) * mw * 4 + width * 4 + 2] = 1.0;
-            pixels[(height + 2) * mw * 4 + width * 4 + 0] = 1.0;
-            pixels[(height + 2) * mw * 4 + width * 4 + 1] = 1.0;
-            pixels[(height + 2) * mw * 4 + width * 4 + 2] = 1.0;
-            var markup1 = new ZsImage(pixels, mw, mh, 4);
+            var markup1 = Create3pixBiggerMarkupNotEmptyOutsideOfTheImage(width, height);
             var pyramidBuilder = new PyramidBuilder();
 
-            var markup2 = CreateImage(width, height);
+            var markup2 = CreateImage(width / 2, height / 2);
 
             // Act 
             pyramidBuilder.Init(image, markup1);
@@ -185,6 +185,33 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         {
             var pixels = Enumerable.Repeat(val, width * height * 4).ToArray();
             return new ZsImage(pixels, width, height, 4);
+        }
+
+        private static ZsImage Create3pixBiggerMarkupNotEmptyOutsideOfTheImage(int imageWidth, int imageHeight)
+        {
+            int mw = imageWidth + 3;
+            int mh = imageHeight + 3;
+            var pixels = Enumerable.Repeat<double>(0.0, mw * mh * 4).ToArray();
+            var x1 = imageWidth + 0;
+            var y1 = imageHeight + 0;
+
+            var x2 = imageWidth + 1;
+            var y2 = imageHeight + 1;
+
+            var x3 = imageWidth + 2;
+            var y3 = imageHeight + 2;
+
+            pixels[(y1 * mw + x1) * 4 + 0] = 1.0;
+            pixels[(y1 * mw + x1) * 4 + 1] = 1.0;
+            pixels[(y1 * mw + x1) * 4 + 2] = 1.0;
+            pixels[(y2 * mw + x2) * 4 + 0] = 1.0;
+            pixels[(y2 * mw + x2) * 4 + 1] = 1.0;
+            pixels[(y2 * mw + x2) * 4 + 2] = 1.0;
+            pixels[(y3 * mw + x3) * 4 + 0] = 1.0;
+            pixels[(y3 * mw + x3) * 4 + 1] = 1.0;
+            pixels[(y3 * mw + x3) * 4 + 2] = 1.0;
+            var markup = new ZsImage(pixels, mw, mh, 4);
+            return markup;
         }
     }
 }
