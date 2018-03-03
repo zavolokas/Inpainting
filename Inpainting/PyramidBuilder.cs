@@ -39,7 +39,11 @@ namespace Zavolokas.ImageProcessing.Inpainting
         }
 
         /// <summary>
-        /// Builds an imageArgb pyramid with the specified levels amount.
+        /// Build pyramids by downscaling the image and the markup.
+        /// We also apply a smoothing filter to the scaled images 
+        /// to reduce high spatial ferquency introduced by scaling
+        /// (the filter is not applied to the inoainted area to avoid
+        /// inpainted object propagation out of its boundaries)
         /// </summary>
         /// <param name="levelsAmount">The levels amount.</param>
         /// <returns></returns>
@@ -87,13 +91,17 @@ namespace Zavolokas.ImageProcessing.Inpainting
             if (inpaintArea.IsEmpty)
                 throw new NoAreaToInpaintException();
 
+            if (imageArea.Substract(inpaintArea).IsEmpty)
+                throw new AreaRemovedException();
+
             // Build pyramids
 
             var images = new List<ZsImage>(levelsAmount);
             var mappings = new List<Area2DMap>(levelsAmount);
             var markups = new List<Area2D>(levelsAmount);
 
-            var mapBuilder = new InpaintMapBuilder(new Area2DMapBuilder());
+            //var mapBuilder = new InpaintMapBuilder(new Area2DMapBuilder());
+            var mapBuilder = new Area2DMapBuilder();
 
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
@@ -124,9 +132,12 @@ namespace Zavolokas.ImageProcessing.Inpainting
                 }
 
                 // Create a mapping for the level.
-                var mapping = mapBuilder.InitNewMap(nnfTargetArea)
-                    .SetInpaintArea(inpaintArea)
+                //var mapping = mapBuilder.InitNewMap(nnfTargetArea)
+                //    .SetInpaintArea(inpaintArea)
+                //    .Build();
+                var mapping = mapBuilder.InitNewMap(nnfTargetArea, nnfSourceArea)
                     .Build();
+
 
                 mappings.Add(mapping);
                 markups.Add(inpaintArea);
