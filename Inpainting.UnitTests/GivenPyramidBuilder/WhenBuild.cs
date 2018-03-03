@@ -118,16 +118,25 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             var image = CreateImage(width, height);
             int mw = width + 3;
             int mh = height + 3;
-            var pixels = Enumerable.Repeat<double>(0.0, mw * mh).ToArray();
-            pixels[(height + 0) * mw * 4 + width * 4 + 0] = 1.0;
-            pixels[(height + 0) * mw * 4 + width * 4 + 1] = 1.0;
-            pixels[(height + 0) * mw * 4 + width * 4 + 2] = 1.0;
-            pixels[(height + 1) * mw * 4 + width * 4 + 0] = 1.0;
-            pixels[(height + 1) * mw * 4 + width * 4 + 1] = 1.0;
-            pixels[(height + 1) * mw * 4 + width * 4 + 2] = 1.0;
-            pixels[(height + 2) * mw * 4 + width * 4 + 0] = 1.0;
-            pixels[(height + 2) * mw * 4 + width * 4 + 1] = 1.0;
-            pixels[(height + 2) * mw * 4 + width * 4 + 2] = 1.0;
+            var pixels = Enumerable.Repeat<double>(0.0, mw * mh * 4).ToArray();
+            var x1 = width + 0;
+            var y1 = height + 0;
+
+            var x2 = width + 1;
+            var y2 = height + 1;
+
+            var x3 = width + 2;
+            var y3 = height + 2;
+
+            pixels[(y1 * mw + x1) * 4 + 0] = 1.0;
+            pixels[(y1 * mw + x1) * 4 + 1] = 1.0;
+            pixels[(y1 * mw + x1) * 4 + 2] = 1.0;
+            pixels[(y2 * mw + x2) * 4 + 0] = 1.0;
+            pixels[(y2 * mw + x2) * 4 + 1] = 1.0;
+            pixels[(y2 * mw + x2) * 4 + 2] = 1.0;
+            pixels[(y3 * mw + x3) * 4 + 0] = 1.0;
+            pixels[(y3 * mw + x3) * 4 + 1] = 1.0;
+            pixels[(y3 * mw + x3) * 4 + 2] = 1.0;
             var markup = new ZsImage(pixels, mw, mh, 4);
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.Init(image, markup);
