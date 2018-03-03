@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.ImageProcessing.PatchMatch;
 using Zavolokas.Structures;
@@ -25,70 +24,17 @@ namespace Inpaint
             const double dk = 0.001;
 
             var calculator = ImagePatchDistance.Cie2000;
-            var backgroundColor = new [] { 0.0, 0.0, 0.0 };
 
             var K = InitK;
 
             // TODO: extract a part of the image that can be scaled down 
             // required amount of times (levels)
 
-            // Build pyramids by downscaling the image and the markup.
-            // We also apply a smoothing filter to the scaled images 
-            // to reduce high spatial ferquency introduced by scaling
-            // (the filter is not applied to the inoainted area to avoid
-            // inpainted object propagation out of its boundaries)
-            var images = new Stack<ZsImage>();
-            var mappings = new Stack<Area2DMap>();
-            var markups = new Stack<Area2D>();
+            var pyramidBuilder = new PyramidBuilder();
+            pyramidBuilder.Init(imageArgb, markupArgb);
+            var pyramid = pyramidBuilder.Build(levelsAmount);
 
-            var mapBuilder = new Area2DMapBuilder();
             var nnfBuilder = new PatchMatchNnfBuilder();
-
-            // TODO: extract method
-            // Build pyramids
-            for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
-            {
-                // convert image to Lab color space and store it
-                var imageCopy = imageArgb.Clone()
-                    .FromArgbToRgb(backgroundColor)
-                    .FromRgbToLab();
-                images.Push(imageCopy);
-
-                var inpaintArea = markupArgb.FromArgbToArea2D();
-                var imageArea = Area2D.Create(0, 0, imageArgb.Width, imageArgb.Height);
-                var nnfSourceArea = imageArea.Substract(inpaintArea);
-                Area2D nnfTargetArea;
-
-                // Obtain target area for the NNF building based on the level
-                if (levelIndex == levelsAmount - 1)
-                {
-                    // For the top level, the target area should be the whole image area
-                    nnfTargetArea = imageArea;
-                }
-                else
-                {
-                    // For the rest levels, the target area should be
-                    // slightly bigger then the inpaint area.
-                    nnfTargetArea = inpaintArea
-                        .Dilation(patchSize)
-                        .Intersect(imageArea);
-                }
-
-                // Create a mapping for the level.
-                var mapping = mapBuilder.InitNewMap(nnfTargetArea, nnfSourceArea)
-                    .Build();
-
-                mappings.Push(mapping);
-                markups.Push(inpaintArea);
-
-                if (levelIndex < levelsAmount - 1)
-                {
-                    // downscale for the next level
-                    // NOTE: we shouldn't blur out the inpainted area so it is not getting bigger!!
-                    imageArgb.PyramidDownArgb(nnfSourceArea);
-                    markupArgb.PyramidDownArgb(false);
-                }
-            }
 
             // go thru all the pyramid levels starting from the top one
             Nnf nnf = null;
@@ -98,9 +44,10 @@ namespace Inpaint
             
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
-                image = images.Pop();
-                var mapping = mappings.Pop();
-                var inpaintArea = markups.Pop();
+                byte i = (byte)(levelsAmount - 1 - levelIndex);
+                image = pyramid.GetImage(i);
+                var mapping = pyramid.GetMapping(i);
+                var inpaintArea = pyramid.GetInpaintArea(i);
 
                 var imageArea = Area2D.Create(0, 0, image.Width, image.Height);
 
@@ -113,7 +60,7 @@ namespace Inpaint
                 // start inpaint iterations
                 K = InitK;
                 int inpaintIteration = 0;
-                while (inpaintIteration < 10)
+                while (inpaintIteration < 20)
                 {
                     // Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
@@ -166,7 +113,7 @@ namespace Inpaint
 
                     inpaintIteration++;
                     // if the change is smaller then a treshold, we quit
-                    if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
+                    //if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
                 }
             }
 
