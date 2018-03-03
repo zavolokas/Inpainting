@@ -139,7 +139,6 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
         }
 
         [TestCase(1, 1, 0, 0, 0, 0, 16, 16, 0, 0, 8, 8)]
-        [TestCase(2, 0, 32, 32, 0, 0, 16, 16, 0, 0, 8, 8)]
         [TestCase(0, 0, 0, 0, 1, 1, 16, 16, 0, 0, 8, 8)]
         [TestCase(0, 0, 32, 32, 0, 2, 0, 0, 0, 0, 8, 8)]
         [TestCase(0, 0, 32, 32, 5, 0, 0, 0, 0, 0, 8, 8)]
