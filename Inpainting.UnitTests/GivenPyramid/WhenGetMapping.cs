@@ -53,7 +53,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             var mapping = pyramid.GetMapping(levelIndex);
 
             // Assert
-            mapping.ShouldBe(mappings[levelIndex]);
+            mapping.ShouldBe(mappings[levelsAmount - 1 - levelIndex]);
         }
     }
 }

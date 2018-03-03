@@ -7,9 +7,9 @@ namespace Zavolokas.ImageProcessing.Inpainting
 {
     public class Pyramid
     {
-        private readonly IList<ZsImage> _images;
-        private readonly IList<Area2D> _inpaintAreas;
-        private readonly IList<Area2DMap> _mappings;
+        private readonly ZsImage[] _images;
+        private readonly Area2D[] _inpaintAreas;
+        private readonly Area2DMap[] _mappings;
 
         internal Pyramid(IList<ZsImage> images, IList<Area2D> inpaintAreas, IList<Area2DMap> mappings)
         {
@@ -50,25 +50,34 @@ namespace Zavolokas.ImageProcessing.Inpainting
                 h /= 2;
             }
 
-            _images = images;
-            _inpaintAreas = inpaintAreas;
-            _mappings = mappings;
+            _images = images.Reverse().ToArray();
+            _inpaintAreas = inpaintAreas.Reverse().ToArray();
+            _mappings = mappings.Reverse().ToArray();
         }
 
         public ZsImage GetImage(byte levelIndex)
         {
+            if (levelIndex >= _images.Length)
+                throw new ArgumentOutOfRangeException();
+
             return _images[levelIndex];
         }
 
         public Area2DMap GetMapping(byte levelIndex)
         {
+            if (levelIndex >= _mappings.Length)
+                throw new ArgumentOutOfRangeException();
+
             return _mappings[levelIndex];
         }
         public Area2D GetInpaintArea(byte levelIndex)
         {
+            if (levelIndex >= _inpaintAreas.Length)
+                throw new ArgumentOutOfRangeException();
+
             return _inpaintAreas[levelIndex];
         }
 
-        public byte LevelsAmount => (byte)_images.Count;
+        public byte LevelsAmount => (byte)_images.Length;
     }
 }
