@@ -6,7 +6,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using Zavolokas.GdiExtensions;
-using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.Structures;
 
 namespace Inpaint
@@ -79,7 +78,7 @@ namespace Inpaint
                 donors.AddRange(donorNames.Select(donorName => OpenArgbImage(Path.Combine(imagesPath, donorName))));
             }
             var inpainter = new Inpainter();
-            
+
 
             inpainter.IterationFinished += (sender, eventArgs) =>
             {
@@ -100,61 +99,10 @@ namespace Inpaint
                 .FromArgbToBitmap()
                 .SaveTo($"..//..//out//result.png", ImageFormat.Png);
 
-            //var pyramidBuilder = new PyramidBuilder();
-            //pyramidBuilder.Init(imageArgb, markupArgb);
-            //var pyramid = pyramidBuilder.Build(5);
-
-            //for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
-            //{
-            //    pyramid
-            //        .GetImage(levelIndex)
-            //        .FromLabToRgb()
-            //        .FromRgbToBitmap()
-            //        .SaveTo($"..//..//out//image{levelIndex}.png", ImageFormat.Png);
-
-            //    pyramid
-            //        .GetInpaintArea(levelIndex)
-            //        .ToBitmap(Color.Blue)
-            //        .SaveTo($"..//..//out//inpaint{levelIndex}.png", ImageFormat.Png);
-
-            //    var mapping = (IAreasMapping)pyramid.GetMapping(levelIndex);
-            //    mapping
-            //        .DestArea
-            //        .ToBitmap(Color.Blue)
-            //        .SaveTo($"..//..//out//dest{levelIndex}.png", ImageFormat.Png);
-
-            //    mapping
-            //        .SourceArea
-            //        .ToBitmap(Color.Red)
-            //        .SaveTo($"..//..//out//src{levelIndex}.png", ImageFormat.Png);
-            //}
-
-
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
 
             Console.WriteLine($"Done in {elapsedMs}ms");
-        }
-
-        private static void SaveNnf(Nnf nnf, int width, byte levelIndex, int inpaintIteration)
-        {
-            var nnfdata = nnf
-                .GetNnfItems()
-                .Where((d, i) => i % 2 == 0)
-                .Select((d, ind) =>
-                {
-                    var i = ind + 1;
-                    var x = d % width;
-                    var y = d / width;
-
-                    var line = $"{x:00}:{y:00} ";
-                    if (i % width == 0)
-                        line += "\n";
-                    return line;
-                })
-                .Aggregate("", (s1, s2) => s1 + s2);
-
-            File.AppendAllText($"..//..//n{levelIndex}_{inpaintIteration}.txt", nnfdata);
         }
 
         private static ZsImage OpenArgbImage(string path)

@@ -25,7 +25,7 @@ namespace Inpaint
             const double MinK = 3.0;
             const double dk = 0.001;
 
-            var calculator = ImagePatchDistance.Cie2000;
+            var calculator = ImagePatchDistance.Cie76;// Cie2000;
 
             var K = InitK;
 
