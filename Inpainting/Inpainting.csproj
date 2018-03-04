@@ -59,8 +59,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Zavolokas.ImageProcessing.PatchMatch, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Zavolokas.ImageProcessing.PatchMatch.1.0.5\lib\net462\Zavolokas.ImageProcessing.PatchMatch.dll</HintPath>
+    <Reference Include="Zavolokas.ImageProcessing.PatchMatch, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Zavolokas.ImageProcessing.PatchMatch.1.0.6\lib\net462\Zavolokas.ImageProcessing.PatchMatch.dll</HintPath>
     </Reference>
     <Reference Include="Zavolokas.Math, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Zavolokas.Math.1.0.0\lib\net462\Zavolokas.Math.dll</HintPath>
