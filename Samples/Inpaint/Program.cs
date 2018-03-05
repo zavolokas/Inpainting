@@ -20,18 +20,19 @@ namespace Inpaint
 
             var donorNames = new string[0];
 
-            //const string imageName = "t009.jpg";
-            //const string markupName = "m009.png";
+            const string imageName = "t009.jpg";
+            const string markupName = "m009.png";
 
-            const string imageName = "t061.jpg";
-            const string markupName = "m061.png";
-            donorNames = new[] {"d0611.png", "d0612.png"};
+            //const string imageName = "t061.jpg";
+            //const string markupName = "m061.png";
+            //donorNames = new[] {"d0611.png", "d0612.png"};
 
             //const string imageName = "t048.png";
             //const string markupName = "m048.png";
 
             //const string imageName = "t023.jpg";
             //const string markupName = "m023.png";
+            //donorNames = new[] {"d0231.png"};
 
             //const string imageName = "t097.png";
             //const string markupName = "m097.png";
