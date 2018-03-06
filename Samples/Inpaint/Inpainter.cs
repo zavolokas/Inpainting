@@ -16,8 +16,7 @@ namespace Inpaint
         public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb)
         {
             // TODO: move settings to a separate entity
-            // TODO: should be calculated based on image and markup size
-            const byte levelsAmount = 5;
+
             const byte patchSize = 11;
             const double changedPixelsPercentTreshold = 0.005;
 
@@ -25,9 +24,12 @@ namespace Inpaint
             const double MinK = 3.0;
             const double dk = 0.001;
 
-            var calculator = ImagePatchDistance.Cie76;// Cie2000;
+            var calculator = ImagePatchDistance.Cie2000;
 
             var K = InitK;
+
+            var levelDetector = new PyramidLevelsDetector();
+            var levelsAmount = levelDetector.CalculateLevelsAmount(imageArgb, markupArgb, patchSize);
 
             // TODO: extract a part of the image that can be scaled down 
             // required amount of times (levels)
@@ -47,7 +49,7 @@ namespace Inpaint
             ZsImage image = null;
 
             var nnfSettings = new PatchMatchSettings { PatchSize = patchSize };
-            
+
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
                 image = pyramid.GetImage(levelIndex);
@@ -119,6 +121,7 @@ namespace Inpaint
                     inpaintIteration++;
                     // if the change is smaller then a treshold, we quit
                     if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
+                    //if (levelIndex == levelsAmount - 1) break;
                 }
             }
 
