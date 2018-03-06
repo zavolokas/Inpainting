@@ -76,7 +76,7 @@
     <Compile Include="InpaintingResult.cs" />
     <Compile Include="InpaintMapBuilder.cs" />
     <Compile Include="ColorResolvers\MeanShiftColorResolver.cs" />
-    <Compile Include="LevelsDetector.cs" />
+    <Compile Include="PyramidLevelsDetector.cs" />
     <Compile Include="Pyramid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ColorResolvers\SimpleColorResolver.cs" />

@@ -88,7 +88,7 @@
     <Compile Include="GivenInpaintMapBuilder\WhenBuild.cs" />
     <Compile Include="GivenInpaintMapBuilder\WhenSetInpaintArea.cs" />
     <Compile Include="GivenInpaintMapBuilder\WhenReduceDestArea.cs" />
-    <Compile Include="GivenLevelsDetector\WhenCalculateLevelsAmount.cs" />
+    <Compile Include="GivenPyramidLevelsDetector\WhenCalculateLevelsAmount.cs" />
     <Compile Include="GivenPyramidBuilder\WhenBuild.cs" />
     <Compile Include="GivenPyramidBuilder\WhenInit.cs" />
     <Compile Include="GivenPyramid\PyramidTestBase.cs" />

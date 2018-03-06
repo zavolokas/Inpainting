@@ -13,7 +13,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
         public void Should_Throw_ArgumentNullException_When_Image_IsNull()
         {
             // Arrange
-            var detector = new LevelsDetector();
+            var detector = new PyramidLevelsDetector();
             ZsImage image = null;
             ZsImage markup = CreateImage(100, 100);
             byte patchSize = 7;
@@ -28,7 +28,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
         public void Should_Throw_ArgumentNullException_When_RemoveMarkup_IsNull()
         {
             // Arrange
-            var detector = new LevelsDetector();
+            var detector = new PyramidLevelsDetector();
             ZsImage image = CreateImage(100, 100);
             ZsImage markup = null;
             byte patchSize = 7;
@@ -44,7 +44,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
         public void Should_Throw_ArgumentOutOfRangeException_When_PatchSize_Less_Than_2(byte patchSize)
         {
             // Arrange
-            var detector = new LevelsDetector();
+            var detector = new PyramidLevelsDetector();
             ZsImage image = CreateImage(100, 100);
             ZsImage markup = CreateImage(50, 100);
 
@@ -61,7 +61,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
         public void Should_Throw_AreaRemovedException_When_Markup_Covers_Image(int iw, int ih, int mw, int mh)
         {
             // Arrange
-            var detector = new LevelsDetector();
+            var detector = new PyramidLevelsDetector();
             ZsImage image = CreateImage(iw, ih);
             ZsImage markup = CreateImage(mw, mh);
             byte patchSize = 7;
@@ -76,7 +76,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
         public void Should_Return_1_When_Markup_IsEmpty()
         {
             // Arrange
-            var detector = new LevelsDetector();
+            var detector = new PyramidLevelsDetector();
             ZsImage image = CreateImage(100, 100);
             ZsImage markup = CreateImage(100, 100, 0.0);
             byte patchSize = 7;
@@ -92,7 +92,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
         public void Should_Return_1_When_Markup_IsEmpty_Inside_Image_Area()
         {
             // Arrange
-            var detector = new LevelsDetector();
+            var detector = new PyramidLevelsDetector();
             ZsImage image = CreateImage(100, 100);
             ZsImage markup = Create3pixBiggerMarkupNotEmptyOutsideOfTheImage(100, 100);
             byte patchSize = 7;
