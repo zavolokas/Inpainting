@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using Zavolokas.ImageProcessing.Inpainting;
@@ -13,7 +14,7 @@ namespace Inpaint
 
         private InpaintingResult _inpaintingResult;
 
-        public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb)
+        public ZsImage Inpaint(ZsImage imageArgb2, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb2)
         {
             // TODO: move settings to a separate entity
 
@@ -29,10 +30,18 @@ namespace Inpaint
             var K = InitK;
 
             var levelDetector = new PyramidLevelsDetector();
-            var levelsAmount = levelDetector.CalculateLevelsAmount(imageArgb, markupArgb, patchSize);
+            var levelsAmount = levelDetector.CalculateLevelsAmount(imageArgb2, markupArgb, patchSize);
 
-            // TODO: extract a part of the image that can be scaled down 
+            // extract a part of the image that can be scaled down 
             // required amount of times (levels)
+            var donorsArgb = new List<ZsImage>();
+            var imageSrcArea = ExtractWorkArea(imageArgb2, markupArgb, levelsAmount);
+            var imageArgb = CopyImageArea(imageArgb2, imageSrcArea);
+            markupArgb = CopyImageArea(markupArgb, imageSrcArea);
+            foreach (var donorImage in donorsArgb2)
+            {
+                donorsArgb.Add(CopyImageArea(donorImage, imageSrcArea));
+            }
 
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.Init(imageArgb, markupArgb);
@@ -121,15 +130,17 @@ namespace Inpaint
                     inpaintIteration++;
                     // if the change is smaller then a treshold, we quit
                     if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
-                    //if (levelIndex == levelsAmount - 1) break;
+                    if (levelIndex == levelsAmount - 1) break;
                 }
             }
 
             // TODO: paste result in the original bitmap where it was extracted from
-
-            return image
-                .FromLabToRgb()
+            image.FromLabToRgb()
                 .FromRgbToArgb(Area2D.Create(0, 0, image.Width, image.Height));
+
+            imageArgb2.CopyFromImage(imageSrcArea, image, Area2D.Create(0, 0, image.Width, image.Height));
+
+            return imageArgb2;
         }
 
         private InpaintingResult Inpaint(ZsImage image, Area2D removeArea, Nnf nnf, int patchSize, ColorResolver colorResolver, double k)
@@ -243,6 +254,85 @@ namespace Inpaint
             _inpaintingResult.ChangedPixelsDifference = changedPixelsDifference;
 
             return _inpaintingResult;
+        }
+
+        public Tuple<int, int> Calculate(int width, int height, byte levels)
+        {
+            var resultWidth = width;
+            var resultHeight = height;
+
+            if (width % 2 != 0)
+                resultWidth--;
+
+            if (height % 2 != 0)
+                resultHeight--;
+
+            while (!IsValid(resultWidth, levels))
+            {
+                resultWidth -= 2;
+            }
+
+            while (!IsValid(resultHeight, levels))
+            {
+                resultHeight -= 2;
+            }
+
+            return new Tuple<int, int>(resultWidth, resultHeight);
+        }
+
+        private static bool IsValid(int val, byte levels)
+        {
+            bool wNoRest = true;
+            for (int levelIndex = 0; levelIndex < (levels - 1) && wNoRest; levelIndex++)
+            {
+                if (val % 2 != 0)
+                    wNoRest = false;
+
+                val /= 2;
+            }
+
+            return wNoRest;
+        }
+
+        public Vector2D CalculateOffset(int width, int height, Area2D markup)
+        {
+            int x = 0;
+            int y = 0;
+
+            var bottomRightX = markup.Bound.Width + markup.Bound.X;
+            var bottomRightY = markup.Bound.Height + markup.Bound.Y;
+
+            while (x + width <= bottomRightX || x + width <= bottomRightX)
+            {
+                x++;
+            }
+
+            while (y + height <= bottomRightY || y + height <= bottomRightY)
+            {
+                y++;
+            }
+
+            return new Vector2D(x, y);
+        }
+
+        private static ZsImage CopyImageArea(ZsImage imageArgb2, Area2D imageSrcArea)
+        {
+            var pixels = Enumerable.Repeat(0.0, imageSrcArea.Bound.Width * imageSrcArea.Bound.Height * 4).ToArray();
+            var imageArgb = new ZsImage(pixels, imageSrcArea.Bound.Width, imageSrcArea.Bound.Height, 4);
+            var imageArgbArea = Area2D.Create(0, 0, imageSrcArea.Bound.Width, imageSrcArea.Bound.Height);
+            imageArgb.CopyFromImage(imageArgbArea, imageArgb2, imageSrcArea);
+            return imageArgb;
+        }
+
+        private Area2D ExtractWorkArea(ZsImage imageArgb2, ZsImage markupArgb, byte levelsAmount)
+        {
+            var size = Calculate(imageArgb2.Width, imageArgb2.Height, levelsAmount);
+
+            var markupArgbArea = markupArgb.FromArgbToArea2D();
+            var offset = CalculateOffset(size.Item1, size.Item2, markupArgbArea);
+
+            var imageSrcArea = Area2D.Create((int)offset.X, (int)offset.Y, size.Item1, size.Item2);
+            return imageSrcArea;
         }
     }
 }
