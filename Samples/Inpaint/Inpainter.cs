@@ -25,33 +25,29 @@ namespace Inpaint
 
         public ZsImage Inpaint(ZsImage imageArgb2, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb2)
         {
-            // TODO: move settings to a separate entity
+            return Inpaint(imageArgb2, markupArgb, donorsArgb2, new InpaintSettings());
+        }
 
-            const byte patchSize = 11;
-            const double changedPixelsPercentTreshold = 0.005;
+        public ZsImage Inpaint(ZsImage imageArgb2, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb2, InpaintSettings settings)
+        {
+            // TODO: validate the inputs
 
-            const double InitK = 3.0;
-            const double MinK = 3.0;
-            const double dk = 0.001;
+            // cache settings
+            var patchSize = settings.PatchSize;
+            var calculator = settings.PatchDistanceCalculator;
+            var nnfSettings = settings.PatchMatch;
+            var changedPixelsPercentTreshold = settings.ChangedPixelsPercentTreshold;
+            var K = settings.MeanShift.InitK;
+            var maxInpaintIterationsAmount = settings.MaxInpaintIterations;
 
-            var calculator = ImagePatchDistance.Cie2000;
-
-            var K = InitK;
-            var nnfSettings = new PatchMatchSettings { PatchSize = patchSize };
-
-
+            // Prepare input data
             var levelsAmount = _levelDetector.CalculateLevelsAmount(imageArgb2, markupArgb, patchSize);
 
-            // extract a part of the image that can be scaled down 
-            // required amount of times (levels)
-            var donorsArgb = new List<ZsImage>();
+            // extract a part of the image that can be scaled down required amount of times (levels)
             var imageSrcArea = ExtractWorkArea(imageArgb2, markupArgb, levelsAmount);
             var imageArgb = CopyImageArea(imageArgb2, imageSrcArea);
             markupArgb = CopyImageArea(markupArgb, imageSrcArea);
-            foreach (var donorImage in donorsArgb2)
-            {
-                donorsArgb.Add(CopyImageArea(donorImage, imageSrcArea));
-            }
+            var donorsArgb = donorsArgb2.Select(donorImage => CopyImageArea(donorImage, imageSrcArea)).ToList();
 
             _pyramidBuilder.Init(imageArgb, markupArgb);
             foreach (var donorArgb in donorsArgb)
@@ -75,13 +71,13 @@ namespace Inpaint
                 // if there is a NNF built on the prev level
                 // scale it up
                 nnf = nnf == null
-                    ? new Nnf(image.Width, image.Height, image.Width, image.Height, nnfSettings.PatchSize)
+                    ? new Nnf(image.Width, image.Height, image.Width, image.Height, patchSize)
                     : nnf.CloneAndScale2XWithUpdate(image, image, nnfSettings, mapping, calculator);
 
                 // start inpaint iterations
-                K = InitK;
-                int inpaintIteration = 0;
-                while (inpaintIteration < 50)
+                K = settings.MeanShift.InitK;
+                int inpaintIterationIndex = 0;
+                while (inpaintIterationIndex < maxInpaintIterationsAmount)
                 {
                     // Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
@@ -89,14 +85,14 @@ namespace Inpaint
                     // that we want to inpaint. That is why before the area is not
                     // inpainted - we should exclude this area.
                     var pixelsArea = imageArea;
-                    if (levelIndex == 0 && inpaintIteration == 0)
+                    if (levelIndex == 0 && inpaintIterationIndex == 0)
                     {
                         pixelsArea = imageArea.Substract(inpaintArea);
                     }
 
                     // skip building NNF for the first iteration in the level
                     // unless it is top level (for the top one we haven't built NNF yet)
-                    if (levelIndex == 0 || inpaintIteration > 0)
+                    if (levelIndex == 0 || inpaintIterationIndex > 0)
                     {
                         // in order to find best matches for the inpainted area,
                         // we build NNF for this image as a dest and a source 
@@ -114,10 +110,10 @@ namespace Inpaint
                     nnfNormalized.Normalize();
 
                     // after we have the NNF - we calculate the values of the pixels in the inpainted area
-                    var inpaintResult = Inpaint(image, inpaintArea, nnfNormalized, nnfSettings.PatchSize, ColorResolver.MeanShift, K);
+                    var inpaintResult = Inpaint(image, inpaintArea, nnfNormalized, K, settings);
                     //if (K > MinK)
                     //{
-                    //    K -= dk;
+                    //    K -= DeltaK;
                     //}
 
                     if (IterationFinished != null)
@@ -127,12 +123,12 @@ namespace Inpaint
                             InpaintedLabImage = image.Clone(),
                             InpaintResult = inpaintResult,
                             LevelIndex = levelIndex,
-                            InpaintIteration = inpaintIteration
+                            InpaintIteration = inpaintIterationIndex
                         };
                         IterationFinished(this, eventArgs);
                     }
 
-                    inpaintIteration++;
+                    inpaintIterationIndex++;
                     // if the change is smaller then a treshold, we quit
                     if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
                     if (levelIndex == levelsAmount - 1) break;
@@ -148,7 +144,7 @@ namespace Inpaint
             return imageArgb2;
         }
 
-        private InpaintingResult Inpaint(ZsImage image, Area2D removeArea, Nnf nnf, int patchSize, ColorResolver colorResolver, double k)
+        private InpaintingResult Inpaint(ZsImage image, Area2D removeArea, Nnf nnf, double k, IInpaintSettings settings)
         {
             // Since the nnf was normalized, the sigma now is normalized as well and it
             // has not any more some specific value.
@@ -157,12 +153,15 @@ namespace Inpaint
             //double NaturalLogBase2 = System.Math.Pow(System.Math.E, 1.0 / minusSigmaCube2);
             const double naturalLogBasePowMinusSigmaCube2 = 0.33373978049163078;
 
-            const double pixelChangeTreshold = 0.00003;
             const double maxSquareDistanceInLab = 32668.1151;
             // Gamma is used for calculation of alpha in markup. The confidence.
             const double gamma = 1.3;
             // The value of confidence in non marked areas.
             const double confidentValue = 1.50;
+
+            var patchSize = settings.PatchSize;
+            var colorResolver = settings.ColorResolver;
+            var pixelChangeTreshold = settings.PixelChangeTreshold;
 
             // Get points' indexes that that needs to be inpainted.
             var pointIndexes = new int[removeArea.ElementsCount];
