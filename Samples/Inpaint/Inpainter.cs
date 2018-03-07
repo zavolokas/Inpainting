@@ -1,5 +1,4 @@
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using Zavolokas.ImageProcessing.Inpainting;
@@ -13,6 +12,16 @@ namespace Inpaint
         public event EventHandler<InpaintIterationFinishedEventArgs> IterationFinished;
 
         private InpaintingResult _inpaintingResult;
+        private readonly PyramidLevelsDetector _levelDetector;
+        private readonly PyramidBuilder _pyramidBuilder;
+        private readonly PatchMatchNnfBuilder _nnfBuilder;
+
+        public Inpainter()
+        {
+            _levelDetector = new PyramidLevelsDetector();
+            _pyramidBuilder = new PyramidBuilder();
+            _nnfBuilder = new PatchMatchNnfBuilder();
+        }
 
         public ZsImage Inpaint(ZsImage imageArgb2, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb2)
         {
@@ -28,9 +37,10 @@ namespace Inpaint
             var calculator = ImagePatchDistance.Cie2000;
 
             var K = InitK;
+            var nnfSettings = new PatchMatchSettings { PatchSize = patchSize };
 
-            var levelDetector = new PyramidLevelsDetector();
-            var levelsAmount = levelDetector.CalculateLevelsAmount(imageArgb2, markupArgb, patchSize);
+
+            var levelsAmount = _levelDetector.CalculateLevelsAmount(imageArgb2, markupArgb, patchSize);
 
             // extract a part of the image that can be scaled down 
             // required amount of times (levels)
@@ -43,21 +53,16 @@ namespace Inpaint
                 donorsArgb.Add(CopyImageArea(donorImage, imageSrcArea));
             }
 
-            var pyramidBuilder = new PyramidBuilder();
-            pyramidBuilder.Init(imageArgb, markupArgb);
+            _pyramidBuilder.Init(imageArgb, markupArgb);
             foreach (var donorArgb in donorsArgb)
             {
-                pyramidBuilder.AddDonorMarkup(donorArgb);
+                _pyramidBuilder.AddDonorMarkup(donorArgb);
             }
-            var pyramid = pyramidBuilder.Build(levelsAmount, patchSize);
-
-            var nnfBuilder = new PatchMatchNnfBuilder();
+            var pyramid = _pyramidBuilder.Build(levelsAmount, patchSize);
 
             // go thru all the pyramid levels starting from the top one
             Nnf nnf = null;
             ZsImage image = null;
-
-            var nnfSettings = new PatchMatchSettings { PatchSize = patchSize };
 
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
@@ -97,12 +102,12 @@ namespace Inpaint
                         // we build NNF for this image as a dest and a source 
                         // but excluding the inpainted area from the source area
                         // (our mapping already takes care of it)
-                        nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        _nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
+                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
                     }
 
                     var nnfNormalized = nnf.Clone();
