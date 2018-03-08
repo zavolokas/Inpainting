@@ -21,8 +21,9 @@ namespace Inpaint
         
         public double ChangedPixelsPercentTreshold = 0.005;
         public int MaxInpaintIterations = 50;
-        public MeanShiftSettings MeanShift;
         public ImagePatchDistanceCalculator PatchDistanceCalculator;
+
+        public MeanShiftSettings MeanShift { get; }
 
         public PatchMatchSettings PatchMatch { get; }
         public ColorResolver ColorResolver { get; set; } = ColorResolver.MeanShift;
@@ -37,8 +38,17 @@ namespace Inpaint
 
     public class MeanShiftSettings
     {
-        public double InitK = 3.0;
-        public double MinK = 3.0;
-        public double DeltaK = 0.001;
+        /// <summary>
+        /// Determines window size.
+        /// </summary>
+        public double K = 3.0;
+        /// <summary>
+        /// Determines the minimum K(window size).
+        /// </summary>
+        public double MinK = 0.02;
+        /// <summary>
+        /// Determines how fast K(window size) decreases.
+        /// </summary>
+        public double KDecreaseStep = 0.001;
     }
 }
