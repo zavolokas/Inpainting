@@ -23,42 +23,37 @@ namespace Inpaint
             _nnfBuilder = new PatchMatchNnfBuilder();
         }
 
-        public ZsImage Inpaint(ZsImage imageArgb2, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb2)
+        public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb)
         {
-            return Inpaint(imageArgb2, markupArgb, donorsArgb2, new InpaintSettings());
+            return Inpaint(imageArgb, markupArgb, donorsArgb, new InpaintSettings());
         }
 
-        public ZsImage Inpaint(ZsImage imageArgb2, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb2, InpaintSettings settings)
+        public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb, InpaintSettings settings)
         {
             // TODO: validate the inputs
 
-            // cache settings
+            #region cache settings
             var patchSize = settings.PatchSize;
             var calculator = settings.PatchDistanceCalculator;
             var nnfSettings = settings.PatchMatch;
             var changedPixelsPercentTreshold = settings.ChangedPixelsPercentTreshold;
-            var K = settings.MeanShift.InitK;
             var maxInpaintIterationsAmount = settings.MaxInpaintIterations;
+            var kStep = settings.MeanShift.KDecreaseStep;
+            var minK = settings.MeanShift.MinK;
+            #endregion
 
             // Prepare input data
-            var levelsAmount = _levelDetector.CalculateLevelsAmount(imageArgb2, markupArgb, patchSize);
+            var levelsAmount = _levelDetector.CalculateLevelsAmount(imageArgb, markupArgb, patchSize);
 
             // extract a part of the image that can be scaled down required amount of times (levels)
-            var imageSrcArea = ExtractWorkArea(imageArgb2, markupArgb, levelsAmount);
-            var imageArgb = CopyImageArea(imageArgb2, imageSrcArea);
-            markupArgb = CopyImageArea(markupArgb, imageSrcArea);
-            var donorsArgb = donorsArgb2.Select(donorImage => CopyImageArea(donorImage, imageSrcArea)).ToList();
-
-            _pyramidBuilder.Init(imageArgb, markupArgb);
-            foreach (var donorArgb in donorsArgb)
-            {
-                _pyramidBuilder.AddDonorMarkup(donorArgb);
-            }
-            var pyramid = _pyramidBuilder.Build(levelsAmount, patchSize);
+            var imageSrcArea = ExtractWorkArea(imageArgb, markupArgb, levelsAmount);
+            var image = CopyImageArea(imageArgb, imageSrcArea);
+            var markup = CopyImageArea(markupArgb, imageSrcArea);
+            var donors = donorsArgb.Select(donorImage => CopyImageArea(donorImage, imageSrcArea)).ToList();
+            var pyramid = BuildPyramid(image, markup, donors, levelsAmount, patchSize);
 
             // go thru all the pyramid levels starting from the top one
             Nnf nnf = null;
-            ZsImage image = null;
 
             for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
             {
@@ -75,9 +70,8 @@ namespace Inpaint
                     : nnf.CloneAndScale2XWithUpdate(image, image, nnfSettings, mapping, calculator);
 
                 // start inpaint iterations
-                K = settings.MeanShift.InitK;
-                int inpaintIterationIndex = 0;
-                while (inpaintIterationIndex < maxInpaintIterationsAmount)
+                var k = settings.MeanShift.K;
+                for (var inpaintIterationIndex = 0; inpaintIterationIndex < maxInpaintIterationsAmount; inpaintIterationIndex++)
                 {
                     // Obtain pixels area.
                     // Pixels area defines which pixels are allowed to be used
@@ -110,11 +104,8 @@ namespace Inpaint
                     nnfNormalized.Normalize();
 
                     // after we have the NNF - we calculate the values of the pixels in the inpainted area
-                    var inpaintResult = Inpaint(image, inpaintArea, nnfNormalized, K, settings);
-                    //if (K > MinK)
-                    //{
-                    //    K -= DeltaK;
-                    //}
+                    var inpaintResult = Inpaint(image, inpaintArea, nnfNormalized, k, settings);
+                    k = k > minK ? k - kStep : k;
 
                     if (IterationFinished != null)
                     {
@@ -128,20 +119,31 @@ namespace Inpaint
                         IterationFinished(this, eventArgs);
                     }
 
-                    inpaintIterationIndex++;
                     // if the change is smaller then a treshold, we quit
                     if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
                     if (levelIndex == levelsAmount - 1) break;
                 }
             }
 
-            // TODO: paste result in the original bitmap where it was extracted from
+            // paste result in the original bitmap where it was extracted from
             image.FromLabToRgb()
                 .FromRgbToArgb(Area2D.Create(0, 0, image.Width, image.Height));
 
-            imageArgb2.CopyFromImage(imageSrcArea, image, Area2D.Create(0, 0, image.Width, image.Height));
+            imageArgb.CopyFromImage(imageSrcArea, image, Area2D.Create(0, 0, image.Width, image.Height));
 
-            return imageArgb2;
+            return imageArgb;
+        }
+
+        private Pyramid BuildPyramid(ZsImage imageArgb, ZsImage markupArgb, List<ZsImage> donorsArgb, byte levelsAmount, byte patchSize)
+        {
+            _pyramidBuilder.Init(imageArgb, markupArgb);
+            foreach (var donorArgb in donorsArgb)
+            {
+                _pyramidBuilder.AddDonorMarkup(donorArgb);
+            }
+
+            var pyramid = _pyramidBuilder.Build(levelsAmount, patchSize);
+            return pyramid;
         }
 
         private InpaintingResult Inpaint(ZsImage image, Area2D removeArea, Nnf nnf, double k, IInpaintSettings settings)
@@ -319,18 +321,18 @@ namespace Inpaint
             return new Vector2D(x, y);
         }
 
-        private static ZsImage CopyImageArea(ZsImage imageArgb2, Area2D imageSrcArea)
+        private static ZsImage CopyImageArea(ZsImage imageArgb, Area2D imageSrcArea)
         {
             var pixels = Enumerable.Repeat(0.0, imageSrcArea.Bound.Width * imageSrcArea.Bound.Height * 4).ToArray();
-            var imageArgb = new ZsImage(pixels, imageSrcArea.Bound.Width, imageSrcArea.Bound.Height, 4);
+            var resultImage = new ZsImage(pixels, imageSrcArea.Bound.Width, imageSrcArea.Bound.Height, 4);
             var imageArgbArea = Area2D.Create(0, 0, imageSrcArea.Bound.Width, imageSrcArea.Bound.Height);
-            imageArgb.CopyFromImage(imageArgbArea, imageArgb2, imageSrcArea);
-            return imageArgb;
+            resultImage.CopyFromImage(imageArgbArea, imageArgb, imageSrcArea);
+            return resultImage;
         }
 
-        private Area2D ExtractWorkArea(ZsImage imageArgb2, ZsImage markupArgb, byte levelsAmount)
+        private Area2D ExtractWorkArea(ZsImage imageArgb, ZsImage markupArgb, byte levelsAmount)
         {
-            var size = Calculate(imageArgb2.Width, imageArgb2.Height, levelsAmount);
+            var size = Calculate(imageArgb.Width, imageArgb.Height, levelsAmount);
 
             var markupArgbArea = markupArgb.FromArgbToArea2D();
             var offset = CalculateOffset(size.Item1, size.Item2, markupArgbArea);
