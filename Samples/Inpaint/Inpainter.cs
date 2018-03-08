@@ -23,14 +23,40 @@ namespace Inpaint
             _nnfBuilder = new PatchMatchNnfBuilder();
         }
 
-        public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb)
+        public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb = null)
         {
-            return Inpaint(imageArgb, markupArgb, donorsArgb, new InpaintSettings());
+
+            return Inpaint(imageArgb, markupArgb, new InpaintSettings(), donorsArgb);
         }
 
-        public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb, InpaintSettings settings)
+        public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, InpaintSettings settings, IEnumerable<ZsImage> donorsArgb = null)
         {
-            // TODO: validate the inputs
+            #region validate the inputs
+            
+            if (imageArgb == null)
+                throw new ArgumentNullException(nameof(imageArgb));
+
+            if (imageArgb.NumberOfComponents != 4)
+                throw new BadImageFormatException($"{nameof(imageArgb)} is expected to be in ARGB format");
+
+            if (markupArgb == null)
+                throw new ArgumentNullException(nameof(markupArgb));
+
+            if (markupArgb.NumberOfComponents != 4)
+                throw new BadImageFormatException($"{nameof(markupArgb)} is expected to be in ARGB format");
+
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+
+            if (donorsArgb == null)
+            {
+                donorsArgb = new ZsImage[0];
+            }
+            else if (donorsArgb.Any(donorArgb => donorArgb.NumberOfComponents != 4))
+            {
+                throw new BadImageFormatException($"{nameof(donorsArgb)} are expected to be in ARGB format");
+            }
+            #endregion
 
             #region cache settings
             var patchSize = settings.PatchSize;

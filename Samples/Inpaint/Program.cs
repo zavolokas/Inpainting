@@ -100,7 +100,7 @@ namespace Inpaint
 
             var settings = new InpaintSettings();
             settings.MeanShift.KDecreaseStep = 0;
-            var result = inpainter.Inpaint(imageArgb, markupArgb, donors);
+            var result = inpainter.Inpaint(imageArgb, markupArgb, settings, donors);
             result
                 .FromArgbToBitmap()
                 .SaveTo($"..//..//out//result.png", ImageFormat.Png);
