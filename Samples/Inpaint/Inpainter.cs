@@ -59,20 +59,31 @@ namespace Inpaint
             #endregion
 
             // Prepare input data
-            var levelsAmount = _levelDetector.CalculateLevelsAmount(imageArgb, markupArgb, settings.PatchSize);
+            var originalImageArea = Area2D.Create(0, 0, imageArgb.Width, imageArgb.Height);
+            var imageToPorcess = imageArgb;
+            Pyramid imagePyramid;
 
-            // extract a part of the image that can be scaled down required amount of times (levels)
-            Pyramid pyramid;
+            var levelsAmount = _levelDetector.CalculateLevelsAmount(imageArgb, markupArgb, settings.PatchSize);
+            
+            // Get the area of the image that can be scaled down required amount of times (levels)
             var areaToProcess = GetImageAreaToProcess(imageArgb, markupArgb, levelsAmount);
 
-            var imageToPorcess = CopyImageArea(imageArgb, areaToProcess);
+            if (!areaToProcess.IsSameAs(originalImageArea))
             {
+                // We need to crop the original image, markup and donors
+                // since the area to process differs from the image area
+                imageToPorcess = CopyImageArea(imageArgb, areaToProcess);
                 var markup = CopyImageArea(markupArgb, areaToProcess);
-                var donors = donorsArgb.Select(donorImage => CopyImageArea(donorImage, areaToProcess)).ToList();
-                pyramid = BuildPyramid(imageToPorcess, markup, donors, levelsAmount, settings.PatchSize);
+                var donors = donorsArgb.Select(donorImage => CopyImageArea(donorImage, areaToProcess));
+
+                imagePyramid = BuildPyramid(imageToPorcess, markup, donors, levelsAmount, settings.PatchSize);
+            }
+            else
+            {
+                imagePyramid = BuildPyramid(imageToPorcess, markupArgb, donorsArgb, levelsAmount, settings.PatchSize);
             }
 
-            imageToPorcess = InternalInpaint(pyramid, settings);
+            imageToPorcess = InternalInpaint(imagePyramid, settings);
 
             // paste result in the original bitmap where it was extracted from
             var imageArea = Area2D.Create(0, 0, imageToPorcess.Width, imageToPorcess.Height);
@@ -175,7 +186,7 @@ namespace Inpaint
             return image;
         }
 
-        private Pyramid BuildPyramid(ZsImage imageArgb, ZsImage markupArgb, List<ZsImage> donorsArgb, byte levelsAmount, byte patchSize)
+        private Pyramid BuildPyramid(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb, byte levelsAmount, byte patchSize)
         {
             _pyramidBuilder.Init(imageArgb, markupArgb);
             foreach (var donorArgb in donorsArgb)
