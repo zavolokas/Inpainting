@@ -25,7 +25,6 @@ namespace Inpaint
 
         public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb = null)
         {
-
             return Inpaint(imageArgb, markupArgb, new InpaintSettings(), donorsArgb);
         }
 
@@ -186,18 +185,6 @@ namespace Inpaint
             return image;
         }
 
-        private Pyramid BuildPyramid(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb, byte levelsAmount, byte patchSize)
-        {
-            _pyramidBuilder.Init(imageArgb, markupArgb);
-            foreach (var donorArgb in donorsArgb)
-            {
-                _pyramidBuilder.AddDonorMarkup(donorArgb);
-            }
-
-            var pyramid = _pyramidBuilder.Build(levelsAmount, patchSize);
-            return pyramid;
-        }
-
         private InpaintingResult Inpaint(ZsImage image, Area2D removeArea, Nnf nnf, double k, IInpaintSettings settings)
         {
             // Since the nnf was normalized, the sigma now is normalized as well and it
@@ -275,7 +262,7 @@ namespace Inpaint
                                     weightedColors[colorsCount * (cmpts + 1) + ci] = image.PixelsData[srcPixelIndex * cmpts + ci];
                                 }
                                 weightedColors[colorsCount * (cmpts + 1) + cmpts] =
-                                    System.Math.Pow(naturalLogBasePowMinusSigmaCube2, nnfdata[destPatchPointIndex * 2 + 1]) *
+                                    Math.Pow(naturalLogBasePowMinusSigmaCube2, nnfdata[destPatchPointIndex * 2 + 1]) *
                                     confidence[ii];
 
                                 colorsCount++;
@@ -312,6 +299,18 @@ namespace Inpaint
             _inpaintingResult.ChangedPixelsDifference = changedPixelsDifference;
 
             return _inpaintingResult;
+        }
+
+        private Pyramid BuildPyramid(ZsImage imageArgb, ZsImage markupArgb, IEnumerable<ZsImage> donorsArgb, byte levelsAmount, byte patchSize)
+        {
+            _pyramidBuilder.Init(imageArgb, markupArgb);
+            foreach (var donorArgb in donorsArgb)
+            {
+                _pyramidBuilder.AddDonorMarkup(donorArgb);
+            }
+
+            var pyramid = _pyramidBuilder.Build(levelsAmount, patchSize);
+            return pyramid;
         }
 
         public Tuple<int, int> Calculate(int width, int height, byte levels)
