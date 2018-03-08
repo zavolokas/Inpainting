@@ -23,9 +23,10 @@ namespace Inpaint
             const string imageName = "t009.jpg";
             const string markupName = "m009.png";
 
+            #region other samples
             //const string imageName = "t061.jpg";
             //const string markupName = "m061.png";
-            //donorNames = new[] {"d0611.png", "d0612.png"};
+            //donorNames = new[] { "d0611.png", "d0612.png" };
 
             //const string imageName = "t048.png";
             //const string markupName = "m048.png";
@@ -47,8 +48,8 @@ namespace Inpaint
             //const string markupName = "m097.png";
 
             //const string imageName = "t058.jpg";
-            ////const string markupName = "m058_2.png";
-            //const string markupName = "m058_1.png";
+            //const string markupName = "m058_2.png";
+            ////const string markupName = "m058_1.png";
 
             //const string imageName = "t102.jpg";
             //const string markupName = "m102.png";
@@ -59,19 +60,22 @@ namespace Inpaint
             //const string imageName = "t007.jpg";
             //const string markupName = "m007.png";
 
-            //const string imageName = "t003.jpg";
-            //const string markupName = "m003.png";
+            //const string imageName = "t015.jpg";
+            //const string markupName = "m015.png";
+            //donorNames = new[] { "d0152.png", "d0151.png" };
+
+            //const string imageName = "t085.jpg";
+            //const string markupName = "m085.png";
 
             //const string imageName = "t101.jpg";
             //const string markupName = "m101.png";
 
             //const string imageName = "t027.jpg";
             //const string markupName = "m027.png";
+            #endregion
 
             // open an image and an image with a marked area to inpaint
             var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
-            var w = imageArgb.Width;
-            var h = imageArgb.Height;
             var markupArgb = OpenArgbImage(Path.Combine(imagesPath, markupName));
             var donors = new List<ZsImage>();
             if (donorNames.Any())
@@ -90,11 +94,12 @@ namespace Inpaint
                 eventArgs.InpaintedLabImage
                     .FromLabToRgb()
                     .FromRgbToBitmap()
-                    .CloneWithScaleTo(w, h, InterpolationMode.HighQualityBilinear)
+                    //.CloneWithScaleTo(w, h, InterpolationMode.HighQualityBilinear)
                     .SaveTo($"..//..//out//r{eventArgs.LevelIndex}_{eventArgs.InpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
             };
 
-            //TODO: make sure the inputs are got cloned inside.
+            var settings = new InpaintSettings();
+            settings.MeanShift.KDecreaseStep = 0;
             var result = inpainter.Inpaint(imageArgb, markupArgb, donors);
             result
                 .FromArgbToBitmap()
