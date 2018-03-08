@@ -1,7 +1,6 @@
-using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.ImageProcessing.PatchMatch;
 
-namespace Inpaint
+namespace Zavolokas.ImageProcessing.Inpainting
 {
     internal interface IInpaintSettings
     {

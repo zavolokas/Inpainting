@@ -1,8 +1,7 @@
 using System;
-using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.Structures;
 
-namespace Inpaint
+namespace Zavolokas.ImageProcessing.Inpainting
 {
     public class InpaintIterationFinishedEventArgs : EventArgs
     {

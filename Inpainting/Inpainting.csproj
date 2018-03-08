@@ -73,7 +73,10 @@
     <Compile Include="ColorResolvers\ColorResolver.cs" />
     <Compile Include="ImageNotProvidedException.cs" />
     <Compile Include="InpaintAreaIsNotSetException.cs" />
+    <Compile Include="Inpainter.cs" />
+    <Compile Include="InpainterSettings.cs" />
     <Compile Include="InpaintingResult.cs" />
+    <Compile Include="InpaintIterationFinishedEventArgs.cs" />
     <Compile Include="InpaintMapBuilder.cs" />
     <Compile Include="ColorResolvers\MeanShiftColorResolver.cs" />
     <Compile Include="PyramidLevelsDetector.cs" />

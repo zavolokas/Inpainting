@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using Zavolokas.GdiExtensions;
+using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.Structures;
 
 namespace Inpaint
@@ -94,7 +95,7 @@ namespace Inpaint
                 eventArgs.InpaintedLabImage
                     .FromLabToRgb()
                     .FromRgbToBitmap()
-                    //.CloneWithScaleTo(w, h, InterpolationMode.HighQualityBilinear)
+                    .CloneWithScaleTo(imageArgb.Width, imageArgb.Height, InterpolationMode.HighQualityBilinear)
                     .SaveTo($"..//..//out//r{eventArgs.LevelIndex}_{eventArgs.InpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
             };
 

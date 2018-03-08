@@ -59,9 +59,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Inpainter.cs" />
-    <Compile Include="InpainterSettings.cs" />
-    <Compile Include="InpaintIterationFinishedEventArgs.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

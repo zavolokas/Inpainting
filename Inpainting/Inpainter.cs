@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.ImageProcessing.PatchMatch;
 using Zavolokas.Structures;
 
-namespace Inpaint
+namespace Zavolokas.ImageProcessing.Inpainting
 {
     public class Inpainter
     {
@@ -262,7 +261,7 @@ namespace Inpaint
                                     weightedColors[colorsCount * (cmpts + 1) + ci] = image.PixelsData[srcPixelIndex * cmpts + ci];
                                 }
                                 weightedColors[colorsCount * (cmpts + 1) + cmpts] =
-                                    Math.Pow(naturalLogBasePowMinusSigmaCube2, nnfdata[destPatchPointIndex * 2 + 1]) *
+                                    System.Math.Pow(naturalLogBasePowMinusSigmaCube2, nnfdata[destPatchPointIndex * 2 + 1]) *
                                     confidence[ii];
 
                                 colorsCount++;
