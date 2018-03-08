@@ -32,7 +32,7 @@ namespace Inpaint
         public ZsImage Inpaint(ZsImage imageArgb, ZsImage markupArgb, InpaintSettings settings, IEnumerable<ZsImage> donorsArgb = null)
         {
             #region validate the inputs
-            
+
             if (imageArgb == null)
                 throw new ArgumentNullException(nameof(imageArgb));
 
@@ -58,6 +58,35 @@ namespace Inpaint
             }
             #endregion
 
+            // Prepare input data
+            var levelsAmount = _levelDetector.CalculateLevelsAmount(imageArgb, markupArgb, settings.PatchSize);
+
+            // extract a part of the image that can be scaled down required amount of times (levels)
+            Pyramid pyramid;
+            var areaToProcess = GetImageAreaToProcess(imageArgb, markupArgb, levelsAmount);
+
+            var imageToPorcess = CopyImageArea(imageArgb, areaToProcess);
+            {
+                var markup = CopyImageArea(markupArgb, areaToProcess);
+                var donors = donorsArgb.Select(donorImage => CopyImageArea(donorImage, areaToProcess)).ToList();
+                pyramid = BuildPyramid(imageToPorcess, markup, donors, levelsAmount, settings.PatchSize);
+            }
+
+            imageToPorcess = InternalInpaint(pyramid, settings);
+
+            // paste result in the original bitmap where it was extracted from
+            var imageArea = Area2D.Create(0, 0, imageToPorcess.Width, imageToPorcess.Height);
+            imageToPorcess.FromLabToRgb()
+                .FromRgbToArgb(imageArea);
+
+            imageArgb.CopyFromImage(areaToProcess, imageToPorcess, imageArea);
+
+            return imageArgb;
+        }
+
+        private ZsImage InternalInpaint(Pyramid pyramid, InpaintSettings settings)
+        {
+
             #region cache settings
             var patchSize = settings.PatchSize;
             var calculator = settings.PatchDistanceCalculator;
@@ -68,20 +97,12 @@ namespace Inpaint
             var minK = settings.MeanShift.MinK;
             #endregion
 
-            // Prepare input data
-            var levelsAmount = _levelDetector.CalculateLevelsAmount(imageArgb, markupArgb, patchSize);
-
-            // extract a part of the image that can be scaled down required amount of times (levels)
-            var imageSrcArea = ExtractWorkArea(imageArgb, markupArgb, levelsAmount);
-            var image = CopyImageArea(imageArgb, imageSrcArea);
-            var markup = CopyImageArea(markupArgb, imageSrcArea);
-            var donors = donorsArgb.Select(donorImage => CopyImageArea(donorImage, imageSrcArea)).ToList();
-            var pyramid = BuildPyramid(image, markup, donors, levelsAmount, patchSize);
+            ZsImage image = null;
 
             // go thru all the pyramid levels starting from the top one
             Nnf nnf = null;
 
-            for (byte levelIndex = 0; levelIndex < levelsAmount; levelIndex++)
+            for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
             {
                 image = pyramid.GetImage(levelIndex);
                 var mapping = pyramid.GetMapping(levelIndex);
@@ -147,17 +168,11 @@ namespace Inpaint
 
                     // if the change is smaller then a treshold, we quit
                     if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
-                    if (levelIndex == levelsAmount - 1) break;
+                    if (levelIndex == pyramid.LevelsAmount - 1) break;
                 }
             }
 
-            // paste result in the original bitmap where it was extracted from
-            image.FromLabToRgb()
-                .FromRgbToArgb(Area2D.Create(0, 0, image.Width, image.Height));
-
-            imageArgb.CopyFromImage(imageSrcArea, image, Area2D.Create(0, 0, image.Width, image.Height));
-
-            return imageArgb;
+            return image;
         }
 
         private Pyramid BuildPyramid(ZsImage imageArgb, ZsImage markupArgb, List<ZsImage> donorsArgb, byte levelsAmount, byte patchSize)
@@ -356,7 +371,7 @@ namespace Inpaint
             return resultImage;
         }
 
-        private Area2D ExtractWorkArea(ZsImage imageArgb, ZsImage markupArgb, byte levelsAmount)
+        private Area2D GetImageAreaToProcess(ZsImage imageArgb, ZsImage markupArgb, byte levelsAmount)
         {
             var size = Calculate(imageArgb.Width, imageArgb.Height, levelsAmount);
 
