@@ -178,7 +178,7 @@ namespace Zavolokas.ImageProcessing.Inpainting
 
                     // if the change is smaller then a treshold, we quit
                     if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
-                    if (levelIndex == pyramid.LevelsAmount - 1) break;
+                    //if (levelIndex == pyramid.LevelsAmount - 1) break;
                 }
             }
 
