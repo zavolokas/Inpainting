@@ -8,6 +8,7 @@ using System.Linq;
 using Zavolokas.GdiExtensions;
 using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.Structures;
+using Zavolokas.Utils.Processes;
 
 namespace Inpaint
 {
@@ -17,69 +18,16 @@ namespace Inpaint
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            const string imagesPath = @"../../../images";
-
-            var donorNames = new string[0];
-
-            const string imageName = "t009.jpg";
-            const string markupName = "m009.png";
+            const string imagesPath = "../../../images";
             const string outputPath = "../../out";
+            string resultPath = Path.Combine(outputPath, "result.png");
+
+            const string imageName = "t067.jpg";
+            const string markupName = "m067.png";
+            var donorNames = new string [0];// { "d0231.png", "d0612.png" };
 
             if (!Directory.Exists(outputPath))
-            {
                 Directory.CreateDirectory(outputPath);
-            }
-
-            #region other samples
-            //const string imageName = "t061.jpg";
-            //const string markupName = "m061.png";
-            //donorNames = new[] { "d0611.png", "d0612.png" };
-
-            //const string imageName = "t048.png";
-            //const string markupName = "m048.png";
-
-            //const string imageName = "t023.jpg";
-            //const string markupName = "m023.png";
-            //donorNames = new[] {"d0231.png"};
-
-            //const string imageName = "t097.png";
-            //const string markupName = "m097.png";
-
-            //const string imageName = "t096.png";
-            //const string markupName = "m099.png";
-
-            //const string imageName = "t090.png";
-            //const string markupName = "m090.png";
-
-            //const string imageName = "t097.png";
-            //const string markupName = "m097.png";
-
-            //const string imageName = "t058.jpg";
-            //const string markupName = "m058_2.png";
-            ////const string markupName = "m058_1.png";
-
-            //const string imageName = "t102.jpg";
-            //const string markupName = "m102.png";
-
-            //const string imageName = "t016.jpg";
-            //const string markupName = "m016.png";
-
-            //const string imageName = "t007.jpg";
-            //const string markupName = "m007.png";
-
-            //const string imageName = "t015.jpg";
-            //const string markupName = "m015.png";
-            //donorNames = new[] { "d0152.png", "d0151.png" };
-
-            //const string imageName = "t085.jpg";
-            //const string markupName = "m085.png";
-
-            //const string imageName = "t101.jpg";
-            //const string markupName = "m101.png";
-
-            //const string imageName = "t027.jpg";
-            //const string markupName = "m027.png";
-            #endregion
 
             // open an image and an image with a marked area to inpaint
             var imageArgb = OpenArgbImage(Path.Combine(imagesPath, imageName));
@@ -100,14 +48,15 @@ namespace Inpaint
                     .FromLabToRgb()
                     .FromRgbToBitmap()
                     .CloneWithScaleTo(imageArgb.Width, imageArgb.Height, InterpolationMode.HighQualityBilinear)
-                    .SaveTo($"..//..//out//r{eventArgs.LevelIndex}_{eventArgs.InpaintIteration}.png", ImageFormat.Png);
+                    .SaveTo(Path.Combine(outputPath, $"r{eventArgs.LevelIndex}_{eventArgs.InpaintIteration}.png"), ImageFormat.Png);
             };
 
             Console.WriteLine($"Begin processing ...");
             var result = inpainter.Inpaint(imageArgb, markupArgb, donors);
             result
                 .FromArgbToBitmap()
-                .SaveTo($"..//..//out//result.png", ImageFormat.Png);
+                .SaveTo(resultPath, ImageFormat.Png)
+                .ShowFile();
 
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
@@ -117,11 +66,19 @@ namespace Inpaint
 
         private static ZsImage OpenArgbImage(string path)
         {
-            ZsImage image;
-            using (var imageBitmap = new Bitmap(path))
+            const double maxSize = 2048.0;
+
+            var imageBitmap = new Bitmap(path);
+            if (imageBitmap.Width > maxSize || imageBitmap.Height > maxSize)
             {
-                image = imageBitmap.ToArgbImage();
+                var tmp = imageBitmap;
+                double percent = imageBitmap.Width > imageBitmap.Height ? maxSize / imageBitmap.Width : maxSize / imageBitmap.Height;
+                imageBitmap = imageBitmap.CloneWithScaleTo((int)(imageBitmap.Width * percent), (int)(imageBitmap.Height * percent));
+                tmp.Dispose();
             }
+
+            var image = imageBitmap.ToArgbImage();
+            imageBitmap.Dispose();
             return image;
         }
     }
