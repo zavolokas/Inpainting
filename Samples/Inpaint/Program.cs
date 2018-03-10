@@ -23,6 +23,12 @@ namespace Inpaint
 
             const string imageName = "t009.jpg";
             const string markupName = "m009.png";
+            const string outputPath = "../../out";
+
+            if (!Directory.Exists(outputPath))
+            {
+                Directory.CreateDirectory(outputPath);
+            }
 
             #region other samples
             //const string imageName = "t061.jpg";
@@ -88,20 +94,17 @@ namespace Inpaint
 
             inpainter.IterationFinished += (sender, eventArgs) =>
             {
-                var inpaintResult = eventArgs.InpaintResult;
-                Console.WriteLine($"Changed pix%:{inpaintResult.ChangedPixelsPercent:F8}, ChangedPixels: {inpaintResult.PixelsChangedAmount}, PixDiff: {inpaintResult.ChangedPixelsDifference}");
-                File.AppendAllLines($"../../out/{eventArgs.LevelIndex}.txt", new[] { $"{inpaintResult.ChangedPixelsPercent:F8}" });
+                Console.WriteLine($"Level:{eventArgs.LevelIndex}\tIteration: {eventArgs.InpaintIteration}");
 
                 eventArgs.InpaintedLabImage
                     .FromLabToRgb()
                     .FromRgbToBitmap()
                     .CloneWithScaleTo(imageArgb.Width, imageArgb.Height, InterpolationMode.HighQualityBilinear)
-                    .SaveTo($"..//..//out//r{eventArgs.LevelIndex}_{eventArgs.InpaintIteration}_CPP{inpaintResult.ChangedPixelsPercent:F8}_CPA{inpaintResult.PixelsChangedAmount}.png", ImageFormat.Png);
+                    .SaveTo($"..//..//out//r{eventArgs.LevelIndex}_{eventArgs.InpaintIteration}.png", ImageFormat.Png);
             };
 
-            var settings = new InpaintSettings();
-            settings.MeanShift.KDecreaseStep = 0;
-            var result = inpainter.Inpaint(imageArgb, markupArgb, settings, donors);
+            Console.WriteLine($"Begin processing ...");
+            var result = inpainter.Inpaint(imageArgb, markupArgb, donors);
             result
                 .FromArgbToBitmap()
                 .SaveTo($"..//..//out//result.png", ImageFormat.Png);
