@@ -58,7 +58,7 @@ namespace Zavolokas.ImageProcessing.Inpainting
 
             // Prepare input data
             var originalImageArea = Area2D.Create(0, 0, imageArgb.Width, imageArgb.Height);
-            var imageToPorcess = imageArgb;
+            ZsImage imageToPorcess;
             Pyramid imagePyramid;
 
             var levelsAmount = _levelDetector.CalculateLevelsAmount(imageArgb, markupArgb, settings.PatchSize);
@@ -78,6 +78,7 @@ namespace Zavolokas.ImageProcessing.Inpainting
             }
             else
             {
+                imageToPorcess = imageArgb.Clone();
                 imagePyramid = BuildPyramid(imageToPorcess, markupArgb, donorsArgb, levelsAmount, settings.PatchSize);
             }
 
