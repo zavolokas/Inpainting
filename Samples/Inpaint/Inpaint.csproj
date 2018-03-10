@@ -57,6 +57,9 @@
     <Reference Include="Zavolokas.Structures.Gdi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Zavolokas.Structures.Gdi.1.0.0\lib\net462\Zavolokas.Structures.Gdi.dll</HintPath>
     </Reference>
+    <Reference Include="Zavolokas.Utils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Zavolokas.Utils.1.0.0\lib\net452\Zavolokas.Utils.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
