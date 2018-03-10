@@ -25,7 +25,7 @@ namespace Zavolokas.ImageProcessing.Inpainting
         public MeanShiftSettings MeanShift { get; }
 
         public PatchMatchSettings PatchMatch { get; }
-        public ColorResolver ColorResolver { get; set; } = ColorResolver.MeanShift;
+        public ColorResolver ColorResolver { get; set; } = ColorResolver.Simple;
         public double PixelChangeTreshold { get; set; } = 0.00003;
 
         public byte PatchSize
