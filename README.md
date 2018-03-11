@@ -3,10 +3,10 @@
 [![Build Status](https://travis-ci.org/zavolokas/Inpainting.svg?branch=develop)](https://travis-ci.org/zavolokas/Inpainting)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/zavolokas)
 
-.NET implementation of content-aware fill(also known as inpainting or image completion) in image processing domain.
+.NET implementation of content-aware fill (also known as inpainting or image completion) in image processing domain.
 
 ## What is it for?
-Content aware fill is used to fill in unwanted or missing areas of photographs. See the example of such fill below where we don't want to have the man in blue t-shirt on our picture:
+Content aware fill is used to fill in unwanted or missing areas of photographs. See an example of such fill below where we don't want to have the man in blue t-shirt on our picture:
 
 | Original image | Processed image |
 |----------------|-----------------|
