@@ -6,7 +6,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
 {
     public class PyramidTestBase
     {
-        protected Pyramid CreatePyramid(int width, int height, byte levelsAmount)
+        internal Pyramid CreatePyramid(int width, int height, byte levelsAmount)
         {
             IList<ZsImage> images = new List<ZsImage>();
             PopulateImages(images, levelsAmount, width, height);

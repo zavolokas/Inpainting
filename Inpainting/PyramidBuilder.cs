@@ -5,7 +5,7 @@ using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting
 {
-    public class PyramidBuilder
+    internal class PyramidBuilder
     {
         private ZsImage _imageArgb;
         private ZsImage _inpaintMarkup;
