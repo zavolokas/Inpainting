@@ -27,7 +27,7 @@ The `Inpainter` takes as input
 - an image to inpaint
 - a simitransparent image with a mask
 - optionally it takes a set of simitransparent images that define donor areas for the parts of the area to inpaint.
-- optionally is takes an instance of settings.
+- optionally it takes an instance of settings.
 
 > Note: the images are not GDI+ images but images in an internal format and can be obtained from GDI+ `Bitmap`s using extensions.
 
@@ -43,7 +43,7 @@ The `Inpainter` takes as input
 
 ## Settings
 The execution of the algorithm can be customized by adjusting the settings. 
-- **MaxInpaintIterations**: determines how many iterations will be run to find better values for the area to fill. The more iterations you run, better result you'll get.
+- **MaxInpaintIterations**: determines how many iterations will be run to find better values for the area to fill. The more iterations you run, the better result you'll get.
 - **PatchDistanceCalculator**: determines algorithm to use for calculating a metrics how much one color is different from another. Possible values are:
   - Cie76 - fastest
   - Cie2000 - more accurate
