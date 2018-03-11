@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inpainting.UnitTests", "Inp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inpaint", "Samples\Inpaint\Inpaint.csproj", "{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InpaintWinForms", "Samples\InpaintWinForms\InpaintWinForms.csproj", "{64552774-8C1F-4FE6-89F2-7CEB66839538}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,12 +31,17 @@ Global
 		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64552774-8C1F-4FE6-89F2-7CEB66839538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64552774-8C1F-4FE6-89F2-7CEB66839538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64552774-8C1F-4FE6-89F2-7CEB66839538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64552774-8C1F-4FE6-89F2-7CEB66839538}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB} = {10E9F6F4-4AEA-4C61-8A09-88D623E1EB97}
+		{64552774-8C1F-4FE6-89F2-7CEB66839538} = {10E9F6F4-4AEA-4C61-8A09-88D623E1EB97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DFFB98D7-F1D5-4B78-88EC-A639FD00DC56}
