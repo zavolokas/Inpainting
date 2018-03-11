@@ -7,9 +7,10 @@
 
 ## What is it for?
 Content aware fill is used to fill in unwanted or missing areas of photographs. See the example of such fill below where we don't want to have the man in blue t-shirt on our picture:
+
 | Original image | Processed image |
 |----------------|-----------------|
-|![t009]|![r009]|
+| ![t009] | ![r009] |
 
 ## How to use it?
 
