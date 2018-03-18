@@ -48,6 +48,52 @@ return string.IsNullOrWhiteSpace(blob) || string.IsNullOrWhiteSpace(container)
     : req.CreateResponse(HttpStatusCode.OK, $"{container}/{blob}");
 ```
 
+6. Create blob storage
+We need a blob storage to store the images to process. That is why we need to create a `storage account`. Go to Azure portal and Click 'Create a resource', then choose 'Storage' and finally 'Storage account - blob, file, table, queue'.
+
+![CreateStorageAccount1]
+
+After that you will need to fill in a Name, Resource Group and Location.
+
+![CreateStorageAccount2]
+
+> Question: Resource Group - what is it and what for?
+
+After that we need to get the connection string for the created storage accout.
+
+![StorageConnectionString]
+
+7. Read from blob
+
+> Question: Is it possible to get a binding to a blob from a Http trigger?
+
+Now we are prepared to read a data from a blob. First we need to adjust `local.settings.json` to contain the connection string.
+
+```Json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "AzureWebJobsDashboard": ""
+  },
+  "ConnectionStrings": {
+    "Storage": "DefaultEndpointsProtocol=https;AccountName=<account name>;AccountKey=<account key>;EndpointSuffix=core.windows.net"
+  }
+}
+```
+Now we can read a data from a blob(don't forget to upload one).
+```CSharp
+var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
+var storageAccount = CloudStorageAccount.Parse(connectionString);
+var blobClient = storageAccount.CreateCloudBlobClient();
+var container = blobClient.GetContainerReference(containerName);
+var blob = container.GetBlockBlobReference(blobName);
+
+using (var imageData = new MemoryStream())
+{
+    await blob.DownloadToStreamAsync(imageData);
+}
+```
 
 
 
@@ -56,3 +102,6 @@ return string.IsNullOrWhiteSpace(blob) || string.IsNullOrWhiteSpace(container)
 [CreateProject]:images\001_CreateProj.png
 [CreateFunction1]:images\002_AddFunction1.png
 [CreateFunction2]:images\002_AddFunction2.png
+[CreateStorageAccount1]:images\003_CreateStorageAccount.png
+[CreateStorageAccount2]:images\004_CreateStorageAccount2.png
+[StorageConnectionString]:images\005_StorageConnectionString.png
