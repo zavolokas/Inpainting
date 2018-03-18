@@ -1,6 +1,7 @@
 using System;
 using System.Configuration;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -26,10 +27,10 @@ namespace InpaintService
 
             // parse query parameter
             var args = req.GetQueryNameValuePairs();
-            var containerName = args.FirstOrDefault(q => string.Compare(q.Key, "container", true) == 0)
+            var containerName = args.FirstOrDefault(q => String.Compare(q.Key, "container", StringComparison.OrdinalIgnoreCase) == 0)
                 .Value;
 
-            var blobName = args.FirstOrDefault(q => string.Compare(q.Key, "blob", true) == 0)
+            var blobName = args.FirstOrDefault(q => String.Compare(q.Key, "blob", StringComparison.OrdinalIgnoreCase) == 0)
                 .Value;
 
             if (string.IsNullOrWhiteSpace(blobName) || string.IsNullOrWhiteSpace(containerName))
@@ -44,45 +45,45 @@ namespace InpaintService
                 throw new ConfigurationErrorsException();
             }
 
-            CloudBlockBlob blob = null;
-            try
+            CloudBlockBlob imageBlob;
+            CloudBlockBlob resultImageBlob;
+            if (CloudStorageAccount.TryParse(connectionString, out var storageAccount))
             {
-                var storageAccount = CloudStorageAccount.Parse(connectionString);
                 var blobClient = storageAccount.CreateCloudBlobClient();
                 var container = blobClient.GetContainerReference(containerName);
-                blob = container.GetBlockBlobReference(blobName);
+                imageBlob = container.GetBlockBlobReference(blobName);
+                resultImageBlob = container.GetBlockBlobReference("result.png");
             }
-            catch (FormatException)
+            else
             {
                 log.Error($"The format of the connection string is wrong: {connectionString}");
-                throw;
-            }
-            catch (Exception e)
-            {
-                log.Error("Exception",e);
-                throw;
+                return req.CreateResponse(HttpStatusCode.InternalServerError);
             }
 
             // verify the image is there
-            if (blob.Exists())
+            if (imageBlob.Exists())
             {
                 using (var imageData = new MemoryStream())
                 {
-                    await blob.DownloadToStreamAsync(imageData);
+                    await imageBlob.DownloadToStreamAsync(imageData);
                     using (var bitmap = new Bitmap(imageData))
+                    using (var graphics = Graphics.FromImage(bitmap))
+                    using (var outputStream = new MemoryStream())
                     {
+                        // modify image
+                        graphics.DrawString("Stamp", SystemFonts.DefaultFont, Brushes.Red, new PointF(80, 80));
+                        bitmap.Save(outputStream, ImageFormat.Png);
 
-                        // TODO: modify image
-                        // TODO: save the result back
+                        // save the result back
+                        outputStream.Position = 0;
+                        await resultImageBlob.UploadFromStreamAsync(outputStream);
 
                         return req.CreateResponse(HttpStatusCode.OK, $"Width: {bitmap.Width}; Height: {bitmap.Height}");
                     }
                 }
             }
-            else
-            {
-                return req.CreateResponse(HttpStatusCode.BadRequest, "Provided container or blob doesn't exist.");
-            }
+
+            return req.CreateResponse(HttpStatusCode.BadRequest, "Provided container or blob doesn't exist.");
         }
     }
 }
