@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inpaint", "Samples\Inpaint\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InpaintWinForms", "Samples\InpaintWinForms\InpaintWinForms.csproj", "{64552774-8C1F-4FE6-89F2-7CEB66839538}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InpaintService", "Samples\InpaintService\InpaintService.csproj", "{F5273722-7EBA-4399-8E49-19B7F832D75B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InpaintService", "Samples\InpaintService\InpaintService.csproj", "{F5273722-7EBA-4399-8E49-19B7F832D75B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
