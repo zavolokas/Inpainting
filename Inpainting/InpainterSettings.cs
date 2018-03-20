@@ -2,7 +2,7 @@ using Zavolokas.ImageProcessing.PatchMatch;
 
 namespace Zavolokas.ImageProcessing.Inpainting
 {
-    internal interface IInpaintSettings
+    public interface IInpaintSettings
     {
         byte PatchSize { get; }
         double PixelChangeTreshold { get; }
