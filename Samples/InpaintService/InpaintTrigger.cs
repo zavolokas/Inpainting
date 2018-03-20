@@ -25,7 +25,7 @@ namespace InpaintService
             log.Info("C# HTTP trigger function processed a request.");
 
 
-            string jsonContent = req.Content.ReadAsStringAsync().Result;
+            string jsonContent = await req.Content.ReadAsStringAsync();
             if (string.IsNullOrWhiteSpace(jsonContent))
             {
                 return req.CreateResponse(HttpStatusCode.BadRequest, "No body has been provided.");
