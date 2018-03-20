@@ -7,6 +7,8 @@
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.9" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
 	<PackageReference Include="Zavolokas.ImageProcessing.PatchMatch" Version="1.0.7" />
+	<PackageReference Include="Zavolokas.Structures" Version="1.0.2" />
+	<PackageReference Include="Zavolokas.Structures.Gdi" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Inpainting\Inpainting.csproj" />
