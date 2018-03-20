@@ -6,7 +6,7 @@ using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting
 {
-    internal class InpaintMapBuilder
+    public class InpaintMapBuilder
     {
         private readonly IArea2DMapBuilder _mapBuilder;
         private readonly IList<Area2D> _donors;
