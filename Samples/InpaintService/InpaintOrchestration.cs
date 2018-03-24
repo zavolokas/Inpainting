@@ -28,7 +28,7 @@ namespace InpaintService
 
             var levelDetector = new PyramidLevelsDetector();
             var pyramidBuilder = new PyramidBuilder();
-            var _nnfBuilder = new PatchMatchNnfBuilder();
+            var nnfBuilder = new PatchMatchNnfBuilder();
             var settings = new InpaintSettings();
 
             var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
@@ -95,12 +95,12 @@ namespace InpaintService
                         // we build NNF for this image as a dest and a source 
                         // but excluding the inpainted area from the source area
                         // (our mapping already takes care of it)
-                        _nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
-                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                        _nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
                     }
 
                     var nnfNormalized = nnf.Clone();
@@ -110,12 +110,12 @@ namespace InpaintService
                     var inpaintResult = Inpaint(image, inpaintArea, nnfNormalized, k, settings);
                     k = k > minK ? k - kStep : k;
 
-                    var bitmap = image
+                    var argbImage = image
                                     .Clone()
                                     .FromLabToRgb()
-                                    .FromRgbToArgb(Area2D.Create(0, 0, image.Width, image.Height))
-                                    .FromArgbToBitmap();
+                                    .FromRgbToArgb(Area2D.Create(0, 0, image.Width, image.Height));
 
+                    using (var bitmap = argbImage.FromArgbToBitmap())
                     using (var outputStream = new MemoryStream())
                     {
                         // modify image
