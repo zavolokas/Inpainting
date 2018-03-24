@@ -17,7 +17,7 @@ namespace InpaintService
         [FunctionName("InpaintTrigger")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "inpaint")]
-            HttpRequestMessage req, 
+            HttpRequestMessage req,
             [OrchestrationClient]
             DurableOrchestrationClient orchestrationClient,
             TraceWriter log)
