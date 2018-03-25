@@ -11,6 +11,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Newtonsoft.Json;
 using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.ImageProcessing.PatchMatch;
 using Zavolokas.Structures;
@@ -26,24 +27,10 @@ namespace InpaintService
         {
             var inpaintRequest = ctx.GetInput<InpaintRequest>();
 
-            var levelDetector = new PyramidLevelsDetector();
-            var pyramidBuilder = new PyramidBuilder();
             var nnfBuilder = new PatchMatchNnfBuilder();
             var settings = new InpaintSettings();
 
-            var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
-            var blobClient = storageAccount.CreateCloudBlobClient();
-            var container = blobClient.GetContainerReference(inpaintRequest.Container);
-            var imageBlob = container.GetBlockBlobReference(inpaintRequest.Image);
-            var removeMaskBlob = container.GetBlockBlobReference(inpaintRequest.RemoveMask);
-
-            var imageArgb = await ConvertBlobToArgbImage(imageBlob);
-            var removeMaskArgb = await ConvertBlobToArgbImage(removeMaskBlob);
-
-            var levelsAmount = levelDetector.CalculateLevelsAmount(imageArgb, removeMaskArgb, settings.PatchSize);
-            pyramidBuilder.Init(imageArgb, removeMaskArgb);
-            var pyramid = pyramidBuilder.Build(levelsAmount, settings.PatchSize);
+            var pyramid = await ctx.CallActivityAsync<CloudPyramid>("GeneratePyramids", inpaintRequest);
 
             ZsImage image = null;
             Nnf nnf = null;
@@ -60,73 +47,133 @@ namespace InpaintService
 
             for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
             {
-                image = pyramid.GetImage(levelIndex);
-                var levelImageName = $"{levelIndex}.png";
-                await SaveImageLabToBlob(image, container, levelImageName);
-                var mapping = pyramid.GetMapping(levelIndex);
-                var inpaintArea = pyramid.GetInpaintArea(levelIndex);
+                //image = pyramid.GetImage(levelIndex);
+                //var levelImageName = $"{levelIndex}.png";
+                ////await SaveImageLabToBlob(image, container, levelImageName);
+                //var mapping = pyramid.GetMapping(levelIndex);
+                //var mapping = pyramid.GetInpaintArea(levelIndex);
 
-                var imageArea = Area2D.Create(0, 0, image.Width, image.Height);
+                //var imageArea = Area2D.Create(0, 0, image.Width, image.Height);
 
-                // if there is a NNF built on the prev level
-                // scale it up
-                nnf = nnf == null
-                    ? new Nnf(image.Width, image.Height, image.Width, image.Height, patchSize)
-                    : nnf.CloneAndScale2XWithUpdate(image, image, nnfSettings, mapping, calculator);
+                //// if there is a NNF built on the prev level
+                //// scale it up
+                //nnf = nnf == null
+                //    ? new Nnf(image.Width, image.Height, image.Width, image.Height, patchSize)
+                //    : nnf.CloneAndScale2XWithUpdate(image, image, nnfSettings, mapping, calculator);
 
-                // start inpaint iterations
-                var k = settings.MeanShift.K;
-                for (var inpaintIterationIndex = 0; inpaintIterationIndex < maxInpaintIterationsAmount; inpaintIterationIndex++)
-                {
-                    // Obtain pixels area.
-                    // Pixels area defines which pixels are allowed to be used
-                    // for the patches distance calculation. We must avoid pixels
-                    // that we want to inpaint. That is why before the area is not
-                    // inpainted - we should exclude this area.
-                    var pixelsArea = imageArea;
-                    if (levelIndex == 0 && inpaintIterationIndex == 0)
-                    {
-                        pixelsArea = imageArea.Substract(inpaintArea);
-                    }
+                //// start inpaint iterations
+                //var k = settings.MeanShift.K;
+                //for (var inpaintIterationIndex = 0; inpaintIterationIndex < maxInpaintIterationsAmount; inpaintIterationIndex++)
+                //{
+                //    // Obtain pixels area.
+                //    // Pixels area defines which pixels are allowed to be used
+                //    // for the patches distance calculation. We must avoid pixels
+                //    // that we want to inpaint. That is why before the area is not
+                //    // inpainted - we should exclude this area.
+                //    var pixelsArea = imageArea;
+                //    if (levelIndex == 0 && inpaintIterationIndex == 0)
+                //    {
+                //        pixelsArea = imageArea.Substract(mapping);
+                //    }
 
-                    // skip building NNF for the first iteration in the level
-                    // unless it is top level (for the top one we haven't built NNF yet)
-                    if (levelIndex == 0 || inpaintIterationIndex > 0)
-                    {
-                        // in order to find best matches for the inpainted area,
-                        // we build NNF for this imageLab as a dest and a source 
-                        // but excluding the inpainted area from the source area
-                        // (our mapping already takes care of it)
+                //    // skip building NNF for the first iteration in the level
+                //    // unless it is top level (for the top one we haven't built NNF yet)
+                //    if (levelIndex == 0 || inpaintIterationIndex > 0)
+                //    {
+                //        // in order to find best matches for the inpainted area,
+                //        // we build NNF for this imageLab as a dest and a source 
+                //        // but excluding the inpainted area from the source area
+                //        // (our mapping already takes care of it)
 
-                        var res = await ctx.CallActivityAsync<int>("LengthCheck", "inputData");
-                        //var inputData = NnfInputData.From(nnf, inpaintRequest.Container, levelImageName, nnfSettings, calculator, mapping, pixelsArea, false);
-                        //var nnfState = await ctx.CallActivityAsync<NnfState>("RandomNnfInitIteration", inputData);
-                        //nnf = new Nnf(nnfState);
+                //        var res = await ctx.CallActivityAsync<int>("LengthCheck", "inputData");
+                //        //var inputData = NnfInputData.From(nnf, inpaintRequest.Container, levelImageName, nnfSettings, calculator, mapping, pixelsArea, false);
+                //        //var nnfState = await ctx.CallActivityAsync<NnfState>("RandomNnfInitIteration", inputData);
+                //        //nnf = new Nnf(nnfState);
 
-                        nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                    }
+                //        nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
+                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                //    }
 
-                    var nnfNormalized = nnf.Clone();
-                    nnfNormalized.Normalize();
+                //    var nnfNormalized = nnf.Clone();
+                //    nnfNormalized.Normalize();
 
-                    // after we have the NNF - we calculate the values of the pixels in the inpainted area
-                    var inpaintResult = Inpaint(image, inpaintArea, nnfNormalized, k, settings);
-                    k = k > minK ? k - kStep : k;
+                //    // after we have the NNF - we calculate the values of the pixels in the inpainted area
+                //    var inpaintResult = Inpaint(image, mapping, nnfNormalized, k, settings);
+                //    k = k > minK ? k - kStep : k;
 
-                    await SaveImageLabToBlob(image, container, $"{levelIndex}_{inpaintIterationIndex}.png");
+                //    //await SaveImageLabToBlob(image, container, $"{levelIndex}_{inpaintIterationIndex}.png");
 
-                    // if the change is smaller then a treshold, we quit
-                    if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
-                    if (levelIndex == pyramid.LevelsAmount - 1) break;
-                }
+                //    // if the change is smaller then a treshold, we quit
+                //    if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
+                //    if (levelIndex == pyramid.LevelsAmount - 1) break;
+                //}
             }
 
             return 100;
+        }
+
+        [FunctionName("GeneratePyramids")]
+        public static async Task<CloudPyramid> GeneratePyramids([ActivityTrigger] InpaintRequest inpaintRequest)
+        {
+            var levelDetector = new PyramidLevelsDetector();
+            var pyramidBuilder = new PyramidBuilder();
+            var settings = new InpaintSettings();
+
+            var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var blobClient = storageAccount.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference(inpaintRequest.Container);
+            var imageBlob = container.GetBlockBlobReference(inpaintRequest.Image);
+            var removeMaskBlob = container.GetBlockBlobReference(inpaintRequest.RemoveMask);
+
+            var imageArgb = await ConvertBlobToArgbImage(imageBlob);
+            var removeMaskArgb = await ConvertBlobToArgbImage(removeMaskBlob);
+
+            var levelsAmount = levelDetector.CalculateLevelsAmount(imageArgb, removeMaskArgb, settings.PatchSize);
+            pyramidBuilder.Init(imageArgb, removeMaskArgb);
+            var pyramid = pyramidBuilder.Build(levelsAmount, settings.PatchSize);
+            var cloudPyramid = new CloudPyramid
+            {
+                ImageNames = new string[pyramid.LevelsAmount],
+                InpaintAreas = new string[pyramid.LevelsAmount],
+                Mappings = new string[pyramid.LevelsAmount]
+            };
+
+            for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
+            {
+                var image = pyramid.GetImage(levelIndex);
+                var fileName = $"{levelIndex}.png";
+                await SaveImageLabToBlob(image, container, fileName);
+                cloudPyramid.ImageNames[levelIndex] = fileName;
+
+                var inpaintArea = pyramid.GetInpaintArea(levelIndex).GetState();
+                var inpaintAreaFileName = $"ia{levelIndex}.json";
+                var inpaintAreaData = JsonConvert.SerializeObject(inpaintArea);
+                SaveJsonToBlob(inpaintAreaData, container, inpaintAreaFileName);
+                cloudPyramid.InpaintAreas[levelIndex] = inpaintAreaFileName;
+
+                var mapping = pyramid.GetMapping(levelIndex).GetState();
+                var mappingFileName = $"map{levelIndex}.json";
+                var mappingData = JsonConvert.SerializeObject(mapping);
+                SaveJsonToBlob(mappingData, container, mappingFileName);
+                cloudPyramid.Mappings[levelIndex] = mappingFileName;
+            }
+
+            return cloudPyramid;
+        }
+
+        private static void SaveJsonToBlob(string data, CloudBlobContainer container, string fileName)
+        {
+            var blob = container.GetBlockBlobReference(fileName);
+            blob.DeleteIfExists();
+            using (var stream = new MemoryStream(Encoding.Default.GetBytes(data), false))
+            {
+                blob.UploadFromStream(stream);
+            }
         }
 
         private static async Task SaveImageLabToBlob(ZsImage imageLab, CloudBlobContainer container, string fileName)
