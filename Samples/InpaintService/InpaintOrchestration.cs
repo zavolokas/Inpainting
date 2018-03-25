@@ -22,9 +22,9 @@ namespace InpaintService
         [FunctionName("InpaintOrchestration")]
         public static async Task<long> Orchest(
             [OrchestrationTrigger]
-            DurableOrchestrationContext backupContext)
+            DurableOrchestrationContext ctx)
         {
-            var inpaintRequest = backupContext.GetInput<InpaintRequest>();
+            var inpaintRequest = ctx.GetInput<InpaintRequest>();
 
             var levelDetector = new PyramidLevelsDetector();
             var pyramidBuilder = new PyramidBuilder();
@@ -61,6 +61,8 @@ namespace InpaintService
             for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
             {
                 image = pyramid.GetImage(levelIndex);
+                var levelImageName = $"{levelIndex}.png";
+                await SaveImageLabToBlob(image, container, levelImageName);
                 var mapping = pyramid.GetMapping(levelIndex);
                 var inpaintArea = pyramid.GetInpaintArea(levelIndex);
 
@@ -92,9 +94,15 @@ namespace InpaintService
                     if (levelIndex == 0 || inpaintIterationIndex > 0)
                     {
                         // in order to find best matches for the inpainted area,
-                        // we build NNF for this image as a dest and a source 
+                        // we build NNF for this imageLab as a dest and a source 
                         // but excluding the inpainted area from the source area
                         // (our mapping already takes care of it)
+
+                        var res = await ctx.CallActivityAsync<int>("LengthCheck", "inputData");
+                        //var inputData = NnfInputData.From(nnf, inpaintRequest.Container, levelImageName, nnfSettings, calculator, mapping, pixelsArea, false);
+                        //var nnfState = await ctx.CallActivityAsync<NnfState>("RandomNnfInitIteration", inputData);
+                        //nnf = new Nnf(nnfState);
+
                         nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
                         nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
                         nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
@@ -110,22 +118,7 @@ namespace InpaintService
                     var inpaintResult = Inpaint(image, inpaintArea, nnfNormalized, k, settings);
                     k = k > minK ? k - kStep : k;
 
-                    var argbImage = image
-                                    .Clone()
-                                    .FromLabToRgb()
-                                    .FromRgbToArgb(Area2D.Create(0, 0, image.Width, image.Height));
-
-                    using (var bitmap = argbImage.FromArgbToBitmap())
-                    using (var outputStream = new MemoryStream())
-                    {
-                        // modify image
-                        bitmap.Save(outputStream, ImageFormat.Png);
-
-                        // save the result back
-                        outputStream.Position = 0;
-                        var resultImageBlob = container.GetBlockBlobReference($"{levelIndex}_{inpaintIterationIndex}.png");
-                        await resultImageBlob.UploadFromStreamAsync(outputStream);
-                    }
+                    await SaveImageLabToBlob(image, container, $"{levelIndex}_{inpaintIterationIndex}.png");
 
                     // if the change is smaller then a treshold, we quit
                     if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
@@ -133,12 +126,30 @@ namespace InpaintService
                 }
             }
 
-            //var pyrextr = await backupContext.CallActivityAsync<long>("PyramidCheck", "pyramid");
-
             return 100;
         }
 
-        public static Task<ZsImage> ConvertBlobToArgbImage([ActivityTrigger] CloudBlob imageBlob)
+        private static async Task SaveImageLabToBlob(ZsImage imageLab, CloudBlobContainer container, string fileName)
+        {
+            var argbImage = imageLab
+                .Clone()
+                .FromLabToRgb()
+                .FromRgbToArgb(Area2D.Create(0, 0, imageLab.Width, imageLab.Height));
+
+            using (var bitmap = argbImage.FromArgbToBitmap())
+            using (var outputStream = new MemoryStream())
+            {
+                // modify image
+                bitmap.Save(outputStream, ImageFormat.Png);
+
+                // save the result back
+                outputStream.Position = 0;
+                var resultImageBlob = container.GetBlockBlobReference(fileName);
+                await resultImageBlob.UploadFromStreamAsync(outputStream);
+            }
+        }
+
+        public static Task<ZsImage> ConvertBlobToArgbImage(CloudBlob imageBlob)
         {
             using (var imageData = new MemoryStream())
             {
@@ -151,11 +162,40 @@ namespace InpaintService
             }
         }
 
-        [FunctionName("PyramidCheck")]
-        public static Task<int> Calc([ActivityTrigger] string pyramid)
+        [FunctionName("RandomNnfInitIteration")]
+        public static Task<NnfState> NnfInit([ActivityTrigger] NnfInputData input)
         {
-            return Task.FromResult(pyramid.Length);
-            //return Task.FromResult(pyramid.GetImage(0).Width);
+            var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var blobClient = storageAccount.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference(input.Container);
+            var imageBlob = container.GetBlockBlobReference(input.Image);
+
+            var imageArgb = ConvertBlobToArgbImage(imageBlob).Result;
+            var image = imageArgb
+                            .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
+                            .FromRgbToLab();
+
+            var nnf = new Nnf(input.NnfState);
+            var nnfSettings = new PatchMatchSettings();// input.PmSettings;
+            var calculator = input.IsCie79Calc
+                ? ImagePatchDistance.Cie76
+                : ImagePatchDistance.Cie2000;
+            var mapping = new Area2DMap(input.Area2DMapState);
+            var pixelsArea = Area2D.RestoreFrom(input.PixelsAreaState);
+
+            var nnfBuilder = new PatchMatchNnfBuilder();
+            nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
+
+            return Task.FromResult(nnf.GetState());
+        }
+
+        [FunctionName("LengthCheck")]
+        public static Task<int> Calc([ActivityTrigger] string input)
+        {
+            var task = Task.Delay(TimeSpan.FromSeconds(5));
+            task.Wait();
+            return Task.FromResult(input.Length);
         }
 
         private static InpaintingResult Inpaint(ZsImage image, Area2D removeArea, Nnf nnf, double k, IInpaintSettings settings)
