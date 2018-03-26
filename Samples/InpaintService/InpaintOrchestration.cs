@@ -31,15 +31,9 @@ namespace InpaintService
 
             var pyramid = await ctx.CallActivityAsync<CloudPyramid>("GeneratePyramids", inpaintRequest);
 
-            #region cache settings
-            //var patchSize = settings.PatchSize;
-            //var calculator = settings.PatchDistanceCalculator;
-            //var nnfSettings = settings.PatchMatch;
-            //var changedPixelsPercentTreshold = settings.ChangedPixelsPercentTreshold;
             var maxInpaintIterationsAmount = 3;//settings.MaxInpaintIterations;
-            //var kStep = settings.MeanShift.KDecreaseStep;
-            //var minK = settings.MeanShift.MinK;
-            #endregion
+            var kStep = settings.MeanShift.KDecreaseStep;
+            var minK = settings.MeanShift.MinK;
 
             for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
             {
@@ -47,11 +41,9 @@ namespace InpaintService
                 var mapping = pyramid.GetMapping(levelIndex);
                 var inpaintArea = pyramid.GetInpaintArea(levelIndex);
 
-                //var imageArea = Area2D.Create(0, 0, image.Width, image.Height);
-
                 // if there is a NNF built on the prev level
                 // scale it up
-                var input = NnfInputData.From($"nnf{levelIndex}.json", inpaintRequest.Container, imageName, settings, mapping, inpaintArea, false, levelIndex);
+                var input = NnfInputData.From($"nnf{levelIndex}.json", inpaintRequest.Container, imageName, settings, mapping, inpaintArea, false, levelIndex, settings.MeanShift.K);
 
                 if (levelIndex == 0)
                 {
@@ -62,8 +54,7 @@ namespace InpaintService
                     await ctx.CallActivityAsync<string>("ScaleNnf", input);
                 }
 
-                //// start inpaint iterations
-                //var k = settings.MeanShift.K;
+                // start inpaint iterations
                 for (var inpaintIterationIndex = 0; inpaintIterationIndex < maxInpaintIterationsAmount; inpaintIterationIndex++)
                 {
                     // Obtain pixels area.
@@ -72,6 +63,7 @@ namespace InpaintService
                     // that we want to inpaint. That is why before the area is not
                     // inpainted - we should exclude this area.
                     input.ExcludeInpaintArea = levelIndex == 0 && inpaintIterationIndex == 0;
+                    input.IterationIndex = inpaintIterationIndex;
 
                     // skip building NNF for the first iteration in the level
                     // unless it is top level (for the top one we haven't built NNF yet)
@@ -81,8 +73,6 @@ namespace InpaintService
                         // we build NNF for this imageLab as a dest and a source 
                         // but excluding the inpainted area from the source area
                         // (our mapping already takes care of it)
-
-                        //var res = await ctx.CallActivityAsync<int>("LengthCheck", "inputData");
 
                         await ctx.CallActivityAsync("RandomNnfInitIteration", input);
 
@@ -98,22 +88,41 @@ namespace InpaintService
                         await ctx.CallActivityAsync("RunBuildNnfIteration", input);
                     }
 
-                    //    var nnfNormalized = nnf.Clone();
-                    //    nnfNormalized.Normalize();
+                    var inpaintResult = await ctx.CallActivityAsync<InpaintingResult>("InpaintImage", input);
+                    input.K = input.K > minK ? input.K - kStep : input.K;
 
-                    //    // after we have the NNF - we calculate the values of the pixels in the inpainted area
-                    //    var inpaintResult = Inpaint(image, inpaintArea, nnfNormalized, k, settings);
-                    //    k = k > minK ? k - kStep : k;
-
-                    //    //await SaveImageLabToBlob(image, container, $"{levelIndex}_{inpaintIterationIndex}.png");
-
-                    //    // if the change is smaller then a treshold, we quit
-                    //    if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
-                    //    if (levelIndex == pyramid.LevelsAmount - 1) break;
+                    // if the change is smaller then a treshold, we quit
+                    //if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
+                    //if (levelIndex == pyramid.LevelsAmount - 1) break;
                 }
             }
 
             return 100;
+        }
+
+        [FunctionName("InpaintImage")]
+        public static async Task<InpaintingResult> InpaintImage([ActivityTrigger] NnfInputData input)
+        {
+            var container = OpenBlobContainer(input.Container);
+
+            var imageBlob = container.GetBlockBlobReference(input.Image);
+            var image = (await ConvertBlobToArgbImage(imageBlob))
+                .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
+                .FromRgbToLab();
+
+            var inpaintAreaState = ReadFromBlob<Area2DState>(input.InpaintAreaName, container);
+            var inpaintArea = Area2D.RestoreFrom(inpaintAreaState);
+
+            var nnfState = ReadFromBlob<NnfState>(input.NnfName, container);
+            var nnf = new Nnf(nnfState);
+            nnf.Normalize();
+
+            // after we have the NNF - we calculate the values of the pixels in the inpainted area
+            var inpaintResult = Inpaint(image, inpaintArea, nnf, input.K, input.Settings);
+            await SaveImageLabToBlob(image, container, input.Image);
+            await SaveImageLabToBlob(image, container, $"{input.LevelIndex}_{input.IterationIndex}.png");
+
+            return inpaintResult;
         }
 
         [FunctionName("CreateNnf")]

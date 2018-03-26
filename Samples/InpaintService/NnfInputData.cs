@@ -15,9 +15,11 @@ namespace InpaintService
         public string InpaintAreaName { get; set; }
         public bool ExcludeInpaintArea { get; set; }
         public byte LevelIndex { get; set; }
+        public double K { get; set; }
+        public int IterationIndex { get; set; }
 
-        public static NnfInputData From(string nnf, string container, string image, InpaintSettings settings, 
-            string mapping, string inpaintAreaName, bool isForward, byte levelIndex)
+        public static NnfInputData From(string nnf, string container, string image, InpaintSettings settings,
+            string mapping, string inpaintAreaName, bool isForward, byte levelIndex, double meanShiftK)
         {
             return new NnfInputData
             {
@@ -29,7 +31,8 @@ namespace InpaintService
                 InpaintAreaName = inpaintAreaName,
                 IsForward = isForward,
                 IsCie79Calc = settings.PatchDistanceCalculator == ImagePatchDistance.Cie76,
-                LevelIndex = levelIndex
+                LevelIndex = levelIndex,
+                K = meanShiftK
             };
         }
     }
