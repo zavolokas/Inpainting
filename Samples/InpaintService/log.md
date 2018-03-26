@@ -95,7 +95,11 @@ using (var imageData = new MemoryStream())
 }
 ```
 
-
+# Issues
+- 64K message
+- async code inside Orchestration
+- not breaking resistent code (nnf stored in nnf.json is scaled one more time after a failure)
+- difficult to debug because of saved and restored state.
 
 
 
