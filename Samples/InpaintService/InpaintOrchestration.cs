@@ -27,22 +27,18 @@ namespace InpaintService
         {
             var inpaintRequest = ctx.GetInput<InpaintRequest>();
 
-            var nnfBuilder = new PatchMatchNnfBuilder();
             var settings = new InpaintSettings();
 
             var pyramid = await ctx.CallActivityAsync<CloudPyramid>("GeneratePyramids", inpaintRequest);
 
-            //ZsImage image = null;
-            //Nnf nnf = null;
-
             #region cache settings
-            var patchSize = settings.PatchSize;
-            var calculator = settings.PatchDistanceCalculator;
-            var nnfSettings = settings.PatchMatch;
-            var changedPixelsPercentTreshold = settings.ChangedPixelsPercentTreshold;
-            var maxInpaintIterationsAmount = 10;//settings.MaxInpaintIterations;
-            var kStep = settings.MeanShift.KDecreaseStep;
-            var minK = settings.MeanShift.MinK;
+            //var patchSize = settings.PatchSize;
+            //var calculator = settings.PatchDistanceCalculator;
+            //var nnfSettings = settings.PatchMatch;
+            //var changedPixelsPercentTreshold = settings.ChangedPixelsPercentTreshold;
+            var maxInpaintIterationsAmount = 3;//settings.MaxInpaintIterations;
+            //var kStep = settings.MeanShift.KDecreaseStep;
+            //var minK = settings.MeanShift.MinK;
             #endregion
 
             for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
@@ -55,16 +51,15 @@ namespace InpaintService
 
                 // if there is a NNF built on the prev level
                 // scale it up
-                var input = NnfInputData.From(null, inpaintRequest.Container, imageName, settings, calculator, mapping,
-                    null, false);
+                var input = NnfInputData.From($"nnf{levelIndex}.json", inpaintRequest.Container, imageName, settings, mapping, inpaintArea, false, levelIndex);
 
                 if (levelIndex == 0)
                 {
-                    input.NnfName = await ctx.CallActivityAsync<string>("CreateNnf", input);
+                    await ctx.CallActivityAsync<string>("CreateNnf", input);
                 }
                 else
                 {
-                    input.NnfName = await ctx.CallActivityAsync<string>("ScaleNnf", input);
+                    await ctx.CallActivityAsync<string>("ScaleNnf", input);
                 }
 
                 //// start inpaint iterations
@@ -82,20 +77,25 @@ namespace InpaintService
                     // unless it is top level (for the top one we haven't built NNF yet)
                     if (levelIndex == 0 || inpaintIterationIndex > 0)
                     {
-                        //        // in order to find best matches for the inpainted area,
-                        //        // we build NNF for this imageLab as a dest and a source 
-                        //        // but excluding the inpainted area from the source area
-                        //        // (our mapping already takes care of it)
+                        // in order to find best matches for the inpainted area,
+                        // we build NNF for this imageLab as a dest and a source 
+                        // but excluding the inpainted area from the source area
+                        // (our mapping already takes care of it)
 
-                        //        var res = await ctx.CallActivityAsync<int>("LengthCheck", "inputData");
-                        await ctx.CallActivityAsync<NnfState>("RandomNnfInitIteration", input);
+                        //var res = await ctx.CallActivityAsync<int>("LengthCheck", "inputData");
 
-                        //        nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
-                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        await ctx.CallActivityAsync("RandomNnfInitIteration", input);
+
+                        input.IsForward = true;
+                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
+                        input.IsForward = false;
+                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
+                        input.IsForward = true;
+                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
+                        input.IsForward = false;
+                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
+                        input.IsForward = true;
+                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
                     }
 
                     //    var nnfNormalized = nnf.Clone();
@@ -117,20 +117,19 @@ namespace InpaintService
         }
 
         [FunctionName("CreateNnf")]
-        public static async Task<string> CreateNnf([ActivityTrigger] NnfInputData input)
+        public static async Task CreateNnf([ActivityTrigger] NnfInputData input)
         {
             var container = OpenBlobContainer(input.Container);
             var imageBlob = container.GetBlockBlobReference(input.Image);
             var imageArgb = await ConvertBlobToArgbImage(imageBlob);
             var nnf = new Nnf(imageArgb.Width, imageArgb.Height, imageArgb.Width, imageArgb.Height, input.Settings.PatchSize);
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
-            const string nnfBlobName = "nnf.json";
-            SaveJsonToBlob(nnfData, container, nnfBlobName);
-            return nnfBlobName;
+            
+            SaveJsonToBlob(nnfData, container, input.NnfName);
         }
 
         [FunctionName("ScaleNnf")]
-        public static async Task<string> ScaleNnf([ActivityTrigger] NnfInputData input)
+        public static async Task ScaleNnf([ActivityTrigger] NnfInputData input)
         {
             var container = OpenBlobContainer(input.Container);
             var imageBlob = container.GetBlockBlobReference(input.Image);
@@ -145,16 +144,13 @@ namespace InpaintService
             var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapName, container);
             var mapping = new Area2DMap(mappingState);
 
-            var nnfState = ReadFromBlob<NnfState>(input.NnfName, container);
+            var nnfState = ReadFromBlob<NnfState>($"nnf{input.LevelIndex-1}.json", container);
             var nnf = new Nnf(nnfState);
 
-            nnf.CloneAndScale2XWithUpdate(image, image, input.Settings.PatchMatch, mapping, calculator);
+            nnf = nnf.CloneAndScale2XWithUpdate(image, image, input.Settings.PatchMatch, mapping, calculator);
 
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
-            const string nnfBlobName = "nnf.json";
-            SaveJsonToBlob(nnfData, container, nnfBlobName);
-
-            return nnfBlobName;
+            SaveJsonToBlob(nnfData, container, input.NnfName);
         }
 
         private static T ReadFromBlob<T>(string blobName, CloudBlobContainer container)
@@ -299,6 +295,50 @@ namespace InpaintService
 
             var nnfBuilder = new PatchMatchNnfBuilder();
             nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
+
+            var nnfData = JsonConvert.SerializeObject(nnf.GetState());
+            SaveJsonToBlob(nnfData, container, input.NnfName);
+        }
+
+        [FunctionName("RunBuildNnfIteration")]
+        public static async Task RunBuildNnfIteration([ActivityTrigger] NnfInputData input)
+        {
+            var container = OpenBlobContainer(input.Container);
+
+            var imageBlob = container.GetBlockBlobReference(input.Image);
+            var imageArgb = await ConvertBlobToArgbImage(imageBlob);
+            var image = imageArgb
+                .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
+                .FromRgbToLab();
+
+            var imageArea = Area2D.Create(0, 0, image.Width, image.Height);
+            var pixelsArea = imageArea;
+
+            var nnfSettings = input.Settings.PatchMatch;
+            var calculator = input.IsCie79Calc
+                ? ImagePatchDistance.Cie76
+                : ImagePatchDistance.Cie2000;
+
+            var nnfState = ReadFromBlob<NnfState>(input.NnfName, container);
+            var nnf = new Nnf(nnfState);
+
+            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapName, container);
+            var mapping = new Area2DMap(mappingState);
+
+            if (input.ExcludeInpaintArea)
+            {
+                var inpaintAreaState = ReadFromBlob<Area2DState>(input.InpaintAreaName, container);
+                var inpaintArea = Area2D.RestoreFrom(inpaintAreaState);
+                pixelsArea = imageArea.Substract(inpaintArea);
+            }
+
+            var nnfBuilder = new PatchMatchNnfBuilder();
+
+            var direction = input.IsForward
+                ? NeighboursCheckDirection.Forward
+                : NeighboursCheckDirection.Backward;
+
+            nnfBuilder.RunBuildNnfIteration(nnf, image, image, direction, nnfSettings, calculator, mapping, pixelsArea);
 
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
             SaveJsonToBlob(nnfData, container, input.NnfName);
