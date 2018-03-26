@@ -32,8 +32,8 @@ namespace InpaintService
 
             var pyramid = await ctx.CallActivityAsync<CloudPyramid>("GeneratePyramids", inpaintRequest);
 
-            ZsImage image = null;
-            Nnf nnf = null;
+            //ZsImage image = null;
+            //Nnf nnf = null;
 
             #region cache settings
             var patchSize = settings.PatchSize;
@@ -47,73 +47,131 @@ namespace InpaintService
 
             for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
             {
-                //image = pyramid.GetImage(levelIndex);
-                //var levelImageName = $"{levelIndex}.png";
-                ////await SaveImageLabToBlob(image, container, levelImageName);
-                //var mapping = pyramid.GetMapping(levelIndex);
-                //var mapping = pyramid.GetInpaintArea(levelIndex);
+                var imageName = pyramid.GetImageName(levelIndex);
+                var mapping = pyramid.GetMapping(levelIndex);
+                var inpaintArea = pyramid.GetInpaintArea(levelIndex);
 
                 //var imageArea = Area2D.Create(0, 0, image.Width, image.Height);
 
-                //// if there is a NNF built on the prev level
-                //// scale it up
+                // if there is a NNF built on the prev level
+                // scale it up
+                var input = NnfInputData.From(null, inpaintRequest.Container, imageName, settings, calculator, mapping,
+                    null, false);
+
+                if (levelIndex == 0)
+                {
+                    input.NnfName = await ctx.CallActivityAsync<string>("CreateNnf", input);
+                }
+                else
+                {
+                    input.NnfName = await ctx.CallActivityAsync<string>("ScaleNnf", input);
+                }
                 //nnf = nnf == null
                 //    ? new Nnf(image.Width, image.Height, image.Width, image.Height, patchSize)
                 //    : nnf.CloneAndScale2XWithUpdate(image, image, nnfSettings, mapping, calculator);
 
                 //// start inpaint iterations
                 //var k = settings.MeanShift.K;
-                //for (var inpaintIterationIndex = 0; inpaintIterationIndex < maxInpaintIterationsAmount; inpaintIterationIndex++)
-                //{
-                //    // Obtain pixels area.
-                //    // Pixels area defines which pixels are allowed to be used
-                //    // for the patches distance calculation. We must avoid pixels
-                //    // that we want to inpaint. That is why before the area is not
-                //    // inpainted - we should exclude this area.
-                //    var pixelsArea = imageArea;
-                //    if (levelIndex == 0 && inpaintIterationIndex == 0)
-                //    {
-                //        pixelsArea = imageArea.Substract(mapping);
-                //    }
+                for (var inpaintIterationIndex = 0; inpaintIterationIndex < maxInpaintIterationsAmount; inpaintIterationIndex++)
+                {
+                    // Obtain pixels area.
+                    // Pixels area defines which pixels are allowed to be used
+                    // for the patches distance calculation. We must avoid pixels
+                    // that we want to inpaint. That is why before the area is not
+                    // inpainted - we should exclude this area.
+                    //    var pixelsArea = imageArea;
+                    if (levelIndex == 0 && inpaintIterationIndex == 0)
+                    {
+                        //        pixelsArea = imageArea.Substract(inpaintArea);
+                    }
 
-                //    // skip building NNF for the first iteration in the level
-                //    // unless it is top level (for the top one we haven't built NNF yet)
-                //    if (levelIndex == 0 || inpaintIterationIndex > 0)
-                //    {
-                //        // in order to find best matches for the inpainted area,
-                //        // we build NNF for this imageLab as a dest and a source 
-                //        // but excluding the inpainted area from the source area
-                //        // (our mapping already takes care of it)
+                    // skip building NNF for the first iteration in the level
+                    // unless it is top level (for the top one we haven't built NNF yet)
+                    if (levelIndex == 0 || inpaintIterationIndex > 0)
+                    {
+                        //        // in order to find best matches for the inpainted area,
+                        //        // we build NNF for this imageLab as a dest and a source 
+                        //        // but excluding the inpainted area from the source area
+                        //        // (our mapping already takes care of it)
 
-                //        var res = await ctx.CallActivityAsync<int>("LengthCheck", "inputData");
-                //        //var inputData = NnfInputData.From(nnf, inpaintRequest.Container, levelImageName, nnfSettings, calculator, mapping, pixelsArea, false);
-                //        //var nnfState = await ctx.CallActivityAsync<NnfState>("RandomNnfInitIteration", inputData);
-                //        //nnf = new Nnf(nnfState);
+                        //        var res = await ctx.CallActivityAsync<int>("LengthCheck", "inputData");
+                        //        //var inputData = NnfInputData.From(nnf, inpaintRequest.Container, levelImageName, nnfSettings, calculator, mapping, pixelsArea, false);
+                        //        //var nnfState = await ctx.CallActivityAsync<NnfState>("RandomNnfInitIteration", inputData);
+                        //        //nnf = new Nnf(nnfState);
 
-                //        nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
-                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
-                //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
-                //    }
+                        //        nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
+                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Backward, nnfSettings, calculator, mapping, pixelsArea);
+                        //        nnfBuilder.RunBuildNnfIteration(nnf, image, image, NeighboursCheckDirection.Forward, nnfSettings, calculator, mapping, pixelsArea);
+                    }
 
-                //    var nnfNormalized = nnf.Clone();
-                //    nnfNormalized.Normalize();
+                    //    var nnfNormalized = nnf.Clone();
+                    //    nnfNormalized.Normalize();
 
-                //    // after we have the NNF - we calculate the values of the pixels in the inpainted area
-                //    var inpaintResult = Inpaint(image, mapping, nnfNormalized, k, settings);
-                //    k = k > minK ? k - kStep : k;
+                    //    // after we have the NNF - we calculate the values of the pixels in the inpainted area
+                    //    var inpaintResult = Inpaint(image, mapping, nnfNormalized, k, settings);
+                    //    k = k > minK ? k - kStep : k;
 
-                //    //await SaveImageLabToBlob(image, container, $"{levelIndex}_{inpaintIterationIndex}.png");
+                    //    //await SaveImageLabToBlob(image, container, $"{levelIndex}_{inpaintIterationIndex}.png");
 
-                //    // if the change is smaller then a treshold, we quit
-                //    if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
-                //    if (levelIndex == pyramid.LevelsAmount - 1) break;
-                //}
+                    //    // if the change is smaller then a treshold, we quit
+                    //    if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
+                    //    if (levelIndex == pyramid.LevelsAmount - 1) break;
+                }
             }
 
             return 100;
+        }
+
+        [FunctionName("CreateNnf")]
+        public static async Task<string> CreateNnf([ActivityTrigger] NnfInputData input)
+        {
+            var container = OpenBlobContainer(input.Container);
+            var imageBlob = container.GetBlockBlobReference(input.Image);
+            var imageArgb = await ConvertBlobToArgbImage(imageBlob);
+            var nnf = new Nnf(imageArgb.Width, imageArgb.Height, imageArgb.Width, imageArgb.Height, input.Settings.PatchSize);
+            var nnfData = JsonConvert.SerializeObject(nnf.GetState());
+            const string nnfBlobName = "nnf.json";
+            SaveJsonToBlob(nnfData, container, nnfBlobName);
+            return nnfBlobName;
+        }
+
+        [FunctionName("ScaleNnf")]
+        public static async Task<string> ScaleNnf([ActivityTrigger] NnfInputData input)
+        {
+            var container = OpenBlobContainer(input.Container);
+            var imageBlob = container.GetBlockBlobReference(input.Image);
+            var image = (await ConvertBlobToArgbImage(imageBlob))
+                .FromArgbToRgb(new[] {0.0, 0.0, 0.0})
+                .FromRgbToLab();
+
+            var calculator = input.IsCie79Calc
+                ? ImagePatchDistance.Cie76
+                : ImagePatchDistance.Cie2000;
+
+            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapName, container);
+            var mapping = new Area2DMap(mappingState);
+
+            var nnfState = ReadFromBlob<NnfState>(input.NnfName, container);
+            var nnf = new Nnf(nnfState);
+
+            nnf.CloneAndScale2XWithUpdate(image, image, input.Settings.PatchMatch, mapping, calculator);
+
+            var nnfData = JsonConvert.SerializeObject(nnf.GetState());
+            const string nnfBlobName = "nnf.json";
+            SaveJsonToBlob(nnfData, container, nnfBlobName);
+
+            return nnfBlobName;
+        }
+
+        private static T ReadFromBlob<T>(string blobName, CloudBlobContainer container)
+        {
+            var blob = container.GetBlockBlobReference(blobName);
+            var json = blob.DownloadText();
+            var obj = JsonConvert.DeserializeObject<T>(json);
+            return obj;
         }
 
         [FunctionName("GeneratePyramids")]
@@ -123,10 +181,7 @@ namespace InpaintService
             var pyramidBuilder = new PyramidBuilder();
             var settings = new InpaintSettings();
 
-            var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
-            var blobClient = storageAccount.CreateCloudBlobClient();
-            var container = blobClient.GetContainerReference(inpaintRequest.Container);
+            var container = OpenBlobContainer(inpaintRequest.Container);
             var imageBlob = container.GetBlockBlobReference(inpaintRequest.Image);
             var removeMaskBlob = container.GetBlockBlobReference(inpaintRequest.RemoveMask);
 
@@ -164,6 +219,15 @@ namespace InpaintService
             }
 
             return cloudPyramid;
+        }
+
+        private static CloudBlobContainer OpenBlobContainer(string containerName)
+        {
+            var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var blobClient = storageAccount.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference(containerName);
+            return container;
         }
 
         private static void SaveJsonToBlob(string data, CloudBlobContainer container, string fileName)
@@ -209,33 +273,33 @@ namespace InpaintService
             }
         }
 
-        [FunctionName("RandomNnfInitIteration")]
-        public static Task<NnfState> NnfInit([ActivityTrigger] NnfInputData input)
-        {
-            var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
-            var blobClient = storageAccount.CreateCloudBlobClient();
-            var container = blobClient.GetContainerReference(input.Container);
-            var imageBlob = container.GetBlockBlobReference(input.Image);
+        //[FunctionName("RandomNnfInitIteration")]
+        //public static Task<NnfState> NnfInit([ActivityTrigger] NnfInputData input)
+        //{
+        //    var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
+        //    var storageAccount = CloudStorageAccount.Parse(connectionString);
+        //    var blobClient = storageAccount.CreateCloudBlobClient();
+        //    var container = blobClient.GetContainerReference(input.Container);
+        //    var imageBlob = container.GetBlockBlobReference(input.Image);
 
-            var imageArgb = ConvertBlobToArgbImage(imageBlob).Result;
-            var image = imageArgb
-                            .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
-                            .FromRgbToLab();
+        //    var imageArgb = ConvertBlobToArgbImage(imageBlob).Result;
+        //    var image = imageArgb
+        //                    .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
+        //                    .FromRgbToLab();
 
-            var nnf = new Nnf(input.NnfState);
-            var nnfSettings = new PatchMatchSettings();// input.PmSettings;
-            var calculator = input.IsCie79Calc
-                ? ImagePatchDistance.Cie76
-                : ImagePatchDistance.Cie2000;
-            var mapping = new Area2DMap(input.Area2DMapState);
-            var pixelsArea = Area2D.RestoreFrom(input.PixelsAreaState);
+        //    var nnf = new Nnf(input.NnfState);
+        //    var nnfSettings = new PatchMatchSettings();// input.PmSettings;
+        //    var calculator = input.IsCie79Calc
+        //        ? ImagePatchDistance.Cie76
+        //        : ImagePatchDistance.Cie2000;
+        //    var mapping = new Area2DMap(input.Area2DMapState);
+        //    var pixelsArea = Area2D.RestoreFrom(input.PixelsAreaState);
 
-            var nnfBuilder = new PatchMatchNnfBuilder();
-            nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
+        //    var nnfBuilder = new PatchMatchNnfBuilder();
+        //    nnfBuilder.RunRandomNnfInitIteration(nnf, image, image, nnfSettings, calculator, mapping, pixelsArea);
 
-            return Task.FromResult(nnf.GetState());
-        }
+        //    return Task.FromResult(nnf.GetState());
+        //}
 
         [FunctionName("LengthCheck")]
         public static Task<int> Calc([ActivityTrigger] string input)
