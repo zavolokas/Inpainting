@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
@@ -21,19 +18,23 @@ namespace InpaintService
     public static class InpaintOrchestration
     {
         [FunctionName("InpaintOrchestration")]
-        public static async Task<long> Orchest(
+        public static async Task Orchest(
             [OrchestrationTrigger]
             DurableOrchestrationContext ctx)
         {
             var inpaintRequest = ctx.GetInput<InpaintRequest>();
 
+            // TODO: get the setting from parameters
             var settings = new InpaintSettings();
 
+            // TODO: downscale the input image
+            // TODO: crop the input image
+            
             var pyramid = await ctx.CallActivityAsync<CloudPyramid>("GeneratePyramids", inpaintRequest);
 
-            var maxInpaintIterationsAmount = 3;//settings.MaxInpaintIterations;
-            var kStep = settings.MeanShift.KDecreaseStep;
-            var minK = settings.MeanShift.MinK;
+            var maxInpaintIterationsAmount = 10;//settings.MaxInpaintIterations;
+            //var kStep = settings.MeanShift.KDecreaseStep;
+            //var minK = settings.MeanShift.MinK;
 
             for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
             {
@@ -76,28 +77,25 @@ namespace InpaintService
 
                         await ctx.CallActivityAsync("RandomNnfInitIteration", input);
 
-                        input.IsForward = true;
-                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
-                        input.IsForward = false;
-                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
-                        input.IsForward = true;
-                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
-                        input.IsForward = false;
-                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
-                        input.IsForward = true;
-                        await ctx.CallActivityAsync("RunBuildNnfIteration", input);
+                        for (var pmIteration = 0; pmIteration < settings.PatchMatch.IterationsAmount; pmIteration++)
+                        {
+                            // TODO: split to many parts and process in parallel
+                            input.IsForward = !input.IsForward;
+                            input.PatchMatchIteration = pmIteration;
+                            await ctx.CallActivityAsync("RunBuildNnfIteration", input);
+                        }
+
+                        // TODO: merge nnf into one
                     }
 
                     var inpaintResult = await ctx.CallActivityAsync<InpaintingResult>("InpaintImage", input);
-                    input.K = input.K > minK ? input.K - kStep : input.K;
+                    //input.K = input.K > minK ? input.K - kStep : input.K;
 
                     // if the change is smaller then a treshold, we quit
                     //if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
                     //if (levelIndex == pyramid.LevelsAmount - 1) break;
                 }
             }
-
-            return 100;
         }
 
         [FunctionName("InpaintImage")]

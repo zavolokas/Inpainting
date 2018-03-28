@@ -17,6 +17,7 @@ namespace InpaintService
         public byte LevelIndex { get; set; }
         public double K { get; set; }
         public int IterationIndex { get; set; }
+        public int PatchMatchIteration { get; set; }
 
         public static NnfInputData From(string nnf, string container, string image, InpaintSettings settings,
             string mapping, string inpaintAreaName, bool isForward, byte levelIndex, double meanShiftK)
