@@ -2,7 +2,7 @@
 
 namespace InpaintService
 {
-    public class CloudPyramidLevel
+    public struct CloudPyramidLevel
     {
         public string ImageName { get; set; }
         public string InpaintArea { get; set; }

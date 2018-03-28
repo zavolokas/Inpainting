@@ -31,8 +31,6 @@ namespace InpaintService
 
             for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
             {
-                cloudPyramid.Levels[levelIndex] = new CloudPyramidLevel();
-
                 var image = pyramid.GetImage(levelIndex);
                 var fileName = $"{levelIndex}.png";
                 await SaveImageLabToBlob(image, container, fileName);
