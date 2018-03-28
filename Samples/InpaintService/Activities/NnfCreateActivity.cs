@@ -7,7 +7,9 @@ namespace InpaintService.Activities
 {
     public static class NnfCreateActivity
     {
-        [FunctionName("CreateNnf")]
+        public const string Name = "CreateNnf";
+
+        [FunctionName(Name)]
         public static async Task CreateNnf([ActivityTrigger] NnfInputData input)
         {
             var container = BlobHelper.OpenBlobContainer(input.Container);

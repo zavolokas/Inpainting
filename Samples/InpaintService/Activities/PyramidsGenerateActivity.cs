@@ -7,7 +7,9 @@ namespace InpaintService.Activities
 {
     public static class PyramidsGenerateActivity
     {
-        [FunctionName("GeneratePyramids")]
+        public const string Name = "GeneratePyramids";
+
+        [FunctionName(Name)]
         public static async Task<CloudPyramid> GeneratePyramids([ActivityTrigger] InpaintRequest inpaintRequest)
         {
             var levelDetector = new PyramidLevelsDetector();

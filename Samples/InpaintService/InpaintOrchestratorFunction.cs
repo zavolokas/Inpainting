@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
+using InpaintService.Activities;
 using Microsoft.Azure.WebJobs;
 using Zavolokas.ImageProcessing.Inpainting;
 
 namespace InpaintService
 {
-    public static class InpaintOrchestration
+    public static class InpaintOrchestratorFunction
     {
-        [FunctionName("Orchestrate")]
+        public const string Name = "Orchestrate";
+
+        [FunctionName(Name)]
         public static async Task Orchestrate(
             [OrchestrationTrigger] DurableOrchestrationContext ctx)
         {
@@ -19,9 +22,10 @@ namespace InpaintService
             // TODO: downscale the input image
             // TODO: crop the input image
 
-            var pyramid = await ctx.CallActivityAsync<CloudPyramid>("GeneratePyramids", inpaintRequest);
+            var pyramid = await ctx.CallActivityAsync<CloudPyramid>(PyramidsGenerateActivity.Name, inpaintRequest);
 
-            var maxInpaintIterationsAmount = 10;//settings.MaxInpaintIterations;
+            var maxInpaintIterationsAmount = 2;//settings.MaxInpaintIterations;
+            settings.PatchMatch.IterationsAmount = 2;
             //var kStep = settings.MeanShift.KDecreaseStep;
             //var minK = settings.MeanShift.MinK;
 
@@ -38,11 +42,11 @@ namespace InpaintService
 
                 if (levelIndex == 0)
                 {
-                    await ctx.CallActivityAsync<string>("CreateNnf", input);
+                    await ctx.CallActivityAsync<string>(NnfCreateActivity.Name, input);
                 }
                 else
                 {
-                    await ctx.CallActivityAsync<string>("ScaleNnf", input);
+                    await ctx.CallActivityAsync<string>(NnfScaleActivity.Name, input);
                 }
 
                 // start inpaint iterations
@@ -67,20 +71,20 @@ namespace InpaintService
                         // but excluding the inpainted area from the source area
                         // (our mapping already takes care of it)
 
-                        await ctx.CallActivityAsync("RandomNnfInitIteration", input);
+                        await ctx.CallActivityAsync(NnfRandomInitActivity.Name, input);
 
                         for (var pmIteration = 0; pmIteration < settings.PatchMatch.IterationsAmount; pmIteration++)
                         {
                             // TODO: split to many parts and process in parallel
                             input.IsForward = !input.IsForward;
                             input.PatchMatchIteration = pmIteration;
-                            await ctx.CallActivityAsync("RunBuildNnfIteration", input);
+                            await ctx.CallActivityAsync(NnfBuildActivity.Name, input);
                         }
 
                         // TODO: merge nnf into one
                     }
 
-                    var inpaintResult = await ctx.CallActivityAsync<InpaintingResult>("InpaintImage", input);
+                    var inpaintResult = await ctx.CallActivityAsync<InpaintingResult>(ImageInpaintActivity.Name, input);
                     //input.K = input.K > minK ? input.K - kStep : input.K;
 
                     // if the change is smaller then a treshold, we quit

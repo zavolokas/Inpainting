@@ -8,8 +8,10 @@ namespace InpaintService.Activities
 {
     public static class NnfRandomInitActivity
     {
-        [FunctionName("RandomNnfInitIteration")]
-        public static async Task NnfInit([ActivityTrigger] NnfInputData input)
+        public const string Name = "NnfInitIteration";
+
+        [FunctionName(Name)]
+        public static async Task NnfInitIteration([ActivityTrigger] NnfInputData input)
         {
             var container = BlobHelper.OpenBlobContainer(input.Container);
 

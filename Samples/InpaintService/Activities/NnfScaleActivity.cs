@@ -8,8 +8,10 @@ namespace InpaintService.Activities
 {
     public static class NnfScaleActivity
     {
-        [FunctionName("ScaleNnf")]
-        public static async Task ScaleNnf([ActivityTrigger] IScaleNnfInput input)
+        public const string Name = "ScaleNnf";
+
+        [FunctionName(Name)]
+        public static async Task ScaleNnf([ActivityTrigger] NnfInputData input)
         {
             var container = BlobHelper.OpenBlobContainer(input.Container);
             var imageBlob = container.GetBlockBlobReference(input.Image);

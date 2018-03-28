@@ -8,7 +8,9 @@ namespace InpaintService.Activities
 {
     public static class ImageInpaintActivity
     {
-        [FunctionName("InpaintImage")]
+        public const string Name = "InpaintImage";
+
+        [FunctionName(Name)]
         public static async Task<InpaintingResult> InpaintImage([ActivityTrigger] NnfInputData input)
         {
             var container = BlobHelper.OpenBlobContainer(input.Container);
