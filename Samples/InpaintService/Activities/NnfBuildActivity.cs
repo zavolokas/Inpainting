@@ -4,17 +4,17 @@ using Newtonsoft.Json;
 using Zavolokas.ImageProcessing.PatchMatch;
 using Zavolokas.Structures;
 
-namespace InpaintService
+namespace InpaintService.Activities
 {
-    public static partial class InpaintOrchestration
+    public static class NnfBuildActivity
     {
         [FunctionName("RunBuildNnfIteration")]
         public static async Task RunBuildNnfIteration([ActivityTrigger] NnfInputData input)
         {
-            var container = OpenBlobContainer(input.Container);
+            var container = BlobHelper.OpenBlobContainer(input.Container);
 
             var imageBlob = container.GetBlockBlobReference(input.Image);
-            var imageArgb = await ConvertBlobToArgbImage(imageBlob);
+            var imageArgb = await BlobHelper.ConvertBlobToArgbImage(imageBlob);
             var image = imageArgb
                 .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
                 .FromRgbToLab();
@@ -27,15 +27,15 @@ namespace InpaintService
                 ? ImagePatchDistance.Cie76
                 : ImagePatchDistance.Cie2000;
 
-            var nnfState = ReadFromBlob<NnfState>(input.NnfName, container);
+            var nnfState = BlobHelper.ReadFromBlob<NnfState>(input.NnfName, container);
             var nnf = new Nnf(nnfState);
 
-            var mappingState = ReadFromBlob<Area2DMapState>(input.MappingNames[0], container);
+            var mappingState = BlobHelper.ReadFromBlob<Area2DMapState>(input.MappingNames[0], container);
             var mapping = new Area2DMap(mappingState);
 
             if (input.ExcludeInpaintArea)
             {
-                var inpaintAreaState = ReadFromBlob<Area2DState>(input.InpaintAreaName, container);
+                var inpaintAreaState = BlobHelper.ReadFromBlob<Area2DState>(input.InpaintAreaName, container);
                 var inpaintArea = Area2D.RestoreFrom(inpaintAreaState);
                 pixelsArea = imageArea.Substract(inpaintArea);
             }
@@ -49,7 +49,7 @@ namespace InpaintService
             nnfBuilder.RunBuildNnfIteration(nnf, image, image, direction, nnfSettings, calculator, mapping, pixelsArea);
 
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
-            SaveJsonToBlob(nnfData, container, input.NnfName);
+            BlobHelper.SaveJsonToBlob(nnfData, container, input.NnfName);
         }
     }
 }

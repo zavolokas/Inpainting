@@ -63,7 +63,7 @@ namespace InpaintService
             // verify the image is there
             if (imageBlob.Exists() && removeMaskBlob.Exists())
             {
-                string instanceId = await orchestrationClient.StartNewAsync("InpaintOrchestration", request);
+                string instanceId = await orchestrationClient.StartNewAsync("Orchestrate", request);
 
                 log.Info($"Started orchestration with id={instanceId}");
                 return orchestrationClient.CreateCheckStatusResponse(req, instanceId);

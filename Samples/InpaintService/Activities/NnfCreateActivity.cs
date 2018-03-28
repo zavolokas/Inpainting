@@ -3,20 +3,20 @@ using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json;
 using Zavolokas.Structures;
 
-namespace InpaintService
+namespace InpaintService.Activities
 {
-    public static partial class InpaintOrchestration
+    public static class NnfCreateActivity
     {
         [FunctionName("CreateNnf")]
         public static async Task CreateNnf([ActivityTrigger] NnfInputData input)
         {
-            var container = OpenBlobContainer(input.Container);
+            var container = BlobHelper.OpenBlobContainer(input.Container);
             var imageBlob = container.GetBlockBlobReference(input.Image);
-            var imageArgb = await ConvertBlobToArgbImage(imageBlob);
+            var imageArgb = await BlobHelper.ConvertBlobToArgbImage(imageBlob);
             var nnf = new Nnf(imageArgb.Width, imageArgb.Height, imageArgb.Width, imageArgb.Height, input.Settings.PatchSize);
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
 
-            SaveJsonToBlob(nnfData, container, input.NnfName);
+            BlobHelper.SaveJsonToBlob(nnfData, container, input.NnfName);
         }
     }
 }

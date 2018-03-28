@@ -3,9 +3,9 @@ using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json;
 using Zavolokas.ImageProcessing.Inpainting;
 
-namespace InpaintService
+namespace InpaintService.Activities
 {
-    public static partial class InpaintOrchestration
+    public static class PyramidsGenerateActivity
     {
         [FunctionName("GeneratePyramids")]
         public static async Task<CloudPyramid> GeneratePyramids([ActivityTrigger] InpaintRequest inpaintRequest)
@@ -14,12 +14,12 @@ namespace InpaintService
             var pyramidBuilder = new PyramidBuilder();
             var settings = new InpaintSettings();
 
-            var container = OpenBlobContainer(inpaintRequest.Container);
+            var container = BlobHelper.OpenBlobContainer(inpaintRequest.Container);
             var imageBlob = container.GetBlockBlobReference(inpaintRequest.Image);
             var removeMaskBlob = container.GetBlockBlobReference(inpaintRequest.RemoveMask);
 
-            var imageArgb = await ConvertBlobToArgbImage(imageBlob);
-            var removeMaskArgb = await ConvertBlobToArgbImage(removeMaskBlob);
+            var imageArgb = await BlobHelper.ConvertBlobToArgbImage(imageBlob);
+            var removeMaskArgb = await BlobHelper.ConvertBlobToArgbImage(removeMaskBlob);
 
             var levelsAmount = levelDetector.CalculateLevelsAmount(imageArgb, removeMaskArgb, settings.PatchSize);
             pyramidBuilder.Init(imageArgb, removeMaskArgb);
@@ -33,20 +33,20 @@ namespace InpaintService
             {
                 var image = pyramid.GetImage(levelIndex);
                 var fileName = $"{levelIndex}.png";
-                await SaveImageLabToBlob(image, container, fileName);
+                await BlobHelper.SaveImageLabToBlob(image, container, fileName);
                 cloudPyramid.Levels[levelIndex].ImageName = fileName;
 
                 var inpaintArea = pyramid.GetInpaintArea(levelIndex);
                 var inpaintAreaState = inpaintArea.GetState();
                 var inpaintAreaFileName = $"ia{levelIndex}.json";
                 var inpaintAreaData = JsonConvert.SerializeObject(inpaintAreaState);
-                SaveJsonToBlob(inpaintAreaData, container, inpaintAreaFileName);
+                BlobHelper.SaveJsonToBlob(inpaintAreaData, container, inpaintAreaFileName);
                 cloudPyramid.Levels[levelIndex].InpaintArea = inpaintAreaFileName;
 
                 var mapping = pyramid.GetMapping(levelIndex).GetState();
                 var mappingFileName = $"map{levelIndex}.json";
                 var mappingData = JsonConvert.SerializeObject(mapping);
-                SaveJsonToBlob(mappingData, container, mappingFileName);
+                BlobHelper.SaveJsonToBlob(mappingData, container, mappingFileName);
                 cloudPyramid.Levels[levelIndex].Mappings = new[] { mappingFileName };
             }
 

@@ -3,7 +3,50 @@ using Zavolokas.ImageProcessing.PatchMatch;
 
 namespace InpaintService
 {
-    public class NnfInputData
+    public interface ICreateNnfInput
+    {
+        string Container { get; set; }
+        string Image { get; set; }
+        string NnfName { get; set; }
+        InpaintSettings Settings { get; set; }
+    }
+
+    public interface IScaleNnfInput: ICreateNnfInput
+    {
+        bool IsCie79Calc { get; set; }
+        string[] MappingNames { get; set; }
+        int LevelIndex { get; set; }
+    }
+
+    public interface IInpaintInput: ICreateNnfInput
+    {
+        string InpaintAreaName { get; set; }
+
+        double K { get; set; }
+        byte LevelIndex { get; set; }
+        int IterationIndex { get; set; }
+    }
+
+    public interface INnfInitInput: ICreateNnfInput
+    {
+        string InpaintAreaName { get; set; }
+
+        bool IsCie79Calc { get; set; }
+        string[] MappingNames { get; set; }
+        bool ExcludeInpaintArea { get; set; }
+    }
+
+    public interface INnfBuildInput: ICreateNnfInput
+    {
+        string InpaintAreaName { get; set; }
+
+        bool IsCie79Calc { get; set; }
+        string[] MappingNames { get; set; }
+        bool ExcludeInpaintArea { get; set; }
+        bool IsForward { get; set; }
+    }
+
+    public class NnfInputData: ICreateNnfInput, IInpaintInput
     {
         public string NnfName { get; set; }
         public string Image { get; set; }
