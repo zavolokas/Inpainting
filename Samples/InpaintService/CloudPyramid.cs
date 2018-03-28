@@ -2,27 +2,32 @@
 
 namespace InpaintService
 {
+    public class CloudPyramidLevel
+    {
+        public string ImageName { get; set; }
+        public string InpaintArea { get; set; }
+        public string[] Mappings { get; set; }
+    }
+
     public class CloudPyramid
     {
-        public string[] ImageNames { get; set; }
-        public string[] InpaintAreas { get; set; }
-        public string[] Mappings { get; set; }
+        public CloudPyramidLevel[] Levels { get; set; }
 
         public string GetImageName(byte levelIndex)
         {
-            return ImageNames[levelIndex];
+            return Levels[levelIndex].ImageName;
         }
 
         public string GetInpaintArea(byte levelIndex)
         {
-            return InpaintAreas[levelIndex];
+            return Levels[levelIndex].InpaintArea;
         }
 
-        public string GetMapping(byte levelIndex)
+        public string[] GetMapping(byte levelIndex)
         {
-            return Mappings[levelIndex];
+            return Levels[levelIndex].Mappings;
         }
 
-        public byte LevelsAmount => (byte) ImageNames.Length;
+        public byte LevelsAmount => (byte) Levels.Length;
     }
 }

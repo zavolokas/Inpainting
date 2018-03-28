@@ -29,7 +29,7 @@ namespace InpaintService
 
             // TODO: downscale the input image
             // TODO: crop the input image
-            
+
             var pyramid = await ctx.CallActivityAsync<CloudPyramid>("GeneratePyramids", inpaintRequest);
 
             var maxInpaintIterationsAmount = 10;//settings.MaxInpaintIterations;
@@ -39,12 +39,12 @@ namespace InpaintService
             for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
             {
                 var imageName = pyramid.GetImageName(levelIndex);
-                var mapping = pyramid.GetMapping(levelIndex);
+                var mappings = pyramid.GetMapping(levelIndex);
                 var inpaintArea = pyramid.GetInpaintArea(levelIndex);
 
                 // if there is a NNF built on the prev level
                 // scale it up
-                var input = NnfInputData.From($"nnf{levelIndex}.json", inpaintRequest.Container, imageName, settings, mapping, inpaintArea, false, levelIndex, settings.MeanShift.K);
+                var input = NnfInputData.From($"nnf{levelIndex}.json", inpaintRequest.Container, imageName, settings, mappings, inpaintArea, false, levelIndex, settings.MeanShift.K);
 
                 if (levelIndex == 0)
                 {
@@ -131,7 +131,7 @@ namespace InpaintService
             var imageArgb = await ConvertBlobToArgbImage(imageBlob);
             var nnf = new Nnf(imageArgb.Width, imageArgb.Height, imageArgb.Width, imageArgb.Height, input.Settings.PatchSize);
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
-            
+
             SaveJsonToBlob(nnfData, container, input.NnfName);
         }
 
@@ -148,10 +148,10 @@ namespace InpaintService
                 ? ImagePatchDistance.Cie76
                 : ImagePatchDistance.Cie2000;
 
-            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapName, container);
+            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapNames[0], container);
             var mapping = new Area2DMap(mappingState);
 
-            var nnfState = ReadFromBlob<NnfState>($"nnf{input.LevelIndex-1}.json", container);
+            var nnfState = ReadFromBlob<NnfState>($"nnf{input.LevelIndex - 1}.json", container);
             var nnf = new Nnf(nnfState);
 
             nnf = nnf.CloneAndScale2XWithUpdate(image, image, input.Settings.PatchMatch, mapping, calculator);
@@ -187,30 +187,30 @@ namespace InpaintService
             var pyramid = pyramidBuilder.Build(levelsAmount, settings.PatchSize);
             var cloudPyramid = new CloudPyramid
             {
-                ImageNames = new string[pyramid.LevelsAmount],
-                InpaintAreas = new string[pyramid.LevelsAmount],
-                Mappings = new string[pyramid.LevelsAmount]
+                Levels = new CloudPyramidLevel[pyramid.LevelsAmount]
             };
 
             for (byte levelIndex = 0; levelIndex < pyramid.LevelsAmount; levelIndex++)
             {
+                cloudPyramid.Levels[levelIndex] = new CloudPyramidLevel();
+
                 var image = pyramid.GetImage(levelIndex);
                 var fileName = $"{levelIndex}.png";
                 await SaveImageLabToBlob(image, container, fileName);
-                cloudPyramid.ImageNames[levelIndex] = fileName;
+                cloudPyramid.Levels[levelIndex].ImageName = fileName;
 
                 var inpaintArea = pyramid.GetInpaintArea(levelIndex);
                 var inpaintAreaState = inpaintArea.GetState();
                 var inpaintAreaFileName = $"ia{levelIndex}.json";
                 var inpaintAreaData = JsonConvert.SerializeObject(inpaintAreaState);
                 SaveJsonToBlob(inpaintAreaData, container, inpaintAreaFileName);
-                cloudPyramid.InpaintAreas[levelIndex] = inpaintAreaFileName;
+                cloudPyramid.Levels[levelIndex].InpaintArea = inpaintAreaFileName;
 
                 var mapping = pyramid.GetMapping(levelIndex).GetState();
                 var mappingFileName = $"map{levelIndex}.json";
                 var mappingData = JsonConvert.SerializeObject(mapping);
                 SaveJsonToBlob(mappingData, container, mappingFileName);
-                cloudPyramid.Mappings[levelIndex] = mappingFileName;
+                cloudPyramid.Levels[levelIndex].Mappings = new[] { mappingFileName };
             }
 
             return cloudPyramid;
@@ -290,7 +290,7 @@ namespace InpaintService
             var nnfState = ReadFromBlob<NnfState>(input.NnfName, container);
             var nnf = new Nnf(nnfState);
 
-            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapName, container);
+            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapNames[0], container);
             var mapping = new Area2DMap(mappingState);
 
             if (input.ExcludeInpaintArea)
@@ -329,7 +329,7 @@ namespace InpaintService
             var nnfState = ReadFromBlob<NnfState>(input.NnfName, container);
             var nnf = new Nnf(nnfState);
 
-            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapName, container);
+            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapNames[0], container);
             var mapping = new Area2DMap(mappingState);
 
             if (input.ExcludeInpaintArea)
