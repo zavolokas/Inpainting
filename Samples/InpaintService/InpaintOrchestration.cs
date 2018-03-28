@@ -148,7 +148,7 @@ namespace InpaintService
                 ? ImagePatchDistance.Cie76
                 : ImagePatchDistance.Cie2000;
 
-            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapNames[0], container);
+            var mappingState = ReadFromBlob<Area2DMapState>(input.MappingNames[0], container);
             var mapping = new Area2DMap(mappingState);
 
             var nnfState = ReadFromBlob<NnfState>($"nnf{input.LevelIndex - 1}.json", container);
@@ -290,7 +290,7 @@ namespace InpaintService
             var nnfState = ReadFromBlob<NnfState>(input.NnfName, container);
             var nnf = new Nnf(nnfState);
 
-            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapNames[0], container);
+            var mappingState = ReadFromBlob<Area2DMapState>(input.MappingNames[0], container);
             var mapping = new Area2DMap(mappingState);
 
             if (input.ExcludeInpaintArea)
@@ -329,7 +329,7 @@ namespace InpaintService
             var nnfState = ReadFromBlob<NnfState>(input.NnfName, container);
             var nnf = new Nnf(nnfState);
 
-            var mappingState = ReadFromBlob<Area2DMapState>(input.Area2DMapNames[0], container);
+            var mappingState = ReadFromBlob<Area2DMapState>(input.MappingNames[0], container);
             var mapping = new Area2DMap(mappingState);
 
             if (input.ExcludeInpaintArea)

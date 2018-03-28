@@ -9,7 +9,7 @@ namespace InpaintService
         public string Image { get; set; }
         public string Container { get; set; }
         public InpaintSettings Settings { get; set; }
-        public string[] Area2DMapNames { get; set; }
+        public string[] MappingNames { get; set; }
         public bool IsCie79Calc { get; set; }
         public bool IsForward { get; set; }
         public string InpaintAreaName { get; set; }
@@ -28,7 +28,7 @@ namespace InpaintService
                 Container = container,
                 Image = image,
                 Settings =settings,
-                Area2DMapNames = mappings,
+                MappingNames = mappings,
                 InpaintAreaName = inpaintAreaName,
                 IsForward = isForward,
                 IsCie79Calc = settings.PatchDistanceCalculator == ImagePatchDistance.Cie76,
