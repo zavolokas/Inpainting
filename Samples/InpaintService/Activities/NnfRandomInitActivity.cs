@@ -32,7 +32,7 @@ namespace InpaintService.Activities
             var nnfState = BlobHelper.ReadFromBlob<NnfState>(input.NnfName, container);
             var nnf = new Nnf(nnfState);
 
-            var mappingState = BlobHelper.ReadFromBlob<Area2DMapState>(input.MappingNames[0], container);
+            var mappingState = BlobHelper.ReadFromBlob<Area2DMapState>(input.Mapping, container);
             var mapping = new Area2DMap(mappingState);
 
             if (input.ExcludeInpaintArea)
@@ -47,6 +47,11 @@ namespace InpaintService.Activities
 
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
             BlobHelper.SaveJsonToBlob(nnfData, container, input.NnfName);
+
+            foreach (var subNnfName in input.SplittedNnfNames)
+            {
+                BlobHelper.SaveJsonToBlob(nnfData, container, subNnfName);
+            }
         }
     }
 }

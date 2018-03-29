@@ -23,7 +23,7 @@ namespace InpaintService.Activities
                 ? ImagePatchDistance.Cie76
                 : ImagePatchDistance.Cie2000;
 
-            var mappingState = BlobHelper.ReadFromBlob<Area2DMapState>(input.MappingNames[0], container);
+            var mappingState = BlobHelper.ReadFromBlob<Area2DMapState>(input.Mapping, container);
             var mapping = new Area2DMap(mappingState);
 
             var nnfState = BlobHelper.ReadFromBlob<NnfState>($"nnf{input.LevelIndex - 1}.json", container);

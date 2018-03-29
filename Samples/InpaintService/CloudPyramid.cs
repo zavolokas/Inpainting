@@ -6,7 +6,10 @@ namespace InpaintService
     {
         public string ImageName { get; set; }
         public string InpaintArea { get; set; }
-        public string[] Mappings { get; set; }
+        public string Mapping { get; set; }
+        public string[] SplittedMappings { get; set; }
+        public string Nnf { get; set; }
+        public string[] SplittedNnfs { get; set; }
     }
 
     public class CloudPyramid
@@ -23,9 +26,24 @@ namespace InpaintService
             return Levels[levelIndex].InpaintArea;
         }
 
-        public string[] GetMapping(byte levelIndex)
+        public string GetMapping(byte levelIndex)
         {
-            return Levels[levelIndex].Mappings;
+            return Levels[levelIndex].Mapping;
+        }
+
+        public string GetNnf(byte levelIndex)
+        {
+            return Levels[levelIndex].Nnf;
+        }
+
+        public string[] GetSplittedMappings(byte levelIndex)
+        {
+            return Levels[levelIndex].SplittedMappings;
+        }
+
+        public string[] GetSplittedNnfs(byte levelIndex)
+        {
+            return Levels[levelIndex].SplittedNnfs;
         }
 
         public byte LevelsAmount => (byte) Levels.Length;
