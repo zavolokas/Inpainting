@@ -38,10 +38,11 @@ namespace InpaintService
                 var mappings = pyramid.GetSplittedMappings(levelIndex);
                 var nnfs = pyramid.GetSplittedNnfs(levelIndex);
 
+                // TODO: this looks ugly
+                var input = NnfInputData.From(nnf, inpaintRequest.Container, imageName, settings, mapping, inpaintArea, false, levelIndex, settings.MeanShift.K, nnfs);
+
                 // if there is a NNF built on the prev level
                 // scale it up
-                var input = NnfInputData.From(nnf, inpaintRequest.Container, imageName, settings,
-                    mapping, inpaintArea, false, levelIndex, settings.MeanShift.K, nnfs);
 
                 if (levelIndex == 0)
                 {
@@ -78,25 +79,41 @@ namespace InpaintService
 
                         var tasks = new Task[mappings.Length];
 
+                        var isForward = true;
+
                         for (var pmIteration = 0; pmIteration < settings.PatchMatch.IterationsAmount; pmIteration++)
                         {
-                            // split to many parts and process in parallel
-                            input.IsForward = !input.IsForward;
-                            input.PatchMatchIteration = pmIteration;
-
-                            for (int mapIndex = 0; mapIndex < mappings.Length; mapIndex++)
+                            // process in parallel
+                            if (mappings.Length > 1)
                             {
-                                var pminput = NnfInputData.From(nnfs[mapIndex], inpaintRequest.Container, imageName, settings,
-                                    mappings[mapIndex], inpaintArea, false, levelIndex, settings.MeanShift.K, nnfs);
-                                tasks[mapIndex] = ctx.CallActivityAsync(NnfBuildActivity.Name, pminput);
+                                for (int mapIndex = 0; mapIndex < mappings.Length; mapIndex++)
+                                {
+                                    // TODO: this looks ugly
+                                    var pminput = NnfInputData.From(nnfs[mapIndex], inpaintRequest.Container, imageName,
+                                        settings, mappings[mapIndex], inpaintArea, isForward, levelIndex,
+                                        settings.MeanShift.K, nnfs);
+                                    pminput.PatchMatchIteration = pmIteration;
+
+                                    tasks[mapIndex] = ctx.CallActivityAsync(NnfBuildActivity.Name, pminput);
+                                }
+
+                                await Task.WhenAll(tasks);
+
+                                // TODO: merge nnf into one
+                                await ctx.CallActivityAsync(NnfMergeActivity.Name, (nnfs: nnfs, mappings: mappings, resultNnf: input.NnfName, container: input.Container, input.Mapping));
+                            }
+                            else
+                            {
+                                var pminput = NnfInputData.From(input.NnfName, inpaintRequest.Container, imageName,
+                                    settings, input.Mapping, inpaintArea, isForward, levelIndex,
+                                    settings.MeanShift.K, nnfs);
+                                pminput.PatchMatchIteration = pmIteration;
+
+                                await ctx.CallActivityAsync(NnfBuildActivity.Name, pminput);
                             }
 
-                            await Task.WhenAll(tasks);
-
-                            // TODO: merge nnf into one    
+                            isForward = !isForward;
                         }
-
-
                     }
 
                     var inpaintResult = await ctx.CallActivityAsync<InpaintingResult>(ImageInpaintActivity.Name, input);

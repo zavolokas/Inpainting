@@ -59,7 +59,7 @@ namespace InpaintService.Activities
                 BlobHelper.SaveJsonToBlob(mappingData, container, mappingFileName);
                 cloudPyramid.Levels[levelIndex].Mapping = mappingFileName;
 
-                var mappings = SplitMapping(mapping, 400).ToArray();
+                var mappings = SplitMapping(mapping, 900).ToArray();
                 cloudPyramid.Levels[levelIndex].SplittedMappings = new string[mappings.Length];
                 cloudPyramid.Levels[levelIndex].SplittedNnfs = new string[mappings.Length];
                 for (var i = 0; i < mappings.Length; i++)
