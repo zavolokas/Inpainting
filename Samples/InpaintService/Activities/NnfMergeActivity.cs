@@ -16,13 +16,15 @@ namespace InpaintService.Activities
             return Task.Run(() =>
             {
                 var container = BlobHelper.OpenBlobContainer(input.container);
-                var nnfState = BlobHelper.ReadFromBlob<NnfState>(input.nnf, container);
+                var nnfState = BlobHelper.ReadFromBlob<NnfState>(input.nnfs[0], container);
                 var destNnf = new Nnf(nnfState);
 
-                var mappingState = BlobHelper.ReadFromBlob<Area2DMapState>(input.mapping, container);
+                var mappingState = BlobHelper.ReadFromBlob<Area2DMapState>(input.mappings[0], container);
                 var destMapping = new Area2DMap(mappingState);
 
-                for (int nnfIndex = 0; nnfIndex < input.nnfs.Length; nnfIndex++)
+                var mapBuilder = new Area2DMapBuilder();
+
+                for (int nnfIndex = 1; nnfIndex < input.nnfs.Length; nnfIndex++)
                 {
                     nnfState = BlobHelper.ReadFromBlob<NnfState>(input.nnfs[nnfIndex], container);
                     var srcNnf = new Nnf(nnfState);
@@ -31,10 +33,20 @@ namespace InpaintService.Activities
                     var srcMapping = new Area2DMap(mappingState);
 
                     destNnf.Merge(srcNnf, destMapping, srcMapping);
+
+                    destMapping = mapBuilder
+                        .InitNewMap(destMapping)
+                        .AddMapping(srcMapping)
+                        .Build();
+
                 }
 
                 var nnfData = JsonConvert.SerializeObject(destNnf.GetState());
                 BlobHelper.SaveJsonToBlob(nnfData, container, input.nnf);
+                foreach (var nnf in input.nnfs)
+                {
+                    BlobHelper.SaveJsonToBlob(nnfData, container, nnf);
+                }
             });
         }
     }
