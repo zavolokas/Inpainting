@@ -1,13 +1,23 @@
-Hello!
+# Azure Durable Functions
 
-+++
-
-Hola!
+Sergey Zavoloka
 
 ---
 
-Goodbye!
+## Problem
+bla bla
+```CSharp
+[FunctionName(Name)]
+public static async Task Orchestrate(
+    [OrchestrationTrigger] DurableOrchestrationContext ctx)
+{
+    var inpaintRequest = ctx.GetInput<InpaintRequest>();
 
-+++
+    var pyramid = await ctx.CallActivityAsync<CloudPyramid>(PyramidsGenerateActivity.Name, inpaintRequest);
+}
+```
 
-Adiós!
+---
+
+# Q&A
+Thank you!
