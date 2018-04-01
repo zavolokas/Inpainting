@@ -3,11 +3,13 @@
 Sergey Zavoloka
 
 ---
+
 ## Agenda
 - Domain
+
 ---
 
- Mobile app to remove objects from pictures
+Mobile app to remove objects from pictures
 
 ![Smartest](https://www.youtube.com/embed/QMWHeGsVjFA)
 
@@ -19,16 +21,30 @@ Next App Star Competition
 ---
 
 Bad reviews!
+
 ![bad reviews](images/bad_reviews.png)
 
 ---
+
 App uses Seam Carving
 
 ![se_restrictions](images/se_restrictions.png)
+
 ---
 
-- Users wanted more intellingent functionality
-- Mobiles are not capable of such computation power
+Users wanted more intellingent functionality
+
+![riots](images/riots.jpg)
+
+---
+
+New method
+
+![New method](images/t067.gif)
+
+---
+
+Mobiles are not capable of such computation power
 
 ---
 
