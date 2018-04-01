@@ -3,13 +3,16 @@
 Sergey Zavoloka
 
 ---
+## Agenda
+- Domain
+---
 
  Mobile app to remove objects from pictures
 
-[![Smartest Eraser Screenshot](https://img.youtube.com/vi/QMWHeGsVjFA/2.jpg)](https://www.youtube.com/watch?v=QMWHeGsVjFA&t=21s)
+![Smartest](https://www.youtube.com/embed/QMWHeGsVjFA&t=21s)
 
 ---
-- App uses Seam Carving
+App uses Seam Carving
 
 ![se_restrictions]
 ---
@@ -30,6 +33,11 @@ Sergey Zavoloka
   - Scale
 - Limited lifetime
 - Difficult to orchestrate
+
+---
+
+## Key take aways
+- item1 
 
 ---
 
