@@ -39,6 +39,7 @@ Users wanted more intellingent functionality
 ---
 
 New method
+
 | 1 | 2 |
 |------ | -- |
 | ![bridge](images/t058.gif )| ![chineese](images/t067.gif) |
