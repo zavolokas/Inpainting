@@ -39,8 +39,9 @@ Users wanted more intellingent functionality
 ---
 
 New method
-
-![New method](images/t067.gif)
+|||
+|------ | -- |
+|![New method](images/t058.gif)| ![New method](images/t067.gif) |
 
 ---
 
