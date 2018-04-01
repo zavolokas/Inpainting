@@ -12,6 +12,16 @@ Sergey Zavoloka
 ![Smartest](https://www.youtube.com/embed/QMWHeGsVjFA)
 
 ---
+
+Next App Star Competition
+![NextAppStar](images/nextappstar.png)
+
+---
+
+Bad reviews!
+![bad reviews](images/bad_reviews.png)
+
+---
 App uses Seam Carving
 
 ![se_restrictions](images/se_restrictions.png)
