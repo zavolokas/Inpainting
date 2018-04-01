@@ -59,7 +59,7 @@ namespace InpaintService.Activities
                 BlobHelper.SaveJsonToBlob(mappingData, container, mappingFileName);
                 cloudPyramid.Levels[levelIndex].Mapping = mappingFileName;
 
-                var mappings = SplitMapping(mapping, 900).ToArray();
+                var mappings = SplitMapping(mapping, inpaintRequest.Settings.MaxPointsAmountPerFunction, settings.PatchSize).ToArray();
                 cloudPyramid.Levels[levelIndex].SplittedMappings = new string[mappings.Length];
                 cloudPyramid.Levels[levelIndex].SplittedNnfs = new string[mappings.Length];
                 for (var i = 0; i < mappings.Length; i++)
@@ -77,7 +77,7 @@ namespace InpaintService.Activities
             return cloudPyramid;
         }
 
-        private static IEnumerable<Area2DMap> SplitMapping(Area2DMap currentMap, int maxPointsPerProcess)
+        private static IEnumerable<Area2DMap> SplitMapping(Area2DMap currentMap, int maxPointsPerProcess, byte patchSize)
         {
             // The input should be splitted smartly taking into account the input data and settings.
 
@@ -127,9 +127,17 @@ namespace InpaintService.Activities
                 {
                     for (var x = left; x < left + w; x += cellWidth)
                     {
+                        // we extend cell in all direction
+                        // so that it overlaps with other cells
+
+                        var cx = Math.Max(x - patchSize, 0);
+                        var cy = Math.Max(y - patchSize, 0);
+                        var cw = (x - cx) + cellWidth + patchSize;
+                        var ch = (y - cy) + rowHight + patchSize;
+
                         var map = new Area2DMapBuilder()
                             .InitNewMap(currentMap)
-                            .ReduceDestArea(Area2D.Create(x, y, cellWidth, rowHight), true)
+                            .ReduceDestArea(Area2D.Create(cx, cy, cw, ch), true)
                             .Build();
 
                         if (map.DestElementsCount > 0)
