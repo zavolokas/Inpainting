@@ -9,12 +9,12 @@ Sergey Zavoloka
 
  Mobile app to remove objects from pictures
 
-![Smartest](https://www.youtube.com/embed/QMWHeGsVjFA&t=21s)
+![Smartest](https://www.youtube.com/embed/QMWHeGsVjFA)
 
 ---
 App uses Seam Carving
 
-![se_restrictions]
+![se_restrictions](images/se_restrictions.png)
 ---
 
 - Users wanted more intellingent functionality
@@ -43,5 +43,3 @@ App uses Seam Carving
 
 # Q&A
 Thank you!
-
-[se_restrictions]: images/se_restrictions.png
