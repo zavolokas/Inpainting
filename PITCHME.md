@@ -39,9 +39,9 @@ Users wanted more intellingent functionality
 ---
 
 New method
-|||
+| 1 | 2 |
 |------ | -- |
-|![New method](images/t058.gif)| ![New method](images/t067.gif) |
+| ![bridge](images/t058.gif )| ![chineese](images/t067.gif) |
 
 ---
 
