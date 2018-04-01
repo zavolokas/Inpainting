@@ -44,7 +44,7 @@ Users wanted more intellingent functionality
 | ![bridge](images/t058.gif) | ![chineese](images/t067.gif) |
 
 ---
-@title[New method]
+@title[New method2]
 
 ![bridge](images/t058.gif)
 
