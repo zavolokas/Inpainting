@@ -37,12 +37,16 @@ Users wanted more intellingent functionality
 ![riots](images/riots.jpg)
 
 ---
-
-New method
+@title[New method]
 
 | 1 | 2 |
 |------ | -- |
-| ![bridge](images/t058.gif )| ![chineese](images/t067.gif) |
+| ![bridge](images/t058.gif) | ![chineese](images/t067.gif) |
+
+---
+@title[New method]
+
+![bridge](images/t058.gif)
 
 ---
 
