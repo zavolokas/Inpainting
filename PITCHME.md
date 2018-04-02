@@ -94,11 +94,11 @@ After long studies a new method was ready!
 
 ---
 
----?image=images/skating_orig.png&position=center&background-size=50%
+---?image=images/skating_orig.png&background-size=cover
 
----?image=images/skating_marked.png&position=center&background-size=50%
+---?image=images/skating_marked.png&background-size=cover
 
----?image=images/skating_wex.png&position=center&background-size=50%
+---?image=images/skating_wex.png&background-size=cover
 
 ---?image=images/runners_orig.png&position=center&size=100% 100%
 
