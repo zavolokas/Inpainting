@@ -17,7 +17,7 @@ Mobile app to remove objects from pictures
 
 ![Smartest](https://www.youtube.com/embed/QMWHeGsVjFA)
 
----?image=images/nextappstar.png&position=left&size=auto 65%
+---?image=images/nextappstar.png&position=left&size=auto 45%
 
 @title[NextAppStar]
 
