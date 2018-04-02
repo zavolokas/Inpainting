@@ -17,24 +17,12 @@ Mobile app to remove objects from pictures
 
 ![Smartest](https://www.youtube.com/embed/QMWHeGsVjFA)
 
----
+---?image=images/nextappstar.png&position=left&size=auto 65%
+
 @title[NextAppStar]
 
 - Next App Star Competition
-- 9000 apps participated
-- only 128 in final |
-- Smartest Eraser in top 32 |
-
-<img src="images/nextappstar.png" width="200" height="200" />
-
-<!-- ![NextAppStar](images/nextappstar.png) -->
-
----?image=images/nextappstar.png&position=right&size=auto 75%
-
-@title[NextAppStar2]
-
-- Next App Star Competition
-- 9000 apps participated
+- 9000 apps participated |
 - only 128 in final |
 - Smartest Eraser in top 32 |
 
