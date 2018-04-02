@@ -94,6 +94,21 @@ After long studies a new method was ready!
 
 ---
 
++++?image=images/skating_orig.png&position=center&size=100% 100%
+
++++?image=images/skating_marked.png&position=center&size=100% 100%
+
++++?image=images/skating_wex.png&position=center&size=100% 100%
+
++++?image=images/runners_orig.png&position=center&size=100% 100%
+
++++?image=images/runners_marked.png&position=center&size=100% 100%
+
++++?image=images/runners_wex.png&position=center&size=100% 100%
+
+
+---
+
 Mobiles are not capable of such computation power
 
 ---
