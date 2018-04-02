@@ -20,9 +20,23 @@ Mobile app to remove objects from pictures
 ---
 @title[NextAppStar]
 
-Next App Star Competition
+<table>
+  <tr>
+    <td><img src="images/nextappstar.png" width="200" height="200" /></td>
+    <td>
 
-<img src="images/nextappstar.png" width="200" height="200" />
+- Next App Star Competition
+- 9000 apps participated
+- only 128 in final |
+- Smartest Eraser in top 32 |
+
+    </td>
+  </tr>
+</table>
+
+
+
+<!-- <img src="images/nextappstar.png" width="200" height="200" /> -->
 
 <!-- ![NextAppStar](images/nextappstar.png) -->
 
