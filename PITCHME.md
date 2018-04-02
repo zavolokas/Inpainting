@@ -22,14 +22,7 @@ Mobile app to remove objects from pictures
 
 Next App Star Competition
 
-| Mode | On Key | Off Key |
-| ---- | :------: | :--------: |
-| Fullscreen | F |  Esc |
-| Overview | O |  O |
-| Blackout | B |  B |
-| Help | ? |<img src="images/nextappstar.png" width="100" height="100" />|
-
-
+<img src="images/nextappstar.png" width="200" height="200" />
 
 <!-- ![NextAppStar](images/nextappstar.png) -->
 
