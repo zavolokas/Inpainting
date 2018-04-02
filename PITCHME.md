@@ -50,9 +50,24 @@ Users wanted more intellingent functionality
 ---
 
 @title[New method]
-New 2
+
+After long studies a new method was ready!
+
++++
 
 ![bridge](images/t058.gif)
+
++++
+
+![](images/t067.gif)
+
++++
+
+![](images/t009.gif)
+
++++
+
+![](images/t020.gif)
 
 ---
 
