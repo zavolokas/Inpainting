@@ -92,21 +92,24 @@ After long studies a new method was ready!
 
 ![](images/t020.gif)
 
----
++++
+<!-- .slide: data-transition="none" -->
+![0](image=images/skating_orig.png)
++++
+<!-- .slide: data-transition="none" -->
+![1](image=images/skating_marked.png)
++++
+<!-- .slide: data-transition="none" -->
+![2](image=images/skating_wex.png)
++++
 
----?image=images/skating_orig.png&background-size=cover
-
----?image=images/skating_marked.png&background-size=cover
-
----?image=images/skating_wex.png&background-size=cover
-
----?image=images/runners_orig.png&position=center&size=100% 100%
-
----?image=images/runners_marked.png&position=center&size=100% 100%
-
----?image=images/runners_wex.png&position=center&size=100% 100%
-
-
+![3](image=images/runners_orig.png)
++++
+<!-- .slide: data-transition="none" -->
+![4](image=images/runners_marked.png)
++++
+<!-- .slide: data-transition="none" -->
+![5](image=images/runners_wex.png)
 ---
 
 Mobiles are not capable of such computation power
