@@ -39,7 +39,30 @@ Bad reviews!
 
 App uses Seam Carving
 
-![se_restrictions](images/se_restrictions.png)
+![](images/seams.jpeg)
+
++++?image=images/skating_orig.png&position=center&size=100% 100%
+
++++?image=images/skating_marked.png&position=center&size=100% 100%
+
++++?image=images/skating_sc.png&position=center&size=100% 100%
+
++++?image=images/skating_sc_diffects.png&position=center&size=100% 100%
+
++++?image=images/runners_orig.png&position=center&size=100% 100%
+
++++?image=images/runners_marked.png&position=center&size=100% 100%
+
++++?image=images/runners_sc.png&position=center&size=100% 100%
+
++++?image=images/runners_diffects.png&position=center&size=100% 100%
+
+---
+
+Simplest wat is to explain 
+
+<img src="images/se_restrictions.png"  height="500" /> 
+<!-- ![se_restrictions](images/se_restrictions.png) -->
 
 ---
 
