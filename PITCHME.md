@@ -1,24 +1,40 @@
+@title[Title]
+
 # Azure Durable Functions
 
 Sergey Zavoloka
 
 ---
+@title[Agenda]
 
 ## Agenda
 - Domain
 
 ---
+@title[Smartest Eraser]
 
 Mobile app to remove objects from pictures
 
 ![Smartest](https://www.youtube.com/embed/QMWHeGsVjFA)
 
 ---
+@title[NextAppStar]
 
 Next App Star Competition
-![NextAppStar](images/nextappstar.png)
+
+| Mode | On Key | Off Key |
+| ---- | :------: | :--------: |
+| Fullscreen | F |  Esc |
+| Overview | O |  O |
+| Blackout | B |  B |
+| Help | ? |<img src="images/nextappstar.png" width="100" height="100" />|
+
+
+
+<!-- ![NextAppStar](images/nextappstar.png) -->
 
 ---
+@title[Bad reviews]
 
 Bad reviews!
 
