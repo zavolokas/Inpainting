@@ -148,6 +148,10 @@ Mobiles are not capable of such computation power
 
 ---
 
+TODO: How difficult to use worker
+
+---
+
 | INSTANCE	| CORES |	RAM	| PRICE |
 | ---|---|---|---|
 | A0 | 1 | 0.75 GB | $0.02/hour |
@@ -172,6 +176,44 @@ Mobiles are not capable of such computation power
 - Limited lifetime
 - Difficult to orchestrate
 
+--- 
+
+TODO: How to orchestrate
+
+--- 
+
+TODO: Durable functions - what it is?
+- description
+- version
+
+--- 
+
+TODO: Simple Inpaint algorithm schema
+
+--- 
+
+TODO: How to orchestrate
+
+--- 
+
+TODO: Converted app into Durable without Activities. 
+
+--- 
+
+TODO: Reasons to use Activities
+
+--- 
+
+TODO: Difficulties with Orcestrate function
+-  Blocking code
+- Serializable inputs
+- 60KB payload
+
+--- 
+
+TODO: Replay functionality
+ - how stupid is the orchestration
+ 
 --- 
 
 |||
