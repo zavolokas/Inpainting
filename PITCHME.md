@@ -41,21 +41,33 @@ App uses Seam Carving
 
 ![](images/seams.jpeg)
 
-+++?image=images/skating_orig.png&position=center&size=100% 100%
++++
+<!-- .slide: data-transition="none" -->
+![0](images/skating_orig.png)
 
-+++?image=images/skating_marked.png&position=center&size=100% 100%
++++
+<!-- .slide: data-transition="none" -->
+![1](images/skating_marked.png)
++++
+<!-- .slide: data-transition="none" -->
+![2](images/skating_sc.png)
++++
+<!-- .slide: data-transition="none" -->
+![2](images/skating_sc_diffects.png)
 
-+++?image=images/skating_sc.png&position=center&size=100% 100%
++++
 
-+++?image=images/skating_sc_diffects.png&position=center&size=100% 100%
+![3](images/runners_orig.png)
++++
+<!-- .slide: data-transition="none" -->
+![4](images/runners_marked.png)
++++
+<!-- .slide: data-transition="none" -->
+![5](images/runners_sc.png)
 
-+++?image=images/runners_orig.png&position=center&size=100% 100%
-
-+++?image=images/runners_marked.png&position=center&size=100% 100%
-
-+++?image=images/runners_sc.png&position=center&size=100% 100%
-
-+++?image=images/runners_diffects.png&position=center&size=100% 100%
++++
+<!-- .slide: data-transition="none" -->
+![5](images/runners_diffects.png)
 
 ---
 
@@ -92,24 +104,29 @@ After long studies a new method was ready!
 
 ![](images/t020.gif)
 
+---
+
+What happened with the issues?
+
 +++
 <!-- .slide: data-transition="none" -->
-![0](image=images/skating_orig.png)
+![0](images/skating_orig.png)
+
 +++
 <!-- .slide: data-transition="none" -->
-![1](image=images/skating_marked.png)
+![1](images/skating_marked.png)
 +++
 <!-- .slide: data-transition="none" -->
-![2](image=images/skating_wex.png)
+![2](images/skating_wex.png)
 +++
 
-![3](image=images/runners_orig.png)
+![3](images/runners_orig.png)
 +++
 <!-- .slide: data-transition="none" -->
-![4](image=images/runners_marked.png)
+![4](images/runners_marked.png)
 +++
 <!-- .slide: data-transition="none" -->
-![5](image=images/runners_wex.png)
+![5](images/runners_wex.png)
 ---
 
 Mobiles are not capable of such computation power
