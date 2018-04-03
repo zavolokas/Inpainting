@@ -6,6 +6,9 @@ Sergey Zavoloka
 
 // TODO: insert contacts, picture etc
 
+Note:
+Introduce yourself
+
 ---
 @title[Agenda]
 
@@ -15,10 +18,16 @@ Sergey Zavoloka
 - Application
 - Tips
 
+
 ---
 
 - 2012 TechDays
 - Talks about Windows Phone 7
+
+Note:
+In 2012 I attended TechDays. 
+
+Many talks were about development for Windows Phone 7
 
 ---
 @title[Smartest Eraser]
@@ -234,7 +243,6 @@ TODO: How I failed to switch to Activities
 TODO: Replay functionality (strips)
 
  - how stupid is the orchestration
- -
  
 ---
 
