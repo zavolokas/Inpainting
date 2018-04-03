@@ -11,6 +11,14 @@ Sergey Zavoloka
 
 ## Agenda
 - Domain
+- Durable functions
+- Application
+- Tips
+
+---
+
+- 2012 TechDays
+- Talks about Windows Phone 7
 
 ---
 @title[Smartest Eraser]
@@ -139,18 +147,23 @@ What happened with the issues?
 
 ---
 
+TODO: Simple Inpaint algorithm schema
+
+---
+
 Mobiles are not capable of such computation power
 
 ---
 
 - Azure Cloud Services
   - Worker roles
-  - expencieve 
-  - difficult to scale
 
 ---
 
 TODO: How difficult to use worker
+- one worker many users |
+- reacts on message in a queue |
+- difficult to scale |
 
 ---
 
@@ -173,14 +186,17 @@ TODO: How difficult to use worker
 ---
 
 - Azure functions
-  - Cheap
-  - Scale
-- Limited lifetime
-- Difficult to orchestrate
+  - Pay for usage (real) |
+  - Scale |
 
 ---
 
 TODO: How to orchestrate
+
+---
+
+- Limited lifetime |
+- Difficult to orchestrate |
 
 ---
 
@@ -189,10 +205,6 @@ TODO: Durable functions - what it is?
 - description
 - prerelease version
 - how to reference the NuGet
-
----
-
-TODO: Simple Inpaint algorithm schema
 
 ---
 
@@ -213,7 +225,7 @@ TODO: Reasons to use Activities
 
 TODO: How I failed to switch to Activities
 
-- No `awaits` within Orcestrate |
+- No awaits within Orcestrate |
 - Serializable inputs |
 - 60KB payloads |
 
