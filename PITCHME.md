@@ -4,6 +4,8 @@
 
 Sergey Zavoloka
 
+// TODO: insert contacts, picture etc
+
 ---
 @title[Agenda]
 
@@ -164,9 +166,9 @@ TODO: How difficult to use worker
 
 | instance | price per month|
 | --- | ---|
-| A0 | 24 * 30 * $0.02 = $14.4|
-| A1 | 24 * 30 * $0.08 = $57.6|
-| A2 | 24 * 30 * $0.16 = $115.2|
+| A0 | 24 &ast; 30 &ast; $0.02 = $14.4|
+| A1 | 24 &ast; 30 &ast; $0.08 = $57.6|
+| A2 | 24 &ast; 30 &ast; $0.16 = $115.2|
 
 ---
 
@@ -176,45 +178,82 @@ TODO: How difficult to use worker
 - Limited lifetime
 - Difficult to orchestrate
 
---- 
+---
 
 TODO: How to orchestrate
 
---- 
+---
 
 TODO: Durable functions - what it is?
-- description
-- version
 
---- 
+- description
+- prerelease version
+- how to reference the NuGet
+
+---
 
 TODO: Simple Inpaint algorithm schema
 
---- 
+---
 
 TODO: How to orchestrate
 
---- 
+---
 
 TODO: Converted app into Durable without Activities. 
 
---- 
+---
 
 TODO: Reasons to use Activities
 
---- 
+- Parallalization
+- Restores in case of failure
 
-TODO: Difficulties with Orcestrate function
--  Blocking code
-- Serializable inputs
-- 60KB payload
+---
 
---- 
+TODO: How I failed to switch to Activities
 
-TODO: Replay functionality
+- No `awaits` within Orcestrate |
+- Serializable inputs |
+- 60KB payloads |
+
+---
+
+TODO: Replay functionality (strips)
+
  - how stupid is the orchestration
+ -
  
---- 
+---
+
+TODO: Demonstration of reply in Azure
+
+---
+
+TODO: Explain how Durable works under the hood
+
+---
+
+TODO: Use of sub orchestrations
+
+---
+
+TODO: Possible optimizations
+- Sub Orchestrations |
+- Minimize reads from storage |
+- Use in-memory (REDIS) |
+
+---
+
+TODO: Diagnostics
+
+---
+
+TODO: Deployments
+
+- I had issue referencing a project
+
+---
 
 |||
 |---|--|
@@ -235,3 +274,5 @@ TODO: Replay functionality
 
 # Q&A
 Thank you!
+
+// TODO: insert contacts, picture etc
