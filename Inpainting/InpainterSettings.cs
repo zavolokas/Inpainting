@@ -27,6 +27,7 @@ namespace Zavolokas.ImageProcessing.Inpainting
         public PatchMatchSettings PatchMatch { get; }
         public ColorResolver ColorResolver { get; set; } = ColorResolver.Simple;
         public double PixelChangeTreshold { get; set; } = 0.00003;
+        public bool IgnoreInpaintedPixelsOnFirstIteration { get; set; } = true;
 
         public byte PatchSize
         {
