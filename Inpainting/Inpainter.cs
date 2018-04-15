@@ -136,7 +136,7 @@ namespace Zavolokas.ImageProcessing.Inpainting
                     // that we want to inpaint. That is why before the area is not
                     // inpainted - we should exclude this area.
                     var pixelsArea = imageArea;
-                    if (levelIndex == 0 && inpaintIterationIndex == 0)
+                    if (levelIndex == 0 && inpaintIterationIndex == 0 && settings.IgnoreInpaintedPixelsOnFirstIteration)
                     {
                         pixelsArea = imageArea.Substract(inpaintArea);
                     }
