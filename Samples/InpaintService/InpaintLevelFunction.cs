@@ -58,43 +58,7 @@ namespace InpaintService
 
                     await ctx.CallActivityAsync(NnfRandomInitActivity.Name, input);
 
-                    var tasks = new Task[mappings.Length];
-
-                    var isForward = true;
-
-                    for (var pmIteration = 0; pmIteration < settings.PatchMatch.IterationsAmount; pmIteration++)
-                    {
-                        // process in parallel
-                        if (mappings.Length > 1)
-                        {
-                            for (int mapIndex = 0; mapIndex < mappings.Length; mapIndex++)
-                            {
-                                // TODO: this looks ugly
-                                var pminput = NnfInputData.From(nnfs[mapIndex], container, imageName,
-                                    settings, mappings[mapIndex], inpaintArea, isForward, levelIndex,
-                                    settings.MeanShift.K, nnfs, mappings);
-                                pminput.PatchMatchIteration = pmIteration;
-
-                                tasks[mapIndex] = ctx.CallActivityAsync(NnfBuildActivity.Name, pminput);
-                            }
-
-                            await Task.WhenAll(tasks);
-
-                            // TODO: merge nnf into one
-                            await ctx.CallActivityAsync(NnfMergeActivity.Name, (nnfs: nnfs, mappings: mappings, resultNnf: input.NnfName, container: input.Container, input.Mapping));
-                        }
-                        else
-                        {
-                            var pminput = NnfInputData.From(input.NnfName, container, imageName,
-                                settings, input.Mapping, inpaintArea, isForward, levelIndex,
-                                settings.MeanShift.K, nnfs, mappings);
-                            pminput.PatchMatchIteration = pmIteration;
-
-                            await ctx.CallActivityAsync(NnfBuildActivity.Name, pminput);
-                        }
-
-                        isForward = !isForward;
-                    }
+                    await ctx.CallSubOrchestratorAsync(BuildNnfFunction.Name, input);
                 }
 
                 var inpaintResult = await ctx.CallActivityAsync<InpaintingResult>(ImageInpaintActivity.Name, input);
