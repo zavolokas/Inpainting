@@ -64,8 +64,11 @@ namespace InpaintService
         public int PatchMatchIteration { get; set; }
         public string[] SplittedNnfNames { get; set; }
 
+        public string[] Mappings { get; set; }
+
         public static NnfInputData From(string nnf, string container, string image, InpaintSettings settings,
-            string mapping, string inpaintAreaName, bool isForward, byte levelIndex, double meanShiftK, string[] splittedNnfs)
+            string mapping, string inpaintAreaName, bool isForward, byte levelIndex, double meanShiftK, string[] splittedNnfs,
+            string[] mappings)
         {
             return new NnfInputData
             {
@@ -79,7 +82,8 @@ namespace InpaintService
                 IsCie79Calc = settings.PatchDistanceCalculator == ImagePatchDistance.Cie76,
                 LevelIndex = levelIndex,
                 K = meanShiftK,
-                SplittedNnfNames = splittedNnfs
+                SplittedNnfNames = splittedNnfs,
+                Mappings = mappings
             };
         }
     }
