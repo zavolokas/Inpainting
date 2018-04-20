@@ -65,6 +65,7 @@ namespace InpaintService
         public string[] SplittedNnfNames { get; set; }
 
         public string[] Mappings { get; set; }
+        public int InpaintIterationIndex { get; set; }
 
         public static NnfInputData From(string nnf, string container, string image, InpaintSettings settings,
             string mapping, string inpaintAreaName, bool isForward, byte levelIndex, double meanShiftK, string[] splittedNnfs,
