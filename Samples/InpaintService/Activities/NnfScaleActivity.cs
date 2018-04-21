@@ -14,9 +14,8 @@ namespace InpaintService.Activities
         public static async Task ScaleNnf([ActivityTrigger] NnfInputData input)
         {
             var storage = StorageFactory.Create();
-            var container = storage.OpenBlobContainer(input.Container);
-            var imageBlob = container.GetBlockBlobReference(input.Image);
-            var image = (await storage.ConvertBlobToArgbImage(imageBlob))
+            storage.OpenContainer(input.Container);
+            var image = (await storage.ReadArgbImageAsync(input.Image))
                 .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
                 .FromRgbToLab();
 
@@ -24,16 +23,16 @@ namespace InpaintService.Activities
                 ? ImagePatchDistance.Cie76
                 : ImagePatchDistance.Cie2000;
 
-            var mappingState = storage.ReadFromBlob<Area2DMapState>(input.Mapping, container);
+            var mappingState = storage.Read<Area2DMapState>(input.Mapping);
             var mapping = new Area2DMap(mappingState);
 
-            var nnfState = storage.ReadFromBlob<NnfState>($"nnf{input.LevelIndex - 1}.json", container);
+            var nnfState = storage.Read<NnfState>($"nnf{input.LevelIndex - 1}.json");
             var nnf = new Nnf(nnfState);
 
             nnf = nnf.CloneAndScale2XWithUpdate(image, image, input.Settings.PatchMatch, mapping, calculator);
 
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
-            storage.SaveJsonToBlob(nnfData, container, input.NnfName);
+            storage.SaveJson(nnfData, input.NnfName);
         }
     }
 }

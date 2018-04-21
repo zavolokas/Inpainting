@@ -14,31 +14,32 @@ namespace InpaintService
 {
     public class BlobStorage : IStorage
     {
+        private CloudBlobContainer _container;
+
         internal BlobStorage()
         {
             
         }
 
-        public T ReadFromBlob<T>(string blobName, CloudBlobContainer container)
+        public T Read<T>(string fileName)
         {
-            var blob = container.GetBlockBlobReference(blobName);
+            var blob = _container.GetBlockBlobReference(fileName);
             var json = blob.DownloadText();
             var obj = JsonConvert.DeserializeObject<T>(json);
             return obj;
         }
 
-        public CloudBlobContainer OpenBlobContainer(string containerName)
+        public void OpenContainer(string containerName)
         {
             var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
             var storageAccount = CloudStorageAccount.Parse(connectionString);
             var blobClient = storageAccount.CreateCloudBlobClient();
-            var container = blobClient.GetContainerReference(containerName);
-            return container;
+            _container = blobClient.GetContainerReference(containerName);
         }
 
-        public void SaveJsonToBlob(string data, CloudBlobContainer container, string fileName)
+        public void SaveJson(string data, string fileName)
         {
-            var blob = container.GetBlockBlobReference(fileName);
+            var blob = _container.GetBlockBlobReference(fileName);
             blob.DeleteIfExists();
             using (var stream = new MemoryStream(Encoding.Default.GetBytes(data), false))
             {
@@ -46,7 +47,7 @@ namespace InpaintService
             }
         }
 
-        public async Task SaveImageLabToBlob(ZsImage imageLab, CloudBlobContainer container, string fileName)
+        public async Task SaveImageLabAsync(ZsImage imageLab, string fileName)
         {
             var argbImage = imageLab
                 .Clone()
@@ -61,13 +62,14 @@ namespace InpaintService
 
                 // save the result back
                 outputStream.Position = 0;
-                var resultImageBlob = container.GetBlockBlobReference(fileName);
+                var resultImageBlob = _container.GetBlockBlobReference(fileName);
                 await resultImageBlob.UploadFromStreamAsync(outputStream);
             }
         }
 
-        public Task<ZsImage> ConvertBlobToArgbImage(CloudBlob imageBlob)
+        public Task<ZsImage> ReadArgbImageAsync(string imageName)
         {
+            var imageBlob = _container.GetBlockBlobReference(imageName);
             using (var imageData = new MemoryStream())
             {
                 var downloadTask = imageBlob.DownloadToStreamAsync(imageData);

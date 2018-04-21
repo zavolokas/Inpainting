@@ -14,10 +14,9 @@ namespace InpaintService.Activities
         public static async Task NnfBuildIteration([ActivityTrigger] NnfInputData input)
         {
             var storage = StorageFactory.Create();
-            var container = storage.OpenBlobContainer(input.Container);
+            storage.OpenContainer(input.Container);
 
-            var imageBlob = container.GetBlockBlobReference(input.Image);
-            var imageArgb = await storage.ConvertBlobToArgbImage(imageBlob);
+            var imageArgb = await storage.ReadArgbImageAsync(input.Image);
             var image = imageArgb
                 .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
                 .FromRgbToLab();
@@ -30,15 +29,15 @@ namespace InpaintService.Activities
                 ? ImagePatchDistance.Cie76
                 : ImagePatchDistance.Cie2000;
 
-            var nnfState = storage.ReadFromBlob<NnfState>(input.NnfName, container);
+            var nnfState = storage.Read<NnfState>(input.NnfName);
             var nnf = new Nnf(nnfState);
 
-            var mappingState = storage.ReadFromBlob<Area2DMapState>(input.Mapping, container);
+            var mappingState = storage.Read<Area2DMapState>(input.Mapping);
             var mapping = new Area2DMap(mappingState);
 
             if (input.ExcludeInpaintArea)
             {
-                var inpaintAreaState = storage.ReadFromBlob<Area2DState>(input.InpaintAreaName, container);
+                var inpaintAreaState = storage.Read<Area2DState>(input.InpaintAreaName);
                 var inpaintArea = Area2D.RestoreFrom(inpaintAreaState);
                 pixelsArea = imageArea.Substract(inpaintArea);
             }
@@ -52,7 +51,7 @@ namespace InpaintService.Activities
             nnfBuilder.RunBuildNnfIteration(nnf, image, image, direction, nnfSettings, calculator, mapping, pixelsArea);
 
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
-            storage.SaveJsonToBlob(nnfData, container, input.NnfName);
+            storage.SaveJson(nnfData, input.NnfName);
         }
     }
 }
