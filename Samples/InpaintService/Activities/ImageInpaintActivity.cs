@@ -13,26 +13,27 @@ namespace InpaintService.Activities
         [FunctionName(Name)]
         public static async Task<InpaintingResult> InpaintImage([ActivityTrigger] NnfInputData input)
         {
-            var container = BlobHelper.OpenBlobContainer(input.Container);
+            var storage = StorageFactory.Create();
+            var container = storage.OpenBlobContainer(input.Container);
 
             var imageBlob = container.GetBlockBlobReference(input.Image);
-            var image = (await BlobHelper.ConvertBlobToArgbImage(imageBlob))
+            var image = (await storage.ConvertBlobToArgbImage(imageBlob))
                 .FromArgbToRgb(new[] {0.0, 0.0, 0.0})
                 .FromRgbToLab();
 
-            var inpaintAreaState = BlobHelper.ReadFromBlob<Area2DState>(input.InpaintAreaName, container);
+            var inpaintAreaState = storage.ReadFromBlob<Area2DState>(input.InpaintAreaName, container);
             var inpaintArea = Area2D.RestoreFrom(inpaintAreaState);
 
-            var nnfState = BlobHelper.ReadFromBlob<NnfState>(input.NnfName, container);
+            var nnfState = storage.ReadFromBlob<NnfState>(input.NnfName, container);
             var nnf = new Nnf(nnfState);
             nnf.Normalize();
 
             // after we have the NNF - we calculate the values of the pixels in the inpainted area
             var inpaintResult = Inpaint(image, inpaintArea, nnf, input.K, input.Settings);
-            await BlobHelper.SaveImageLabToBlob(image, container, input.Image);
+            await storage.SaveImageLabToBlob(image, container, input.Image);
 
             // TODO: remove it later it is for debug purpose.
-            await BlobHelper.SaveImageLabToBlob(image, container, $"{input.LevelIndex}_{input.IterationIndex}.png");
+            await storage.SaveImageLabToBlob(image, container, $"{input.LevelIndex}_{input.IterationIndex}.png");
 
             return inpaintResult;
         }

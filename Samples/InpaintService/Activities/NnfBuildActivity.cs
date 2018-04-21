@@ -13,10 +13,11 @@ namespace InpaintService.Activities
         [FunctionName(Name)]
         public static async Task NnfBuildIteration([ActivityTrigger] NnfInputData input)
         {
-            var container = BlobHelper.OpenBlobContainer(input.Container);
+            var storage = StorageFactory.Create();
+            var container = storage.OpenBlobContainer(input.Container);
 
             var imageBlob = container.GetBlockBlobReference(input.Image);
-            var imageArgb = await BlobHelper.ConvertBlobToArgbImage(imageBlob);
+            var imageArgb = await storage.ConvertBlobToArgbImage(imageBlob);
             var image = imageArgb
                 .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
                 .FromRgbToLab();
@@ -29,15 +30,15 @@ namespace InpaintService.Activities
                 ? ImagePatchDistance.Cie76
                 : ImagePatchDistance.Cie2000;
 
-            var nnfState = BlobHelper.ReadFromBlob<NnfState>(input.NnfName, container);
+            var nnfState = storage.ReadFromBlob<NnfState>(input.NnfName, container);
             var nnf = new Nnf(nnfState);
 
-            var mappingState = BlobHelper.ReadFromBlob<Area2DMapState>(input.Mapping, container);
+            var mappingState = storage.ReadFromBlob<Area2DMapState>(input.Mapping, container);
             var mapping = new Area2DMap(mappingState);
 
             if (input.ExcludeInpaintArea)
             {
-                var inpaintAreaState = BlobHelper.ReadFromBlob<Area2DState>(input.InpaintAreaName, container);
+                var inpaintAreaState = storage.ReadFromBlob<Area2DState>(input.InpaintAreaName, container);
                 var inpaintArea = Area2D.RestoreFrom(inpaintAreaState);
                 pixelsArea = imageArea.Substract(inpaintArea);
             }
@@ -51,7 +52,7 @@ namespace InpaintService.Activities
             nnfBuilder.RunBuildNnfIteration(nnf, image, image, direction, nnfSettings, calculator, mapping, pixelsArea);
 
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
-            BlobHelper.SaveJsonToBlob(nnfData, container, input.NnfName);
+            storage.SaveJsonToBlob(nnfData, container, input.NnfName);
         }
     }
 }

@@ -12,9 +12,14 @@ using Zavolokas.Structures;
 
 namespace InpaintService
 {
-    public static class BlobHelper
+    public class BlobStorage : IStorage
     {
-        public static T ReadFromBlob<T>(string blobName, CloudBlobContainer container)
+        internal BlobStorage()
+        {
+            
+        }
+
+        public T ReadFromBlob<T>(string blobName, CloudBlobContainer container)
         {
             var blob = container.GetBlockBlobReference(blobName);
             var json = blob.DownloadText();
@@ -22,7 +27,7 @@ namespace InpaintService
             return obj;
         }
 
-        public static CloudBlobContainer OpenBlobContainer(string containerName)
+        public CloudBlobContainer OpenBlobContainer(string containerName)
         {
             var connectionString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Storage);
             var storageAccount = CloudStorageAccount.Parse(connectionString);
@@ -31,7 +36,7 @@ namespace InpaintService
             return container;
         }
 
-        public static void SaveJsonToBlob(string data, CloudBlobContainer container, string fileName)
+        public void SaveJsonToBlob(string data, CloudBlobContainer container, string fileName)
         {
             var blob = container.GetBlockBlobReference(fileName);
             blob.DeleteIfExists();
@@ -41,7 +46,7 @@ namespace InpaintService
             }
         }
 
-        public static async Task SaveImageLabToBlob(ZsImage imageLab, CloudBlobContainer container, string fileName)
+        public async Task SaveImageLabToBlob(ZsImage imageLab, CloudBlobContainer container, string fileName)
         {
             var argbImage = imageLab
                 .Clone()
@@ -61,7 +66,7 @@ namespace InpaintService
             }
         }
 
-        public static Task<ZsImage> ConvertBlobToArgbImage(CloudBlob imageBlob)
+        public Task<ZsImage> ConvertBlobToArgbImage(CloudBlob imageBlob)
         {
             using (var imageData = new MemoryStream())
             {

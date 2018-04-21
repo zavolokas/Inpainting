@@ -12,13 +12,14 @@ namespace InpaintService.Activities
         [FunctionName(Name)]
         public static async Task CreateNnf([ActivityTrigger] NnfInputData input)
         {
-            var container = BlobHelper.OpenBlobContainer(input.Container);
+            var storage = StorageFactory.Create();
+            var container = storage.OpenBlobContainer(input.Container);
             var imageBlob = container.GetBlockBlobReference(input.Image);
-            var imageArgb = await BlobHelper.ConvertBlobToArgbImage(imageBlob);
+            var imageArgb = await storage.ConvertBlobToArgbImage(imageBlob);
             var nnf = new Nnf(imageArgb.Width, imageArgb.Height, imageArgb.Width, imageArgb.Height, input.Settings.PatchSize);
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
 
-            BlobHelper.SaveJsonToBlob(nnfData, container, input.NnfName);
+            storage.SaveJsonToBlob(nnfData, container, input.NnfName);
         }
     }
 }

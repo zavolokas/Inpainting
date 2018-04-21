@@ -13,9 +13,10 @@ namespace InpaintService.Activities
         [FunctionName(Name)]
         public static async Task ScaleNnf([ActivityTrigger] NnfInputData input)
         {
-            var container = BlobHelper.OpenBlobContainer(input.Container);
+            var storage = StorageFactory.Create();
+            var container = storage.OpenBlobContainer(input.Container);
             var imageBlob = container.GetBlockBlobReference(input.Image);
-            var image = (await BlobHelper.ConvertBlobToArgbImage(imageBlob))
+            var image = (await storage.ConvertBlobToArgbImage(imageBlob))
                 .FromArgbToRgb(new[] { 0.0, 0.0, 0.0 })
                 .FromRgbToLab();
 
@@ -23,16 +24,16 @@ namespace InpaintService.Activities
                 ? ImagePatchDistance.Cie76
                 : ImagePatchDistance.Cie2000;
 
-            var mappingState = BlobHelper.ReadFromBlob<Area2DMapState>(input.Mapping, container);
+            var mappingState = storage.ReadFromBlob<Area2DMapState>(input.Mapping, container);
             var mapping = new Area2DMap(mappingState);
 
-            var nnfState = BlobHelper.ReadFromBlob<NnfState>($"nnf{input.LevelIndex - 1}.json", container);
+            var nnfState = storage.ReadFromBlob<NnfState>($"nnf{input.LevelIndex - 1}.json", container);
             var nnf = new Nnf(nnfState);
 
             nnf = nnf.CloneAndScale2XWithUpdate(image, image, input.Settings.PatchMatch, mapping, calculator);
 
             var nnfData = JsonConvert.SerializeObject(nnf.GetState());
-            BlobHelper.SaveJsonToBlob(nnfData, container, input.NnfName);
+            storage.SaveJsonToBlob(nnfData, container, input.NnfName);
         }
     }
 }

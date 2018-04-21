@@ -17,16 +17,17 @@ namespace InpaintService.Activities
         [FunctionName(Name)]
         public static async Task<CloudPyramid> GeneratePyramids([ActivityTrigger] InpaintRequest inpaintRequest)
         {
+            var storage = StorageFactory.Create();
             var levelDetector = new PyramidLevelsDetector();
             var pyramidBuilder = new PyramidBuilder();
             var settings = new InpaintSettings();
 
-            var container = BlobHelper.OpenBlobContainer(inpaintRequest.Container);
+            var container = storage.OpenBlobContainer(inpaintRequest.Container);
             var imageBlob = container.GetBlockBlobReference(inpaintRequest.Image);
             var removeMaskBlob = container.GetBlockBlobReference(inpaintRequest.RemoveMask);
 
-            var imageArgb = await BlobHelper.ConvertBlobToArgbImage(imageBlob);
-            var removeMaskArgb = await BlobHelper.ConvertBlobToArgbImage(removeMaskBlob);
+            var imageArgb = await storage.ConvertBlobToArgbImage(imageBlob);
+            var removeMaskArgb = await storage.ConvertBlobToArgbImage(removeMaskBlob);
 
             var levelsAmount = levelDetector.CalculateLevelsAmount(imageArgb, removeMaskArgb, settings.PatchSize);
             pyramidBuilder.Init(imageArgb, removeMaskArgb);
@@ -40,14 +41,14 @@ namespace InpaintService.Activities
             {
                 var image = pyramid.GetImage(levelIndex);
                 var fileName = $"{levelIndex}.png";
-                await BlobHelper.SaveImageLabToBlob(image, container, fileName);
+                await storage.SaveImageLabToBlob(image, container, fileName);
                 cloudPyramid.Levels[levelIndex].ImageName = fileName;
 
                 var inpaintArea = pyramid.GetInpaintArea(levelIndex);
                 var inpaintAreaState = inpaintArea.GetState();
                 var inpaintAreaFileName = $"ia{levelIndex}.json";
                 var inpaintAreaData = JsonConvert.SerializeObject(inpaintAreaState);
-                BlobHelper.SaveJsonToBlob(inpaintAreaData, container, inpaintAreaFileName);
+                storage.SaveJsonToBlob(inpaintAreaData, container, inpaintAreaFileName);
                 cloudPyramid.Levels[levelIndex].InpaintArea = inpaintAreaFileName;
 
                 cloudPyramid.Levels[levelIndex].Nnf = $"nnf{levelIndex}.json";
@@ -56,7 +57,7 @@ namespace InpaintService.Activities
                 var mappingFileName = $"map{levelIndex}.json";
                 var mapState = mapping.GetState();
                 var mappingData = JsonConvert.SerializeObject(mapState);
-                BlobHelper.SaveJsonToBlob(mappingData, container, mappingFileName);
+                storage.SaveJsonToBlob(mappingData, container, mappingFileName);
                 cloudPyramid.Levels[levelIndex].Mapping = mappingFileName;
 
                 var mappings = SplitMapping(mapping, inpaintRequest.Settings.MaxPointsAmountPerFunction, settings.PatchSize).ToArray();
@@ -68,7 +69,7 @@ namespace InpaintService.Activities
                     mappingFileName = $"map{levelIndex}_p{i}.json";
                     mapState = map.GetState();
                     mappingData = JsonConvert.SerializeObject(mapState);
-                    BlobHelper.SaveJsonToBlob(mappingData, container, mappingFileName);
+                    storage.SaveJsonToBlob(mappingData, container, mappingFileName);
                     cloudPyramid.Levels[levelIndex].SplittedMappings[i] = mappingFileName;
                     cloudPyramid.Levels[levelIndex].SplittedNnfs[i] = $"nnf{levelIndex}_p{i}.json";
                 }
