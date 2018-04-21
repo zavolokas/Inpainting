@@ -37,8 +37,9 @@ namespace InpaintService
             _container = blobClient.GetContainerReference(containerName);
         }
 
-        public void SaveJson(string data, string fileName)
+        public void Save<T>(T entity, string fileName)
         {
+            var data = JsonConvert.SerializeObject(entity);
             var blob = _container.GetBlockBlobReference(fileName);
             blob.DeleteIfExists();
             using (var stream = new MemoryStream(Encoding.Default.GetBytes(data), false))

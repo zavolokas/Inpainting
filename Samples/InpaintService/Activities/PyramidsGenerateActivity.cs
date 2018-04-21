@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
-using Newtonsoft.Json;
 using Zavolokas.ImageProcessing.Inpainting;
 using Zavolokas.Math.Combinatorics;
 using Zavolokas.Structures;
@@ -44,8 +43,7 @@ namespace InpaintService.Activities
                 var inpaintArea = pyramid.GetInpaintArea(levelIndex);
                 var inpaintAreaState = inpaintArea.GetState();
                 var inpaintAreaFileName = $"ia{levelIndex}.json";
-                var inpaintAreaData = JsonConvert.SerializeObject(inpaintAreaState);
-                storage.SaveJson(inpaintAreaData, inpaintAreaFileName);
+                storage.Save(inpaintAreaState, inpaintAreaFileName);
                 cloudPyramid.Levels[levelIndex].InpaintArea = inpaintAreaFileName;
 
                 cloudPyramid.Levels[levelIndex].Nnf = $"nnf{levelIndex}.json";
@@ -53,8 +51,7 @@ namespace InpaintService.Activities
                 var mapping = pyramid.GetMapping(levelIndex);
                 var mappingFileName = $"map{levelIndex}.json";
                 var mapState = mapping.GetState();
-                var mappingData = JsonConvert.SerializeObject(mapState);
-                storage.SaveJson(mappingData, mappingFileName);
+                storage.Save(mapState, mappingFileName);
                 cloudPyramid.Levels[levelIndex].Mapping = mappingFileName;
 
                 var mappings = SplitMapping(mapping, inpaintRequest.Settings.MaxPointsAmountPerFunction, settings.PatchSize).ToArray();
@@ -65,8 +62,7 @@ namespace InpaintService.Activities
                     var map = mappings[i];
                     mappingFileName = $"map{levelIndex}_p{i}.json";
                     mapState = map.GetState();
-                    mappingData = JsonConvert.SerializeObject(mapState);
-                    storage.SaveJson(mappingData, mappingFileName);
+                    storage.Save(mapState, mappingFileName);
                     cloudPyramid.Levels[levelIndex].SplittedMappings[i] = mappingFileName;
                     cloudPyramid.Levels[levelIndex].SplittedNnfs[i] = $"nnf{levelIndex}_p{i}.json";
                 }

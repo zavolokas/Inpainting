@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
-using Newtonsoft.Json;
 using Zavolokas.ImageProcessing.PatchMatch;
 using Zavolokas.Structures;
 
@@ -42,11 +41,11 @@ namespace InpaintService.Activities
 
                 }
 
-                var nnfData = JsonConvert.SerializeObject(destNnf.GetState());
-                storage.SaveJson(nnfData, input.nnf);
+                var nnfdata = destNnf.GetState();
+                storage.Save(nnfdata, input.nnf);
                 foreach (var nnf in input.nnfs)
                 {
-                    storage.SaveJson(nnfData, nnf);
+                    storage.Save(nnfdata, nnf);
                 }
             });
         }

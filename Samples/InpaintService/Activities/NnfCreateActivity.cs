@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
-using Newtonsoft.Json;
 using Zavolokas.Structures;
 
 namespace InpaintService.Activities
@@ -16,9 +15,8 @@ namespace InpaintService.Activities
             storage.OpenContainer(input.Container);
             var imageArgb = await storage.ReadArgbImageAsync(input.Image);
             var nnf = new Nnf(imageArgb.Width, imageArgb.Height, imageArgb.Width, imageArgb.Height, input.Settings.PatchSize);
-            var nnfData = JsonConvert.SerializeObject(nnf.GetState());
 
-            storage.SaveJson(nnfData, input.NnfName);
+            storage.Save(nnf.GetState(), input.NnfName);
         }
     }
 }
