@@ -62,6 +62,9 @@ namespace InpaintService
 
                 //await ctx.CallActivityAsync<InpaintingResult>(ImageInpaintActivity.Name, input);
                 #endregion
+
+                if (levelIndex == input.LevelsAmount - 1)
+                    break;
             }
         }
     }

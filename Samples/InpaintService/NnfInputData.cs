@@ -67,9 +67,11 @@ namespace InpaintService
         public string[] Mappings { get; set; }
         public int InpaintIterationIndex { get; set; }
 
+        public byte LevelsAmount { get; set; }
+
         public static NnfInputData From(string nnf, string container, string image, InpaintSettings settings,
             string mapping, string inpaintAreaName, bool isForward, byte levelIndex, double meanShiftK, string[] splittedNnfs,
-            string[] mappings)
+            string[] mappings, byte levelsAmount = 0)
         {
             return new NnfInputData
             {
@@ -84,7 +86,8 @@ namespace InpaintService
                 LevelIndex = levelIndex,
                 K = meanShiftK,
                 SplittedNnfNames = splittedNnfs,
-                Mappings = mappings
+                Mappings = mappings,
+                LevelsAmount = levelsAmount
             };
         }
     }

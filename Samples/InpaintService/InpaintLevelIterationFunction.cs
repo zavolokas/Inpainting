@@ -38,13 +38,7 @@ namespace InpaintService
                 await ctx.CallSubOrchestratorAsync(BuildNnfFunction.Name, input);
             }
 
-            var inpaintResult = await ctx.CallActivityAsync<InpaintingResult>(ImageInpaintActivity.Name, input);
-
-            //input.K = input.K > minK ? input.K - kStep : input.K;
-
-            // if the change is smaller then a treshold, we quit
-            //if (inpaintResult.ChangedPixelsPercent < changedPixelsPercentTreshold) break;
-            //if (levelIndex == pyramid.LevelsAmount - 1) break;
+            await ctx.CallActivityAsync<InpaintingResult>(ImageInpaintActivity.Name, input);
         }
     }
 }

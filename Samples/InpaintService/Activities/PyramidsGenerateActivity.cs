@@ -17,13 +17,17 @@ namespace InpaintService.Activities
         public static async Task<CloudPyramid> GeneratePyramids([ActivityTrigger] InpaintRequest inpaintRequest)
         {
             var storage = StorageFactory.Create();
+            var blobStorage = StorageFactory.CreateBlob();
+
             var levelDetector = new PyramidLevelsDetector();
             var pyramidBuilder = new PyramidBuilder();
             var settings = new InpaintSettings();
 
+            blobStorage.OpenContainer(inpaintRequest.Container);
             storage.OpenContainer(inpaintRequest.Container);
-            var imageArgb = await storage.ReadArgbImageAsync(inpaintRequest.Image);
-            var removeMaskArgb = await storage.ReadArgbImageAsync(inpaintRequest.RemoveMask);
+
+            var imageArgb = await blobStorage.ReadArgbImageAsync(inpaintRequest.Image);
+            var removeMaskArgb = await blobStorage.ReadArgbImageAsync(inpaintRequest.RemoveMask);
 
             var levelsAmount = levelDetector.CalculateLevelsAmount(imageArgb, removeMaskArgb, settings.PatchSize);
             pyramidBuilder.Init(imageArgb, removeMaskArgb);

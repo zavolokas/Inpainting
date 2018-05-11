@@ -13,6 +13,9 @@ namespace InpaintService.Activities
         [FunctionName(Name)]
         public static async Task<InpaintingResult> InpaintImage([ActivityTrigger] NnfInputData input)
         {
+            var blobStorage = StorageFactory.CreateBlob();
+            blobStorage.OpenContainer(input.Container);
+
             var storage = StorageFactory.Create();
             storage.OpenContainer(input.Container);
 
@@ -33,6 +36,7 @@ namespace InpaintService.Activities
 
             // TODO: remove it later it is for debug purpose.
             await storage.SaveImageLabAsync(image, $"{input.LevelIndex}_{input.IterationIndex}.png");
+            await blobStorage.SaveImageLabAsync(image, $"{input.LevelIndex}_{input.IterationIndex}.png");
 
             return inpaintResult;
         }

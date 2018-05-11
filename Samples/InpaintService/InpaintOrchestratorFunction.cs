@@ -24,8 +24,8 @@ namespace InpaintService
 
             var pyramid = await ctx.CallActivityAsync<CloudPyramid>(PyramidsGenerateActivity.Name, inpaintRequest);
 
-            settings.MaxInpaintIterations = 20;
-            //settings.PatchMatch.IterationsAmount = 2;
+            settings.MaxInpaintIterations = 10;
+            settings.PatchMatch.IterationsAmount = 3;
             //var kStep = settings.MeanShift.KDecreaseStep;
             //var minK = settings.MeanShift.MinK;
 
@@ -39,9 +39,8 @@ namespace InpaintService
                 var nnfs = pyramid.GetSplittedNnfs(levelIndex);
 
                 // TODO: this looks ugly
-                var input = NnfInputData.From(nnf, inpaintRequest.Container, imageName, settings, mapping, inpaintArea, false, levelIndex, settings.MeanShift.K, nnfs, mappings);
+                var input = NnfInputData.From(nnf, inpaintRequest.Container, imageName, settings, mapping, inpaintArea, false, levelIndex, settings.MeanShift.K, nnfs, mappings, pyramid.LevelsAmount);
                 await ctx.CallSubOrchestratorAsync(InpaintLevelFunction.Name, input);
-
             }
         }
     }
