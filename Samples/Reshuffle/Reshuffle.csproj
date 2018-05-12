@@ -34,12 +34,31 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Zavolokas.GdiExtensions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Zavolokas.GdiExtensions.1.0.0\lib\net462\Zavolokas.GdiExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Zavolokas.ImageProcessing.PatchMatch, Version=1.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Zavolokas.ImageProcessing.PatchMatch.1.0.7\lib\net462\Zavolokas.ImageProcessing.PatchMatch.dll</HintPath>
+    </Reference>
+    <Reference Include="Zavolokas.Math, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Zavolokas.Math.1.0.0\lib\net462\Zavolokas.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="Zavolokas.Structures, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Zavolokas.Structures.1.0.3\lib\net462\Zavolokas.Structures.dll</HintPath>
+    </Reference>
+    <Reference Include="Zavolokas.Structures.Gdi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Zavolokas.Structures.Gdi.1.0.0\lib\net462\Zavolokas.Structures.Gdi.dll</HintPath>
+    </Reference>
+    <Reference Include="Zavolokas.Utils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Zavolokas.Utils.1.0.0\lib\net452\Zavolokas.Utils.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -47,6 +66,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Inpainting\Inpainting.csproj">
+      <Project>{DE1E1F2A-3446-4267-8F76-518F29DE58A0}</Project>
+      <Name>Inpainting</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
