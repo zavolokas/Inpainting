@@ -50,7 +50,8 @@ The execution of the algorithm can be customized by adjusting the settings.
   - Cie2000 - more accurate
 
 
-### Donors
+## Donors
+We don't have any listed as yet! You can always donate here: [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/zavolokas)
 
 # Credits
 The implementation is based on following publications:
