@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Nancy;
+using Nancy.Hosting.Self;
+using Nancy.ErrorHandling;
 
 namespace InpaintAPI
 {
@@ -34,7 +37,6 @@ namespace InpaintAPI
         }
 
     }
-
     public class MyStatusHandler : IStatusCodeHandler
     {
         //TODO: return json error message?
@@ -48,4 +50,5 @@ namespace InpaintAPI
             return;
         }
     }
+
 }
