@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InpaintWinForms", "Samples\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InpaintService", "Samples\InpaintService\InpaintService.csproj", "{F5273722-7EBA-4399-8E49-19B7F832D75B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InpaintHTTP", "..\Inpainting_old\InpaintHTTP\InpaintHTTP.csproj", "{B753EE46-D174-4385-AF6D-5FC362C00749}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
