@@ -89,6 +89,9 @@ namespace InpaintHTTP
                 Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss.fffff") + $"] Error, {this.Request.Files.Count()} files found");
                 return "Err"; //TODO: return json object
             });
+
+            Get("/", _ => View["TestWebsite/index"]);
+
         }
 
         private static ZsImage ConvertToArgbImage(Bitmap imageBitmap)
