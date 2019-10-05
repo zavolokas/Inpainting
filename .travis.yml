@@ -4,5 +4,5 @@ install:
   - nuget restore Inpainting.sln
   - nuget install NUnit.Runners -Version 3.9.0 -OutputDirectory testrunner
 script:
-  - xbuild /p:Configuration=Debug Inpainting.sln
+  - msbuild /p:Configuration=Debug Inpainting.sln
   - mono ./testrunner/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe ./Inpainting.UnitTests/bin/Debug/Inpainting.UnitTests.dll
