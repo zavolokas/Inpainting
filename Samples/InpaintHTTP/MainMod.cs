@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Zavolokas.ImageProcessing.PatchMatch;
 using System.Drawing;
 using System.IO;
-using System.Threading;
 //using Zavolokas.Utils.Processes;
 
 //TODO: Cleanup the mess above & unused References
@@ -28,25 +27,23 @@ namespace InpaintHTTP
                     Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss.fffff") + $"] Error, {this.Request.Files.Count()} files found");
                     return "Err";
                 }
-                    
+                  
                 Bitmap BitmapImg;
-                Bitmap BitmapMask;
-
-                byte[] ByteImg = new byte[this.Request.Files.First().Value.Length];
-                this.Request.Files.First().Value.Read(ByteImg, 0, (int)this.Request.Files.First().Value.Length);
+                var imageFile = this.Request.Files.First();
+                byte[] ByteImg = new byte[imageFile.Value.Length];
+                imageFile.Value.Read(ByteImg, 0, (int)imageFile.Value.Length);
                 using (MemoryStream ms = new MemoryStream(ByteImg))
-                {
                     BitmapImg = new Bitmap(ms);
-                }
-                byte[] ByteMask = new byte[this.Request.Files.Last().Value.Length];
-                this.Request.Files.Last().Value.Read(ByteMask, 0, (int)this.Request.Files.Last().Value.Length);
-                using (MemoryStream ms = new MemoryStream(ByteMask))
-                {
-                    BitmapMask = new Bitmap(ms);
-                }
 
-                var imageArgb = ConvertToArgbImage((Bitmap)BitmapImg);
-                var markupArgb = ConvertToArgbImage((Bitmap)BitmapMask);
+                Bitmap BitmapMask;
+                var maskFile = this.Request.Files.Last();
+                byte[] ByteMask = new byte[maskFile.Value.Length];
+                maskFile.Value.Read(ByteMask, 0, (int)maskFile.Value.Length);
+                using (MemoryStream ms = new MemoryStream(ByteMask))
+                    BitmapMask = new Bitmap(ms);
+
+                var imageArgb = ConvertToArgbImage(BitmapImg);
+                var markupArgb = ConvertToArgbImage(BitmapMask);
 
                 var inpainter = new Inpainter();
                 var settings = new InpaintSettings
@@ -56,14 +53,14 @@ namespace InpaintHTTP
                     PatchDistanceCalculator = ImagePatchDistance.Cie76
                 };
 
-                Image LastImageResult = null;
+                Image finalResult = null;
 
                 inpainter.IterationFinished += (sender, eventArgs) =>
                 {
-                    var ImageResult = eventArgs.InpaintedLabImage
+                    Bitmap iterationResult = eventArgs.InpaintedLabImage
                         .FromLabToRgb()
                         .FromRgbToBitmap();
-                    LastImageResult = ImageResult;
+                    finalResult = iterationResult;
                     Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss.fffff") + "] call on inpainter.IterationFinished"); //Debugging
                 };
 
@@ -71,9 +68,9 @@ namespace InpaintHTTP
 
                 Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss.fffff") + "] Processing finished");
 
-                LastImageResult.Save(@"..\..\TESTAPP.PNG"); //Debugging
+                finalResult.Save(@"..\..\TESTAPP.PNG"); //Debugging
                     
-                Stream stream = new MemoryStream(LastImageResult.GetBytes());
+                Stream stream = new MemoryStream(finalResult.GetBytes());
                 return this.Response.FromStream(stream, "image/jpg");
             });
 
