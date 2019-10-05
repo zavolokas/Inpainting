@@ -5,7 +5,7 @@ using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting
 {
-    internal class Pyramid
+    public class Pyramid
     {
         private readonly ZsImage[] _images;
         private readonly Area2D[] _inpaintAreas;

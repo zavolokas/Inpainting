@@ -3,7 +3,7 @@ using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting
 {
-    internal class PyramidLevelsDetector
+    public class PyramidLevelsDetector
     {
         /// <summary>
         /// Calculates the levels amount.

@@ -1,6 +1,6 @@
 # Inpainting
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)]()
-[![Build Status](https://travis-ci.org/zavolokas/Inpainting.svg?branch=develop)](https://travis-ci.org/zavolokas/Inpainting)
+[![Build Status](https://travis-ci.org/zavolokas/Inpainting.svg?branch=master)](https://travis-ci.org/zavolokas/Inpainting)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/zavolokas)
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=CSharp+project+that+allows+to+remove+an+unwanted+object+from+photo+smartly+as+it+never+was+there&url=https://github.com/zavolokas/Inpainting&hashtags=contentawarefill,csharp,inpainting,imageprocessing,opensource)
 
@@ -50,7 +50,8 @@ The execution of the algorithm can be customized by adjusting the settings.
   - Cie2000 - more accurate
 
 
-### Donors
+## Donors
+We don't have any listed as yet! You can always donate here: [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/zavolokas)
 
 # Credits
 The implementation is based on following publications:

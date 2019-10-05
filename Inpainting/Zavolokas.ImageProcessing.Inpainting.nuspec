@@ -12,11 +12,13 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Handy math utils.</description>
     <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
-    <copyright>Copyright 2017</copyright>
+    <copyright>Copyright 2018</copyright>
     <tags>Tag1 Tag2</tags>
     <dependencies>
       <dependency id="Accord.MachineLearning" version="3.7.0" />
-      <dependency id="Zavolokas.ImageProcessing.PatchMatch" version="1.0.1" />
+	  <dependency id="Zavolokas.Structures" version="1.0.2" />
+	  <dependency id="Zavolokas.Math" version="1.0.0" />
+      <dependency id="Zavolokas.ImageProcessing.PatchMatch" version="1.0.7" />
     </dependencies>
   </metadata>
 </package>
