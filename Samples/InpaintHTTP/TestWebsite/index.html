@@ -2,6 +2,126 @@
 <html>
 <head>
 	<title>Inpainting API test</title>
+<<<<<<< HEAD
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<link class="jsbin" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
+	<script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	<script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
+	<style>
+		body{
+			width: 500px;
+			margin: auto;
+			background-color: #eee;
+		}
+		#content {
+			//background-color: hotpink;
+			margin: auto;
+			//background-image: url(img/logo_transp.png);
+			background-repeat: no-repeat;
+			background-position: 100% 0;
+			border-radius: 10px;
+			min-height: 500px;
+			padding: 15px;
+		}
+		#footer{
+			text-align: center;
+			position: absolute;
+			text-align: center;
+			bottom: 0;
+			text-decoration: none;
+		}
+		h1{
+			padding-left: 10px;
+		}
+		#preview
+		{
+			width: 500px;
+			height: 650px;
+			border-color: gray;
+			border-style: solid;
+			border-radius: 15px;
+			border-width: 3px;
+			margin-bottom: 5px;
+			text-align: center;
+			background-size: 500px 650px;
+			background-repeat: no-repeat;
+		}
+		#button
+		{
+		  background-color: yellow;
+		  border: none;
+		  color: black;
+		  padding: 15px 32px;
+		  text-align: center;
+		  font-weight: bold;
+		  text-decoration: none;
+		  display: inline-block;
+		  font-size: 16px;
+		}
+	</style>
+	<script>
+	function allowDrop(ev) {
+	  ev.preventDefault();
+	}
+
+	function drag(ev) {
+	  ev.dataTransfer.setData("text", ev.target.id);
+	}
+
+	function drop(ev) {
+	  ev.preventDefault();
+	  var data = ev.dataTransfer.getData("text");
+	  ev.target.appendChild(document.getElementById(data));
+	}
+	</script>
+</head>
+<body>
+	<div id="content">
+		<h1>Inpainting Example</h1>
+		<form enctype="multipart/form-data" action="http://localhost:8069/api/inpaint" method="POST">
+			<input type="hidden" name="MAX_FILE_SIZE" value="100000" />
+			<tt>Image: <input name="Image" type="file" onchange="UpdateImg(this, false);"/><br>
+			Mask:&nbsp; </tt><input name="Mask" type="file" onchange="UpdateImg(this, true);"/></tt>
+			
+			<br><br>
+			
+			<div id="preview">
+				<img id="mask" alt="Drag Image Here">
+			</div>
+			
+			<input type="submit" value="impaint" />
+		</form>
+		<div id="footer"><a href="https://ferib.dev/">Created by Ferib Hellscream</a></div>
+	</div>
+	<script>
+	function ProcessImage(){
+		$.post( "http://localhost:8069/api/inpaint", function( data ) {
+			('#preview').css("background-image", "url('" + data + "')");
+		});
+	}
+	function UpdateImg(input, isMask) {
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+
+			if(isMask){
+				reader.onload = function (e) {
+				$('#mask')
+					.attr('src', e.target.result)
+					.width(500)
+					.height(650);
+				};
+			}else{
+				reader.onload = function (e) {
+					$('#preview').css("background-image", "url('" + e.target.result + "')");
+				};
+			}
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
+	</script>
+</body>
+</html>
+=======
 </head>
 <body>
 	<center>
@@ -14,3 +134,4 @@
 		</form>
 	</center>
 </body>
+>>>>>>> 74f8481bbedaa05a4acdcab05caf9aa9833d0647
