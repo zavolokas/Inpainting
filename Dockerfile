@@ -1,14 +1,34 @@
+#
+# This file can be used to create a docker container that will automatically execute
+# the InpaintHTTP executeable on running it.
+#
+# To build this file you need to run docker under Windows in Windows container mode.
+#
+# Building: docker build -t <your tag> Dockerfile
+# Example:  docker build -t inpainter/inpainter Dockerfile
+#
+# Running: docker run -p 8069:8069 <your tag>
+# Example: docker run -p 8069:8069 inpainter/inpainter
+#
+
+# create a build container with .NET v4.7.2
 FROM mcr.microsoft.com/dotnet/framework/sdk:4.7.2-20190312-windowsservercore-ltsc2019 AS build
 WORKDIR /app
 
-# copy csproj and restore as distinct layers
+# copy the project directory to the build container and build the whole solution
 COPY . .
 RUN nuget restore Inpainting.sln
 RUN msbuild Inpainting.sln /p:Configuration=Release
 
-
+# finally create the runtime container
 FROM mcr.microsoft.com/dotnet/framework/sdk:4.7.2-20190312-windowsservercore-ltsc2019 AS runtime
+
+# expose port 8069 of the webserver
 EXPOSE 8069
+
+# copy the compiled release version of the InpaintHTTP sample to the app directory...
 WORKDIR /app
 COPY --from=build /app/Samples/InpaintHTTP/bin/Release/ ./
+
+# ...and set the entry point of the sample
 ENTRYPOINT ["InpaintHTTP.exe"]
