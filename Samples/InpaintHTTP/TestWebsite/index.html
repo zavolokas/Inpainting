@@ -7,7 +7,7 @@
 	<script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
 	<style>
 		body{
-			width: 500px;
+			width: 720px;
 			margin: auto;
 			background-color: #eee;
 		}
@@ -33,15 +33,15 @@
 		}
 		#preview
 		{
-			width: 500px;
-			height: 650px;
+			width: auto;
+			height: auto;
+			min-height: 500px;
 			border-color: gray;
 			border-style: solid;
 			border-radius: 15px;
 			border-width: 3px;
 			margin-bottom: 5px;
-			text-align: center;
-			background-size: 500px 650px;
+			//background-size: 500px 650px;
 			background-repeat: no-repeat;
 		}
 		#button
@@ -69,31 +69,28 @@
 		  from {filter: blur(8px);}
 		  to {filter: blur(14px);}
 		}
+		@keyframes mask-fade {
+		  from {opacity: 1;}
+		  to {opacity: 0;}
+		}
 		.mask-finished
+		{
+			animation-name: mask-fade;
+			animation-duration: 4s;
+			animation-iteration-count: 1;
+			animation-timing-function: ease-in-out;
+			animation-fill-mode: forwards;
+		}
+		.btn-hide
 		{
 			visibility: hidden;
 		}
 	</style>
-	<script>
-	function allowDrop(ev) {
-	  ev.preventDefault();
-	}
-
-	function drag(ev) {
-	  ev.dataTransfer.setData("text", ev.target.id);
-	}
-
-	function drop(ev) {
-	  ev.preventDefault();
-	  var data = ev.dataTransfer.getData("text");
-	  ev.target.appendChild(document.getElementById(data));
-	}
-	</script>
 </head>
 <body>
 	<div id="content">
 		<h1>Inpainting Example</h1>
-		<form enctype="multipart/form-data" action="http://localhost:8069/api/inpaint" method="POST">
+		<form enctype="multipart/form-data" method="POST">
 			<input type="hidden" name="MAX_FILE_SIZE" value="100000" />
 			<tt>Image: <input name="Image" id="Image" type="file" onchange="UpdateImg(this, false);"/><br>
 			Mask:&nbsp; </tt><input name="Mask" id="Mask" type="file" onchange="UpdateImg(this, true);"/></tt>
@@ -101,42 +98,43 @@
 			<br><br>
 			
 			<div id="preview">
-				<img id="mask" class="mask-finished" alt="Drag Image Here">
+				<img id="mask" class="mask-finished" alt="">
 			</div>
+			
+			<div id="footer"><a href="https://github.com/zavolokas/Inpainting">GitHub</a></div>
 			
 			<input type="button" id="inpaint" value="inpaint" />
 		</form>
-		<div id="footer"><a href="https://ferib.dev/">Created by Ferib Hellscream</a></div>
 	</div>
 	<script>
 function ProcessImage(){
-	$.post( "http://localhost:8069/api/inpaint", function( data ) {
+	$.post("/api/inpaint", function( data ) {
 		('#preview').css("background-image", "url('" + data + "')");
 	});
 }
 function UpdateImg(input, isMask) {
 	if (input.files && input.files[0]) {
 		var reader = new FileReader();
-
-		if(isMask){
 			reader.onload = function (e) {
-			$('#mask')
-				.attr('src', e.target.result)
-				.width(500)
-				.height(650)
-				.removeClass("mask-finished");
+				if(isMask)
+				{
+					$('#mask')
+						//.width(500)
+						//.height(650)
+						.removeClass("mask-finished")
+						.attr('src', e.target.result);
+				}
+				else
+				{
+					$('#preview')
+						.css("background-image", "url('" + e.target.result + "')");
+				}
 			};
-		}else{
-			reader.onload = function (e) {
-				$('#preview')
-					.css("background-image", "url('" + e.target.result + "')");
-			};
-		}
 		reader.readAsDataURL(input.files[0]);
 	}
 }
 
-$(document).ready(function(){
+$(function(){
 
     $("#inpaint").click(function(){
 
@@ -150,27 +148,27 @@ $(document).ready(function(){
 		
 		console.log("Started Request");
 		$('#preview').addClass("img-busy");
+		$("#inpaint").addClass("btn-hide");
 		
         $.ajax({
-            url: 'http://localhost:8069/api/inpaint',
+            url: '/api/inpaint', //NOTE: you will get a JS header error when the url is NOT from the same hoste!
             type: 'post',
             data: fd,
             contentType: false,
             processData: false,
-            success: function(response){
-                if(response != 0){
-					console.log("Done");
-					console.log(response);
-                    $("#mask")
-						.attr("src","/")
-						.addClass("mask-finished");
-					$('#preview')
-						.css("background-image", "url('" + response + "')")
-						.removeClass("img-busy");
-                }else{
+            success: function(data){
+				console.log("Done");
+				console.log(data);
+				$("#inpaint").removeClass("btn-hide");
+				$("#mask")
+					.addClass("mask-finished");
+				$('#preview')
+					.css("background-image", "url('" + data + "')")
+					.removeClass("img-busy");
+			},
+			error: function(data){
 					console.log("Unknown Error on Processing Image");
-                }
-            },
+			}
         });
     });
 });
