@@ -12,9 +12,7 @@
 			background-color: #eee;
 		}
 		#content {
-			//background-color: hotpink;
 			margin: auto;
-			//background-image: url(img/logo_transp.png);
 			background-repeat: no-repeat;
 			background-position: 100% 0;
 			border-radius: 10px;
@@ -26,6 +24,7 @@
 			position: absolute;
 			text-align: center;
 			bottom: 0;
+			left:0;
 			text-decoration: none;
 		}
 		h1{
@@ -41,7 +40,7 @@
 			border-radius: 15px;
 			border-width: 3px;
 			margin-bottom: 5px;
-			//background-size: 500px 650px;
+			background-size: contain;
 			background-repeat: no-repeat;
 		}
 		#button
@@ -56,6 +55,11 @@
 		  display: inline-block;
 		  font-size: 16px;
 		}
+		#mask {
+		    object-fit: contain;
+			width: 100%;
+			height: 100%;
+		}
 		.img-busy
 		{
 			filter: blur(8px);
@@ -66,12 +70,12 @@
 			animation-timing-function: ease-in-out
 		}
 		@keyframes scanning {
-		  from {filter: blur(8px);}
-		  to {filter: blur(14px);}
+			from {filter: blur(8px);}
+			to {filter: blur(14px);}
 		}
 		@keyframes mask-fade {
-		  from {opacity: 1;}
-		  to {opacity: 0;}
+			from {opacity: 1;}
+			to {opacity: 0;}
 		}
 		.mask-finished
 		{
@@ -119,8 +123,6 @@ function UpdateImg(input, isMask) {
 				if(isMask)
 				{
 					$('#mask')
-						//.width(500)
-						//.height(650)
 						.removeClass("mask-finished")
 						.attr('src', e.target.result);
 				}
@@ -163,7 +165,7 @@ $(function(){
 				$("#mask")
 					.addClass("mask-finished");
 				$('#preview')
-					.css("background-image", "url('" + data + "')")
+					.css("background-image", "url('data:image/png;base64," + data + "')")
 					.removeClass("img-busy");
 			},
 			error: function(data){
@@ -173,6 +175,15 @@ $(function(){
     });
 });
 
+function _arrayBufferToBase64( buffer ) {
+    var binary = '';
+    var bytes = new Uint8Array( buffer );
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+    return window.btoa( binary );
+}
 </script>
 </body>
 </html>
