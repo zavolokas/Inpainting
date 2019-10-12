@@ -49,7 +49,7 @@ namespace InpaintHTTP
                 var settings = new InpaintSettings
                 {
                     //MaxInpaintIterations = 15,
-                    MaxInpaintIterations = 3, //less iterations for debugging
+                    MaxInpaintIterations = 5, //less iterations for debugging
                     PatchDistanceCalculator = ImagePatchDistance.Cie76
                 };
 

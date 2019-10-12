@@ -66,7 +66,7 @@
 			animation-name: scanning;
 			animation-duration: 1s;
 			animation-direction: alternate;
-			animation-iteration-count: 50;
+			animation-iteration-count: infinite;
 			animation-timing-function: ease-in-out
 		}
 		@keyframes scanning {
@@ -102,7 +102,7 @@
 			<br><br>
 			
 			<div id="preview">
-				<img id="mask" class="mask-finished" alt="">
+				<img id="mask" class="mask-finished">
 			</div>
 			
 			<div id="footer"><a href="https://github.com/zavolokas/Inpainting">GitHub</a></div>
@@ -130,6 +130,20 @@ function UpdateImg(input, isMask) {
 				{
 					$('#preview')
 						.css("background-image", "url('" + e.target.result + "')");
+					
+					//initialize Canvas
+					var canvasWidth = 720; //obtain image details to set correct dimensions??
+					var canvasHeight = 500;
+					var canvasDiv = document.getElementById('preview');
+					canvas = document.createElement('canvas');
+					canvas.setAttribute('width', canvasWidth);
+					canvas.setAttribute('height', canvasHeight);
+					canvas.setAttribute('id', 'canvas');
+					canvasDiv.appendChild(canvas);
+					if(typeof G_vmlCanvasManager != 'undefined') {
+						canvas = G_vmlCanvasManager.initElement(canvas);
+					}
+					context = canvas.getContext("2d");
 				}
 			};
 		reader.readAsDataURL(input.files[0]);
@@ -144,7 +158,17 @@ $(function(){
 
         var imagefile = $('#Image')[0].files[0];
 		var maskfile = $('#Mask')[0].files[0];
-	
+		
+		if(maskfile == null) //NOTE: Canvas will only be used when no mask is selected! (might also use canvas if mask is invisible?)
+		{
+			var CanvasDataUrl = canvas.toDataURL();
+			maskfile = convertBase64ToFile(CanvasDataUrl);
+			$('#mask')
+				.removeClass("mask-finished")
+				.attr('src', CanvasDataUrl);
+			context.clearRect(0, 0, context.canvas.width, context.canvas.height); //Clear canvas
+		}
+
         fd.append('file',imagefile);
         fd.append('file',maskfile);
 		
@@ -160,7 +184,6 @@ $(function(){
             processData: false,
             success: function(data){
 				console.log("Done");
-				console.log(data);
 				$("#inpaint").removeClass("btn-hide");
 				$("#mask")
 					.addClass("mask-finished");
@@ -185,5 +208,72 @@ function _arrayBufferToBase64( buffer ) {
     return window.btoa( binary );
 }
 </script>
+
+<!-- experimental, drawing mask -->
+<script>	
+	$('#preview').mousedown(function(e){
+	  var mouseX = e.pageX - this.offsetLeft;
+	  var mouseY = e.pageY - this.offsetTop;
+			
+	  paint = true;
+	  addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+	  redraw();
+	});
+	$('#preview').mousemove(function(e){
+	  if(paint){
+		addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
+		redraw();
+	  }
+	});
+	$('#preview').mouseup(function(e){
+	  paint = false;
+	});
+	$('#preview').mouseleave(function(e){
+	  paint = false;
+	});
+	var clickX = new Array();
+	var clickY = new Array();
+	var clickDrag = new Array();
+	var paint;
+
+	function addClick(x, y, dragging)
+	{
+	  clickX.push(x);
+	  clickY.push(y);
+	  clickDrag.push(dragging);
+	}
+	function redraw(){
+	  context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+	  
+	  context.strokeStyle = "#df4b26";
+	  context.lineJoin = "round";
+	  context.lineWidth = 20;
+				
+	  for(var i=0; i < clickX.length; i++) {		
+		context.beginPath();
+		if(clickDrag[i] && i){
+		  context.moveTo(clickX[i-1], clickY[i-1]);
+		 }else{
+		   context.moveTo(clickX[i]-1, clickY[i]);
+		 }
+		 context.lineTo(clickX[i], clickY[i]);
+		 context.closePath();
+		 context.stroke();
+	  }
+	}
+	const convertBase64ToFile = function (image) {
+	  const byteString = atob(image.split(',')[1]);
+	  const ab = new ArrayBuffer(byteString.length);
+	  const ia = new Uint8Array(ab);
+	  for (let i = 0; i < byteString.length; i += 1) {
+		ia[i] = byteString.charCodeAt(i);
+	  }
+	  const newBlob = new Blob([ab], {
+		type: 'image/png',
+	  });
+	  return newBlob;
+	};
+</script>
+
 </body>
 </html>
