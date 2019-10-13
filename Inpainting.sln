@@ -15,6 +15,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InpaintWinForms", "Samples\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InpaintHTTP", "Samples\InpaintHTTP\InpaintHTTP.csproj", "{B753EE46-D174-4385-AF6D-5FC362C00749}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8346CA1E-6B09-481C-A54D-BF12073E9375}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+		Dockerfile.Windows = Dockerfile.Windows
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,7 +34,6 @@ Global
 		{7A507467-F683-44BD-A27C-615ED8BE18FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7A507467-F683-44BD-A27C-615ED8BE18FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A507467-F683-44BD-A27C-615ED8BE18FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7A507467-F683-44BD-A27C-615ED8BE18FF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
