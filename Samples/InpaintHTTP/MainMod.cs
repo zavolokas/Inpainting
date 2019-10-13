@@ -49,7 +49,7 @@ namespace InpaintHTTP
                 var settings = new InpaintSettings
                 {
                     //MaxInpaintIterations = 15,
-                    MaxInpaintIterations = 3, //less iterations for debugging
+                    MaxInpaintIterations = 5, //less iterations for debugging
                     PatchDistanceCalculator = ImagePatchDistance.Cie76
                 };
 
@@ -71,7 +71,8 @@ namespace InpaintHTTP
                 finalResult.Save(@"..\..\TESTAPP.PNG"); //Debugging
                     
                 Stream stream = new MemoryStream(finalResult.GetBytes());
-                return this.Response.FromStream(stream, "image/jpg");
+                //return this.Response.FromStream(stream, "image/png");
+                return Convert.ToBase64String(finalResult.GetBytes()); //this does the job ¯\_(ツ)_/¯
             });
 
             Get("/", _ => View["TestWebsite/index"]);

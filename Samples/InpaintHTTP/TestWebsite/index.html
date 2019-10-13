@@ -3,19 +3,16 @@
 <head>
 	<title>Inpainting API test</title>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
-	<link class="jsbin" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
 	<script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 	<script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
 	<style>
 		body{
-			width: 500px;
+			width: 720px;
 			margin: auto;
 			background-color: #eee;
 		}
 		#content {
-			//background-color: hotpink;
 			margin: auto;
-			//background-image: url(img/logo_transp.png);
 			background-repeat: no-repeat;
 			background-position: 100% 0;
 			border-radius: 10px;
@@ -27,6 +24,7 @@
 			position: absolute;
 			text-align: center;
 			bottom: 0;
+			left:0;
 			text-decoration: none;
 		}
 		h1{
@@ -34,15 +32,15 @@
 		}
 		#preview
 		{
-			width: 500px;
-			height: 650px;
+			width: auto;
+			height: auto;
+			min-height: 500px;
 			border-color: gray;
 			border-style: solid;
 			border-radius: 15px;
 			border-width: 3px;
 			margin-bottom: 5px;
-			text-align: center;
-			background-size: 500px 650px;
+			background-size: contain;
 			background-repeat: no-repeat;
 		}
 		#button
@@ -57,66 +55,227 @@
 		  display: inline-block;
 		  font-size: 16px;
 		}
+		#mask {
+		    object-fit: contain;
+			width: 100%;
+			height: 100%;
+		}
+		.img-busy
+		{
+			filter: blur(8px);
+			animation-name: scanning;
+			animation-duration: 1s;
+			animation-direction: alternate;
+			animation-iteration-count: infinite;
+			animation-timing-function: ease-in-out
+		}
+		@keyframes scanning {
+			from {filter: blur(8px);}
+			to {filter: blur(14px);}
+		}
+		@keyframes mask-fade {
+			from {opacity: 1;}
+			to {opacity: 0;}
+		}
+		.mask-finished
+		{
+			animation-name: mask-fade;
+			animation-duration: 4s;
+			animation-iteration-count: 1;
+			animation-timing-function: ease-in-out;
+			animation-fill-mode: forwards;
+		}
+		.btn-hide
+		{
+			visibility: hidden;
+		}
 	</style>
-	<script>
-	function allowDrop(ev) {
-	  ev.preventDefault();
-	}
-
-	function drag(ev) {
-	  ev.dataTransfer.setData("text", ev.target.id);
-	}
-
-	function drop(ev) {
-	  ev.preventDefault();
-	  var data = ev.dataTransfer.getData("text");
-	  ev.target.appendChild(document.getElementById(data));
-	}
-	</script>
 </head>
 <body>
 	<div id="content">
 		<h1>Inpainting Example</h1>
-		<form enctype="multipart/form-data" action="http://localhost:8069/api/inpaint" method="POST">
+		<form enctype="multipart/form-data" method="POST">
 			<input type="hidden" name="MAX_FILE_SIZE" value="100000" />
-			<tt>Image: <input name="Image" type="file" onchange="UpdateImg(this, false);"/><br>
-			Mask:&nbsp; </tt><input name="Mask" type="file" onchange="UpdateImg(this, true);"/></tt>
+			<tt>Image: <input name="Image" id="Image" type="file" onchange="UpdateImg(this, false);"/><br>
+			Mask:&nbsp; </tt><input name="Mask" id="Mask" type="file" onchange="UpdateImg(this, true);"/></tt>
 			
 			<br><br>
 			
 			<div id="preview">
-				<img id="mask" alt="Drag Image Here">
+				<img id="mask" class="mask-finished">
 			</div>
 			
-			<input type="submit" value="inpaint" />
+			<div id="footer"><a href="https://github.com/zavolokas/Inpainting">GitHub</a></div>
+			
+			<input type="button" id="inpaint" value="inpaint" />
 		</form>
-		<div id="footer"><a href="https://ferib.dev/">Created by Ferib Hellscream</a></div>
 	</div>
 	<script>
-	function ProcessImage(){
-		$.post( "http://localhost:8069/api/inpaint", function( data ) {
-			('#preview').css("background-image", "url('" + data + "')");
-		});
+function ProcessImage(){
+	$.post("/api/inpaint", function( data ) {
+		('#preview').css("background-image", "url('" + data + "')");
+	});
+}
+function UpdateImg(input, isMask) {
+	if (input.files && input.files[0]) {
+		var reader = new FileReader();
+			reader.onload = function (e) {
+				if(isMask)
+				{
+					$('#mask')
+						.removeClass("mask-finished")
+						.attr('src', e.target.result);
+				}
+				else
+				{
+					$('#preview')
+						.css("background-image", "url('" + e.target.result + "')");
+					
+					//initialize Canvas
+					/*
+					var canvasWidth = 720; //obtain image details to set correct dimensions??
+					var canvasHeight = 500;
+					var canvasDiv = document.getElementById('preview');
+					canvas = document.createElement('canvas');
+					canvas.setAttribute('width', canvasWidth);
+					canvas.setAttribute('height', canvasHeight);
+					canvas.setAttribute('id', 'canvas');
+					canvasDiv.appendChild(canvas);
+					if(typeof G_vmlCanvasManager != 'undefined') {
+						canvas = G_vmlCanvasManager.initElement(canvas);
+					}
+					context = canvas.getContext("2d");
+					*/
+				}
+			};
+		reader.readAsDataURL(input.files[0]);
 	}
-	function UpdateImg(input, isMask) {
-		if (input.files && input.files[0]) {
-			var reader = new FileReader();
+}
 
-			if(isMask){
-				reader.onload = function (e) {
-				$('#mask')
-					.attr('src', e.target.result)
-					.width(500)
-					.height(650);
-				};
-			}else{
-				reader.onload = function (e) {
-					$('#preview').css("background-image", "url('" + e.target.result + "')");
-				};
-			}
-			reader.readAsDataURL(input.files[0]);
+$(function(){
+
+    $("#inpaint").click(function(){
+
+        var fd = new FormData();
+
+        var imagefile = $('#Image')[0].files[0];
+		var maskfile = $('#Mask')[0].files[0];
+		
+		if(maskfile == null) //NOTE: Canvas will only be used when no mask is selected! (might also use canvas if mask is invisible?)
+		{
+			var CanvasDataUrl = canvas.toDataURL();
+			maskfile = convertBase64ToFile(CanvasDataUrl);
+			$('#mask')
+				.removeClass("mask-finished")
+				.attr('src', CanvasDataUrl);
+			context.clearRect(0, 0, context.canvas.width, context.canvas.height); //Clear canvas
 		}
+
+        fd.append('file',imagefile);
+        fd.append('file',maskfile);
+		
+		console.log("Started Request");
+		$('#preview').addClass("img-busy");
+		$("#inpaint").addClass("btn-hide");
+		
+        $.ajax({
+            url: '/api/inpaint', //NOTE: you will get a JS header error when the url is NOT from the same hoste!
+            type: 'post',
+            data: fd,
+            contentType: false,
+            processData: false,
+            success: function(data){
+				console.log("Done");
+				$("#inpaint").removeClass("btn-hide");
+				$("#mask")
+					.addClass("mask-finished");
+				$('#preview')
+					.css("background-image", "url('data:image/png;base64," + data + "')")
+					.removeClass("img-busy");
+			},
+			error: function(data){
+					console.log("Unknown Error on Processing Image");
+			}
+        });
+    });
+});
+
+function _arrayBufferToBase64( buffer ) {
+    var binary = '';
+    var bytes = new Uint8Array( buffer );
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+    return window.btoa( binary );
+}
+</script>
+
+<!-- experimental, drawing mask -- >
+<script>	
+	$('#preview').mousedown(function(e){
+	  var mouseX = e.pageX - this.offsetLeft;
+	  var mouseY = e.pageY - this.offsetTop;
+			
+	  paint = true;
+	  addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+	  redraw();
+	});
+	$('#preview').mousemove(function(e){
+	  if(paint){
+		addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
+		redraw();
+	  }
+	});
+	$('#preview').mouseup(function(e){
+	  paint = false;
+	});
+	$('#preview').mouseleave(function(e){
+	  paint = false;
+	});
+	var clickX = new Array();
+	var clickY = new Array();
+	var clickDrag = new Array();
+	var paint;
+
+	function addClick(x, y, dragging)
+	{
+	  clickX.push(x);
+	  clickY.push(y);
+	  clickDrag.push(dragging);
 	}
-	</script>
+	function redraw(){
+	  context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+	  
+	  context.strokeStyle = "#df4b26";
+	  context.lineJoin = "round";
+	  context.lineWidth = 20;
+				
+	  for(var i=0; i < clickX.length; i++) {		
+		context.beginPath();
+		if(clickDrag[i] && i){
+		  context.moveTo(clickX[i-1], clickY[i-1]);
+		 }else{
+		   context.moveTo(clickX[i]-1, clickY[i]);
+		 }
+		 context.lineTo(clickX[i], clickY[i]);
+		 context.closePath();
+		 context.stroke();
+	  }
+	}
+	const convertBase64ToFile = function (image) {
+	  const byteString = atob(image.split(',')[1]);
+	  const ab = new ArrayBuffer(byteString.length);
+	  const ia = new Uint8Array(ab);
+	  for (let i = 0; i < byteString.length; i += 1) {
+		ia[i] = byteString.charCodeAt(i);
+	  }
+	  const newBlob = new Blob([ab], {
+		type: 'image/png',
+	  });
+	  return newBlob;
+	};
+</script>
+-->
 </body>
 </html>
