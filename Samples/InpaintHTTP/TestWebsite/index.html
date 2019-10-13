@@ -3,13 +3,20 @@
 <head>
 	<title>Inpainting API test</title>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
-	<script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-	<script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
+	<script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	<script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Long+Cang&display=swap" rel="stylesheet">
 	<style>
 		body{
 			width: 720px;
 			margin: auto;
 			background-color: #eee;
+		}
+		#inpaint {
+			border: 1px solid #AD3B1F;
+			background-color: #df4b26;
+			color: #eee;
+			padding: 5px 10px;
 		}
 		#content {
 			margin: auto;
@@ -28,7 +35,9 @@
 			text-decoration: none;
 		}
 		h1{
-			padding-left: 10px;
+			font-size: 43px;
+			font-family: 'Long Cang', cursive;
+			margin-bottom: 5px;
 		}
 		#preview
 		{
@@ -37,28 +46,45 @@
 			min-height: 500px;
 			border-color: gray;
 			border-style: solid;
-			border-radius: 15px;
-			border-width: 3px;
+			border-radius: 3px;
+			border-width: 1px;
 			margin-bottom: 5px;
 			background-size: contain;
 			background-repeat: no-repeat;
+			color: #dedede;
+			background-color: #333;
 		}
-		#button
+		#preview-note
 		{
-		  background-color: yellow;
-		  border: none;
-		  color: black;
-		  padding: 15px 32px;
-		  text-align: center;
-		  font-weight: bold;
-		  text-decoration: none;
-		  display: inline-block;
-		  font-size: 16px;
+			position: absolute;
+			text-align: center;
+			font-size: 60px;
+			font-family: 'Long Cang', cursive;
+			margin: 120px;
 		}
-		#mask {
+		#mask
+		{
 		    object-fit: contain;
-			width: 100%;
-			height: 100%;
+			position: absolute;
+		}
+		#canvas
+		{
+			position: absolute;
+		}
+		
+		#polaroid-frame
+		{
+			border-color: grey;
+			border-style: solid;
+			border-radius: 6px;
+			border-width: 3px;
+			background-color: #fefefe;
+			padding: 15px;
+		}
+		#polaroid-footer
+		{
+			height: 75px;
+			background-color: #fff;
 		}
 		.img-busy
 		{
@@ -89,33 +115,38 @@
 		{
 			visibility: hidden;
 		}
+		#Image
+		{
+			position: absolute;
+			min-width: 650px;
+			min-height: 500px;
+			outline: none;
+			opacity: 0;
+		}
 	</style>
 </head>
 <body>
 	<div id="content">
-		<h1>Inpainting Example</h1>
-		<form enctype="multipart/form-data" method="POST">
-			<input type="hidden" name="MAX_FILE_SIZE" value="100000" />
-			<tt>Image: <input name="Image" id="Image" type="file" onchange="UpdateImg(this, false);"/><br>
-			Mask:&nbsp; </tt><input name="Mask" id="Mask" type="file" onchange="UpdateImg(this, true);"/></tt>
-			
-			<br><br>
-			
-			<div id="preview">
-				<img id="mask" class="mask-finished">
-			</div>
-			
-			<div id="footer"><a href="https://github.com/zavolokas/Inpainting">GitHub</a></div>
-			
-			<input type="button" id="inpaint" value="inpaint" />
-		</form>
+		<h1>Inpainting - Remove Unwanted Objects</h1>	
+		<div id="polaroid-frame">
+			<form enctype="multipart/form-data" method="POST">
+				<input type="hidden" name="MAX_FILE_SIZE" value="100000" />
+				<input name="Image" id="Image" type="file" onchange="UpdateImg(this, false);"/>
+				<div id="preview">
+					<div id="preview-note">
+						Drag Image Here<br><span style="font-size: 30px">(or click background)</span>
+					</div>
+					<img id="mask" class="mask-finished">
+				</div>
+				<div id="polaroid-footer">
+					<input type="button" id="inpaint" value="inpaint" /><br>
+					Mask File: <input name="Mask" id="Mask" type="file" onchange="UpdateImg(this, true);"/><br>
+					<a href="https://github.com/zavolokas/Inpainting" style="text-align: right;">Find this Project on Github</a>
+				</div>
+			</form>
+		</div>
 	</div>
 	<script>
-function ProcessImage(){
-	$.post("/api/inpaint", function( data ) {
-		('#preview').css("background-image", "url('" + data + "')");
-	});
-}
 function UpdateImg(input, isMask) {
 	if (input.files && input.files[0]) {
 		var reader = new FileReader();
@@ -128,32 +159,47 @@ function UpdateImg(input, isMask) {
 				}
 				else
 				{
+					var img = new Image();
+					img.onload = function(){
+						//initialize Canvas
+						var canvasWidth = this.width; 
+						var canvasHeight = this.height;
+						var canvasDiv = document.getElementById('preview'); //use jQuery or nah??
+						canvas = document.createElement('canvas'); //TODO: clean up this mess
+						canvas.setAttribute('width', canvasWidth);
+						canvas.setAttribute('height', canvasHeight);
+						canvas.setAttribute('id', 'canvas');
+						canvasDiv.appendChild(canvas);
+						if(typeof G_vmlCanvasManager != 'undefined') {
+							canvas = G_vmlCanvasManager.initElement(canvas);
+						}
+						context = canvas.getContext("2d");
+						context.clearRect(0, 0, context.canvas.width, context.canvas.height); //Clear canvas
+						//set preview
+						$('#preview')
+							.css("background-size",canvasWidth + "px " + canvasHeight + "px")
+							.css("width", canvasWidth + "px")
+							.css("height", canvasHeight + "px")
+							.css("min-height", canvasHeight + "px");
+						$('#polaroid-frame')
+							.css("width", canvasWidth + "px")
+							.css("height", canvasHeight + 75 + "px"); //TODO: replace this with a global methode? instead of changing all divs individual
+					};
+					img.src = e.target.result;
+					
 					$('#preview')
 						.css("background-image", "url('" + e.target.result + "')");
-					
-					//initialize Canvas
-					/*
-					var canvasWidth = 720; //obtain image details to set correct dimensions??
-					var canvasHeight = 500;
-					var canvasDiv = document.getElementById('preview');
-					canvas = document.createElement('canvas');
-					canvas.setAttribute('width', canvasWidth);
-					canvas.setAttribute('height', canvasHeight);
-					canvas.setAttribute('id', 'canvas');
-					canvasDiv.appendChild(canvas);
-					if(typeof G_vmlCanvasManager != 'undefined') {
-						canvas = G_vmlCanvasManager.initElement(canvas);
-					}
-					context = canvas.getContext("2d");
-					*/
+
 				}
 			};
 		reader.readAsDataURL(input.files[0]);
 	}
 }
-
 $(function(){
-
+	$('#Image').change(function () {
+		$('#preview-note').text("");
+		$('#Image').css("visibility","hidden");
+	});
     $("#inpaint").click(function(){
 
         var fd = new FormData();
@@ -168,6 +214,11 @@ $(function(){
 			$('#mask')
 				.removeClass("mask-finished")
 				.attr('src', CanvasDataUrl);
+			
+			//Clear all previus marks & canvas itself
+			clickX.length = 0;
+			clickY.length = 0;
+			context = canvas.getContext("2d");
 			context.clearRect(0, 0, context.canvas.width, context.canvas.height); //Clear canvas
 		}
 
@@ -185,6 +236,9 @@ $(function(){
             contentType: false,
             processData: false,
             success: function(data){
+			
+				//TODO: Set returned image as new "uploaded" image, so the image doesn't reset after submitting again
+	
 				console.log("Done");
 				$("#inpaint").removeClass("btn-hide");
 				$("#mask")
@@ -198,21 +252,12 @@ $(function(){
 			}
         });
     });
-});
+	
+	var clickX = new Array();
+	var clickY = new Array();
+	var clickDrag = new Array();
+	var paint;
 
-function _arrayBufferToBase64( buffer ) {
-    var binary = '';
-    var bytes = new Uint8Array( buffer );
-    var len = bytes.byteLength;
-    for (var i = 0; i < len; i++) {
-        binary += String.fromCharCode( bytes[ i ] );
-    }
-    return window.btoa( binary );
-}
-</script>
-
-<!-- experimental, drawing mask -- >
-<script>	
 	$('#preview').mousedown(function(e){
 	  var mouseX = e.pageX - this.offsetLeft;
 	  var mouseY = e.pageY - this.offsetTop;
@@ -233,11 +278,6 @@ function _arrayBufferToBase64( buffer ) {
 	$('#preview').mouseleave(function(e){
 	  paint = false;
 	});
-	var clickX = new Array();
-	var clickY = new Array();
-	var clickDrag = new Array();
-	var paint;
-
 	function addClick(x, y, dragging)
 	{
 	  clickX.push(x);
@@ -263,19 +303,30 @@ function _arrayBufferToBase64( buffer ) {
 		 context.stroke();
 	  }
 	}
+});
+	//snippets from Stackoverflow
 	const convertBase64ToFile = function (image) {
-	  const byteString = atob(image.split(',')[1]);
-	  const ab = new ArrayBuffer(byteString.length);
-	  const ia = new Uint8Array(ab);
-	  for (let i = 0; i < byteString.length; i += 1) {
+		const byteString = atob(image.split(',')[1]);
+		const ab = new ArrayBuffer(byteString.length);
+		const ia = new Uint8Array(ab);
+		for (let i = 0; i < byteString.length; i += 1) {
 		ia[i] = byteString.charCodeAt(i);
-	  }
-	  const newBlob = new Blob([ab], {
+		}
+		const newBlob = new Blob([ab], {
 		type: 'image/png',
-	  });
-	  return newBlob;
+		});
+		return newBlob;
 	};
+	function _arrayBufferToBase64( buffer ) {
+		var binary = '';
+		var bytes = new Uint8Array( buffer );
+		var len = bytes.byteLength;
+		for (var i = 0; i < len; i++) {
+			binary += String.fromCharCode( bytes[ i ] );
+		}
+		return window.btoa( binary );
+	}
 </script>
--->
+
 </body>
 </html>
