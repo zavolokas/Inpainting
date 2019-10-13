@@ -132,6 +132,7 @@ function UpdateImg(input, isMask) {
 						.css("background-image", "url('" + e.target.result + "')");
 					
 					//initialize Canvas
+					/*
 					var canvasWidth = 720; //obtain image details to set correct dimensions??
 					var canvasHeight = 500;
 					var canvasDiv = document.getElementById('preview');
@@ -144,6 +145,7 @@ function UpdateImg(input, isMask) {
 						canvas = G_vmlCanvasManager.initElement(canvas);
 					}
 					context = canvas.getContext("2d");
+					*/
 				}
 			};
 		reader.readAsDataURL(input.files[0]);
@@ -209,7 +211,7 @@ function _arrayBufferToBase64( buffer ) {
 }
 </script>
 
-<!-- experimental, drawing mask -->
+<!-- experimental, drawing mask -- >
 <script>	
 	$('#preview').mousedown(function(e){
 	  var mouseX = e.pageX - this.offsetLeft;
@@ -274,6 +276,6 @@ function _arrayBufferToBase64( buffer ) {
 	  return newBlob;
 	};
 </script>
-
+-->
 </body>
 </html>
