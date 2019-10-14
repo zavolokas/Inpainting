@@ -235,6 +235,7 @@ $(function(){
             data: fd,
             contentType: false,
             processData: false,
+			timeout: 120000, 		// 120 second timeout to avoid connection from breaking while server is still loading
             success: function(data){
 			
 				//TODO: Set returned image as new "uploaded" image, so the image doesn't reset after submitting again
@@ -248,7 +249,14 @@ $(function(){
 					.removeClass("img-busy");
 			},
 			error: function(data){
-					console.log("Unknown Error on Processing Image");
+				//Restore stuff so user knows there is something wrong
+				console.log("Unknown Error on Processing Image");
+				console.log("Done");
+				$("#inpaint").removeClass("btn-hide");
+				$("#mask")
+					.addClass("mask-finished");
+				$('#preview')
+					.removeClass("img-busy");
 			}
         });
     });
