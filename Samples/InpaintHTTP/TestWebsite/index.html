@@ -235,7 +235,7 @@ $(function(){
             data: fd,
             contentType: false,
             processData: false,
-			timeout: 120000, 		// 120 second timeout to avoid connection from breaking while server is still loading
+			timeout: 300000, 		// 300 second timeout to avoid connection from breaking while server is still loading
             success: function(data){
 			
 				//TODO: Set returned image as new "uploaded" image, so the image doesn't reset after submitting again
