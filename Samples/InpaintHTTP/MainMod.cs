@@ -68,7 +68,7 @@ namespace InpaintHTTP
 
                 Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss.fffff") + "] Processing finished");
 
-                finalResult.Save(@"..\..\TESTAPP.PNG"); //Debugging
+                finalResult.Save($"TESTAPP_{DateTime.Now.ToString("HH:mm:ss.fffff")}.PNG"); //Debugging
                     
                 Stream stream = new MemoryStream(finalResult.GetBytes());
                 //return this.Response.FromStream(stream, "image/png");
