@@ -1,0 +1,15 @@
+pipeline:
+  publish:
+    image: plugins/docker
+    username: 
+      from_secret: DOCKER_USERNAME  # we will inject your dockerhub username using drone secrets. 
+    password: 
+      from_secret: DOCKER_PASSWORD # we will inject your dockerhub password using drone secrets.
+    repo: zavolokas/inpainter # refer to dockerhub documentation for repo naming conventions
+    tag: 
+      - latest
+      - 1.1.${DRONE_BUILD_NUMBER}
+    file: Dockerfile
+    when:
+      branch: [ master ]
+      event: [ push ] # step only triggers on push events
