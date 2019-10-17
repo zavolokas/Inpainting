@@ -17,7 +17,7 @@ Content aware fill is used to fill in unwanted or missing areas of photographs. 
 ## Try in Docker
 
 ```bash
-docker run -d -p 8069:8069 zavolokas/inpainter:1.1
+docker run -d -p 8069:8069 zavolokas/inpainter:latest
 ```
 
 Navigate to http://localhost:8069
