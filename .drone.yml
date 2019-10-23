@@ -14,21 +14,39 @@ pipeline:
   #     branch: [ master ]
   #     event: [ push ] # step only triggers on push events
 
-  deploy:
-    image: joshdvir/drone-ecs-deploy
-    cluster: 
-      from_secret: CLUSTER_NAME
-    service: 
-      from_secret: SERVICE_NAME
-    image_name: docker.io/zavolokas/inpainter:latest
-    aws_region: eu-west-1 # defaults to us-east-1
-    # timeout: "600" # defaults to 300 / 5 min
-    # max: "200" # defaults to 200
-    # min: "100" # defaults to 100
-    aws_access_key_id:
+  # deploy:
+  #   image: joshdvir/drone-ecs-deploy
+  #   cluster: 
+  #     from_secret: CLUSTER_NAME
+  #   service: 
+  #     from_secret: SERVICE_NAME
+  #   image_name: docker.io/zavolokas/inpainter:latest
+  #   aws_region: eu-west-1 # defaults to us-east-1
+  #   # timeout: "600" # defaults to 300 / 5 min
+  #   # max: "200" # defaults to 200
+  #   # min: "100" # defaults to 100
+  #   aws_access_key_id:
+  #     from_secret: AWS_ACCESS_KEY
+  #   aws_secret_access_key:
+  #     from_secret: AWS_ACCESS_SECRET
+  #   when:
+  #     branch: [deploy-to-ecs]
+  #     event: [push]
+  
+  ecs:
+    image: peloton/drone-ecs
+    access_key:
       from_secret: AWS_ACCESS_KEY
-    aws_secret_access_key:
+    secret_key:
       from_secret: AWS_ACCESS_SECRET
-    when:
-      branch: [deploy-to-ecs]
-      event: [push]
+    service:
+      from_secret: SERVICE_NAME
+    region: eu-west-1
+    family: inpainter-srv
+    image_name: docker.io/zavolokas/inpainter:latest
+    image_tag: latest
+    # environment_variables:
+    #   - DATABASE_URI=database uri
+    port_mappings:
+      - 80 8069
+    memory: 512
