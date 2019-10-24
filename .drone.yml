@@ -34,7 +34,7 @@ pipeline:
   #     event: [push]
   
   ecs:
-    image: peloton/drone-ecs:1.0.3-linux-arm64
+    image: peloton/drone-ecs
     access_key:
       from_secret: AWS_ACCESS_KEY
     secret_key:
@@ -58,9 +58,9 @@ pipeline:
       - 8069 8069
     memory: 512
     service_network_subnets: 
-      - subnet-0630646c18a8195f9
-      - subnet-01e97e8a9cefb1fed
-    # service_network_security_groups:
-      # - 
+      - subnet-09f5232b6c1ece9f3
+      - subnet-04137fc2a0c19e0c7
+    service_network_security_groups:
+      - sg-051621bfc71107403
 
   
