@@ -14,53 +14,53 @@ pipeline:
   #     branch: [ master ]
   #     event: [ push ] # step only triggers on push events
 
-  # deploy:
-  #   image: joshdvir/drone-ecs-deploy
-  #   cluster: 
-  #     from_secret: CLUSTER_NAME
-  #   service: 
-  #     from_secret: SERVICE_NAME
-  #   image_name: docker.io/zavolokas/inpainter:latest
-  #   aws_region: eu-west-1 # defaults to us-east-1
-  #   # timeout: "600" # defaults to 300 / 5 min
-  #   # max: "200" # defaults to 200
-  #   # min: "100" # defaults to 100
-  #   aws_access_key_id:
-  #     from_secret: AWS_ACCESS_KEY_ID
-  #   aws_secret_access_key:
-  #     from_secret: AWS_SECRET_ACCESS_KEY
-  #   when:
-  #     branch: [deploy-to-ecs]
-  #     event: [push]
-  
-  ecs:
-    image: peloton/drone-ecs
-    access_key:
-      from_secret: AWS_ACCESS_KEY_ID
-    secret_key:
-      from_secret: AWS_SECRET_ACCESS_KEY
-    service:
+  deploy:
+    image: joshdvir/drone-ecs-deploy
+    cluster: 
+      from_secret: CLUSTER_NAME
+    service: 
       from_secret: SERVICE_NAME
-    cluster:
-      from_secret: CLUSTER_NAME  
-    region: eu-west-2
-    family: inpainter-srv
     image_name: docker.io/zavolokas/inpainter:latest
-    image_tag: latest
-    # environment_variables:
-    #   - DATABASE_URI=database uri
-    deployment_configuration: 50 200
-    task_network_mode: "awsvpc"
-    compatibilities: [ "FARGATE" ]
-    task_cpu: 1024 # cpu & memory are related - https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
-    task_memory: 2048
-    port_mappings:
-      - 8069 8069
-    memory: 512
-    service_network_subnets: 
-      - subnet-09f5232b6c1ece9f3
-      - subnet-04137fc2a0c19e0c7
-    service_network_security_groups:
-      - sg-051621bfc71107403
+    aws_region: eu-west-2 # defaults to us-east-1
+    # timeout: "600" # defaults to 300 / 5 min
+    # max: "200" # defaults to 200
+    # min: "100" # defaults to 100
+    aws_access_key_id:
+      from_secret: AWS_ACCESS_KEY_ID
+    aws_secret_access_key:
+      from_secret: AWS_SECRET_ACCESS_KEY
+    when:
+      branch: [deploy-to-ecs]
+      event: [push]
+  
+  # ecs:
+  #   image: peloton/drone-ecs
+  #   access_key:
+  #     from_secret: AWS_ACCESS_KEY_ID
+  #   secret_key:
+  #     from_secret: AWS_SECRET_ACCESS_KEY
+  #   service:
+  #     from_secret: SERVICE_NAME
+  #   cluster:
+  #     from_secret: CLUSTER_NAME  
+  #   region: eu-west-2
+  #   family: inpainter-srv
+  #   image_name: docker.io/zavolokas/inpainter:latest
+  #   image_tag: latest
+  #   # environment_variables:
+  #   #   - DATABASE_URI=database uri
+  #   deployment_configuration: 50 200
+  #   task_network_mode: "awsvpc"
+  #   compatibilities: [ "FARGATE" ]
+  #   task_cpu: 1024 # cpu & memory are related - https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
+  #   task_memory: 2048
+  #   port_mappings:
+  #     - 8069 8069
+  #   memory: 512
+  #   service_network_subnets: 
+  #     - subnet-09f5232b6c1ece9f3
+  #     - subnet-04137fc2a0c19e0c7
+  #   service_network_security_groups:
+  #     - sg-051621bfc71107403
 
   
