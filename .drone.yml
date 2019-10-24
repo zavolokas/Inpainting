@@ -36,9 +36,9 @@ pipeline:
   ecs:
     image: peloton/drone-ecs
     access_key:
-      from_secret: AWS_ACCESS_KEY
+      from_secret: AWS_ACCESS_KEY_ID
     secret_key:
-      from_secret: AWS_ACCESS_SECRET
+      from_secret: AWS_SECRET_ACCESS_KEY
     service:
       from_secret: SERVICE_NAME
     cluster:
