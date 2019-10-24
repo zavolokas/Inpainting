@@ -50,6 +50,7 @@ pipeline:
     # environment_variables:
     #   - DATABASE_URI=database uri
     deployment_configuration: 50 200
+    task_network_mode: "awsvpc"
     compatibilities: [ "FARGATE" ]
     port_mappings:
       - 80 8069
