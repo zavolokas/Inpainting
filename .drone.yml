@@ -52,7 +52,7 @@ pipeline:
     deployment_configuration: 50 200
     task_network_mode: "awsvpc"
     compatibilities: [ "FARGATE" ]
-    task_cpu: 1024 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
+    task_cpu: 1024 # cpu & memory are related - https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
     task_memory: 2048
     port_mappings:
       - 8069 8069
