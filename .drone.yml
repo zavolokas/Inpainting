@@ -47,6 +47,9 @@ pipeline:
     image_tag: latest
     # environment_variables:
     #   - DATABASE_URI=database uri
+    deployment_configuration: 50 200
     port_mappings:
       - 80 8069
     memory: 512
+
+  
