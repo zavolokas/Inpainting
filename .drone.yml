@@ -57,5 +57,10 @@ pipeline:
     port_mappings:
       - 8069 8069
     memory: 512
+    service_network_subnets: 
+      - subnet-0630646c18a8195f9
+      - subnet-01e97e8a9cefb1fed
+    # service_network_security_groups:
+    #   - 
 
   
