@@ -53,7 +53,7 @@ pipeline:
     task_network_mode: "awsvpc"
     compatibilities: [ "FARGATE" ]
     port_mappings:
-      - 80 8069
+      - 8069 8069
     memory: 512
 
   
