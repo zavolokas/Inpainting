@@ -41,8 +41,8 @@ pipeline:
       from_secret: AWS_SECRET_ACCESS_KEY
     service:
       from_secret: SERVICE_NAME
-    cluster:
-      from_secret: CLUSTER_NAME  
+    # cluster:
+    #   from_secret: CLUSTER_NAME  
     region: eu-west-1
     family: inpainter-srv
     image_name: docker.io/zavolokas/inpainter:latest
