@@ -84,5 +84,7 @@ pipeline:
     service_network_subnets:
       - subnet-05e00e9941c9480a3
       - subnet-03a6d1406f9c5226a
+    port_mappings:
+      - 8069 8069
 
   
