@@ -79,5 +79,8 @@ pipeline:
     docker_image: docker.io/zavolokas/inpainter
     image_tag: latest
     deployment_configuration: 50 200
+    service_network_subnets: 
+      - subnet-05e00e9941c9480a3
+      - subnet-03a6d1406f9c5226a
 
   
