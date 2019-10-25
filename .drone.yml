@@ -74,7 +74,7 @@ pipeline:
       from_secret: SERVICE_NAME
     cluster:
       from_secret: CLUSTER_NAME  
-    region: us-west-2
+    region: eu-west-2
     family: inpainter
     docker_image: docker.io/zavolokas/inpainter
     image_tag: latest
