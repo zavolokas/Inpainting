@@ -78,5 +78,6 @@ pipeline:
     family: inpainter
     docker_image: docker.io/zavolokas/inpainter
     image_tag: latest
+    deployment_configuration: 50 200
 
   
