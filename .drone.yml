@@ -80,6 +80,7 @@ pipeline:
     image_tag: latest
     deployment_configuration: 50 200
     task_network_mode: "awsvpc"
+    container_name: inpainter
     service_network_subnets:
       - subnet-05e00e9941c9480a3
       - subnet-03a6d1406f9c5226a
