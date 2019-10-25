@@ -44,7 +44,7 @@ pipeline:
     cluster:
       from_secret: CLUSTER_NAME  
     region: eu-west-2
-    family: inpainter-srv
+    family: inpainter
     docker_image: docker.io/zavolokas/inpainter
     image_tag: latest
     # environment_variables:
@@ -58,9 +58,9 @@ pipeline:
       - 8069 8069
     memory: 512
     service_network_subnets: 
-      - subnet-09f5232b6c1ece9f3
-      - subnet-04137fc2a0c19e0c7
-    service_network_security_groups:
-      - sg-051621bfc71107403
+      - subnet-0bb01e08153c4393c
+      - subnet-05eee5854fd39361d
+    # service_network_security_groups:
+    #   - sg-051621bfc71107403
 
   
