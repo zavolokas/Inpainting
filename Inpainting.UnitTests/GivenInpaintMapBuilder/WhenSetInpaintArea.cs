@@ -1,6 +1,6 @@
 ﻿using System;
+using Moq;
 using NUnit.Framework;
-using Rhino.Mocks;
 using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
@@ -11,10 +11,8 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
         [Test]
         public void Shoud_Throw_MapIsNotInitializedException_When_Called_Before_InitMap_Call()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.Stub<IArea2DMapBuilder>();
-
-            mocks.ReplayAll();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -25,10 +23,8 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
         [Test]
         public void Should_Throw_ArgumentNullException_When_InpaintArea_IsNull()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.Stub<IArea2DMapBuilder>();
-
-            mocks.ReplayAll();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -40,10 +36,8 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
         [Test]
         public void Should_Throw_EmptyAreaException_When_InpaintArea_IsEmpty()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.Stub<IArea2DMapBuilder>();
-
-            mocks.ReplayAll();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -55,10 +49,8 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
         [Test]
         public void Should_Delegate_SetInpaintArea_To_MapBuilder()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.Stub<IArea2DMapBuilder>();
-
-            mocks.ReplayAll();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -66,16 +58,14 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             inpaintMapBuilder.InitNewMap(Area2D.Create(0, 0, 15, 15));
             inpaintMapBuilder.SetInpaintArea(inpaintArea);
 
-            mapBuilder.AssertWasCalled(b => b.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x=>x.IsSameAs(inpaintArea))));
+            mock.Verify(b => b.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(inpaintArea))));
         }
 
         [Test]
         public void InpaintArea_Should_Be_Adjusted_To_Source_Area()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.Stub<IArea2DMapBuilder>();
-
-            mocks.ReplayAll();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -86,7 +76,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 
             var realArea = imageArea.Intersect(inpaintArea);
 
-            mapBuilder.AssertWasCalled(b => b.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x => x.IsSameAs(realArea))));
+            mock.Verify(b => b.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(realArea))));
         }
     }
 }
