@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Zavolokas.ImageProcessing.PatchMatch;
 using System.Drawing;
 using System.IO;
-//using Zavolokas.Utils.Processes;
 
 //TODO: Cleanup the mess above & unused References
 
@@ -67,15 +66,21 @@ namespace InpaintHTTP
                 await Task.Factory.StartNew(() => inpainter.Inpaint(imageArgb, markupArgb, settings));
 
                 Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss.fffff") + "] Processing finished");
-
+#if DEBUG
                 finalResult.Save(@"..\..\TESTAPP.PNG"); //Debugging
-                    
+#endif
+
                 Stream stream = new MemoryStream(finalResult.GetBytes());
                 //return this.Response.FromStream(stream, "image/png");
                 return Convert.ToBase64String(finalResult.GetBytes()); //this does the job ¯\_(ツ)_/¯
             });
 
-            Get("/", _ => View["TestWebsite/index"]);
+            Get(@"/", _ =>
+            {
+                return Response.AsFile("TestWebsite/index.html", "text/html");
+            });
+
+            Get("/ping", _ => "Ping is successful");
 
         }
 
