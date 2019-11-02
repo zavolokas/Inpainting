@@ -1,7 +1,6 @@
 #
 # This file can be used to create a docker container that will automatically execute
-# the InpaintHTTP executeable on running it. This container is based on the Mono build
-# system and should run under Windows and Linux.
+# the InpaintHTTP executeable on running it. 
 #
 # Building: docker build -t <your tag> Dockerfile
 # Example:  docker build -t inpainter/inpainter Dockerfile
@@ -10,24 +9,20 @@
 # Example: docker run -p 8069:8069 inpainter/inpainter
 #
 
-# create a build container with the latest Mono version
-FROM mono AS build
+# create a build container with the .NET Core
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build-env
 WORKDIR /app
 
-# copy the project directory to the build container and build the whole solution
-COPY . .
-RUN nuget restore Inpainting.sln
-RUN xbuild Inpainting.sln /p:Configuration=Release
+# copy some projects and build and publish the app
+COPY Inpainting/ ./
+COPY Samples/ ./
+RUN dotnet restore Inpainting
+RUN dotnet build Inpainting
+RUN dotnet restore Samples/InpaintHTTP
+RUN dotnet publish Samples/InpaintHTTP -c Release -o output
 
-# finally create the runtime container
-FROM mono AS runtime
-
-# expose port 8069 of the webserver
-EXPOSE 8069
-
-# copy the compiled release version of the InpaintHTTP sample to the app directory...
+# Runtime image
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2
 WORKDIR /app
-COPY --from=build /app/Samples/InpaintHTTP/bin/Release/ ./
-
-# ...and set the entry point of the sample
-CMD [ "mono",  "./InpaintHTTP.exe" ]
+COPY --from=build-env /app/output .
+ENTRYPOINT ["dotnet", "InpaintHTTP.exe"]
