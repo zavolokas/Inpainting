@@ -4,6 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Zavolokas.ImageProcessing.Inpainting</AssemblyName>
     <RootNamespace>Zavolokas.ImageProcessing.Inpainting</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.0.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -13,8 +15,8 @@
   <ItemGroup>
     <PackageReference Include="Accord" Version="3.8.0" />
     <PackageReference Include="Accord.MachineLearning" Version="3.8.0" />
-    <PackageReference Include="Zavolokas.ImageProcessing.PatchMatch" Version="1.0.7" />
-    <PackageReference Include="Zavolokas.Structures" Version="1.0.3" />
+    <PackageReference Include="Zavolokas.ImageProcessing.PatchMatch" Version="2.0.0.3" />
+    <PackageReference Include="Zavolokas.Structures" Version="2.0.0.13" />
   </ItemGroup>
 
 </Project>
