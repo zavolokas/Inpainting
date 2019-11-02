@@ -1,31 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
 using Shouldly;
 using Zavolokas.Structures;
+using Xunit;
 
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
 {
-    [TestFixture]
     public class WhenInit
     {
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentNullException_When_Image_Is_Null()
         {
             // Arrange
             var markupImage = CreateImage(128, 128);
             var pyramidBuilder = new PyramidBuilder();
-            
-            Action act = () => pyramidBuilder.Init(null, markupImage); 
+
+            Action act = () => pyramidBuilder.Init(null, markupImage);
 
             // Act & Assert
             act.ShouldThrow<ArgumentNullException>();
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentNullException_When_Markup_Is_Null()
         {
             // Arrange
@@ -37,11 +33,12 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<ArgumentNullException>();
         }
 
-        [TestCase(1)]
-        [TestCase(2)]
-        [TestCase(3)]
-        [TestCase(5)]
-        [TestCase(6)]
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        [InlineData(5)]
+        [InlineData(6)]
         public void Should_Throw_WrongImageFormatException_When_Not_Argb_Image(byte componenetsAmount)
         {
             // Arrange
@@ -54,16 +51,17 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<WrongImageFormatException>();
         }
 
-        [TestCase(1)]
-        [TestCase(2)]
-        [TestCase(3)]
-        [TestCase(5)]
-        [TestCase(6)]
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        [InlineData(5)]
+        [InlineData(6)]
         public void Should_Throw_WrongImageFormatException_When_Not_Argb_Markup(byte componenetsAmount)
         {
             // Arrange
             var image = CreateImage(128, 128, 4);
-            var markupImage = CreateImage(128, 128, componenetsAmount); 
+            var markupImage = CreateImage(128, 128, componenetsAmount);
             var pyramidBuilder = new PyramidBuilder();
             Action act = () => pyramidBuilder.Init(image, markupImage);
 
@@ -71,7 +69,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<WrongImageFormatException>();
         }
 
-        [Test]
+        [Fact]
         public void Should_Not_Throw_When_Images_Correct()
         {
             // Arrange

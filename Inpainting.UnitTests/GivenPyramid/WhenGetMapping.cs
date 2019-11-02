@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 using Shouldly;
+using Xunit;
 using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
 {
-    [TestFixture]
     public class WhenGetMapping : PyramidTestBase
     {
-        [TestCase(1, 1)]
-        [TestCase(1, 2)]
-        [TestCase(2, 2)]
-        [TestCase(2, 5)]
-        [TestCase(3, 3)]
-        [TestCase(3, 4)]
-        [TestCase(4, 4)]
+        [Theory]
+        [InlineData(1, 1)]
+        [InlineData(1, 2)]
+        [InlineData(2, 2)]
+        [InlineData(2, 5)]
+        [InlineData(3, 3)]
+        [InlineData(3, 4)]
+        [InlineData(4, 4)]
         public void Should_Throw_ArgumentOutOfRangeException_When_LevelIndex_Greater_Then_LevelsAmount(byte levelsAmount, byte levelIndex)
         {
             // Arrange
@@ -28,14 +28,15 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
 
-        [TestCase(3, 1)]
-        [TestCase(3, 0)]
-        [TestCase(3, 2)]
-        [TestCase(2, 0)]
-        [TestCase(2, 1)]
-        [TestCase(1, 0)]
-        [TestCase(5, 4)]
-        [TestCase(5, 3)]
+        [Theory]
+        [InlineData(3, 1)]
+        [InlineData(3, 0)]
+        [InlineData(3, 2)]
+        [InlineData(2, 0)]
+        [InlineData(2, 1)]
+        [InlineData(1, 0)]
+        [InlineData(5, 4)]
+        [InlineData(5, 3)]
         public void Should_Return_Mapping_From_Proper_Level(byte levelsAmount, byte levelIndex)
         {
             // Arrange

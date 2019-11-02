@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Linq;
-using NUnit.Framework;
 using Shouldly;
+using Xunit;
 using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
 {
-    [TestFixture]
     public class WhenCalculateLevelsAmount
     {
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentNullException_When_Image_IsNull()
         {
             // Arrange
@@ -24,7 +23,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
             act.ShouldThrow<ArgumentNullException>();
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentNullException_When_RemoveMarkup_IsNull()
         {
             // Arrange
@@ -39,8 +38,9 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
             act.ShouldThrow<ArgumentNullException>();
         }
 
-        [TestCase(0)]
-        [TestCase(1)]
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
         public void Should_Throw_ArgumentOutOfRangeException_When_PatchSize_Less_Than_2(byte patchSize)
         {
             // Arrange
@@ -54,10 +54,11 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
 
-        [TestCase(200, 150, 200, 150)]
-        [TestCase(230, 130, 230, 130)]
-        [TestCase(200, 130, 201, 130)]
-        [TestCase(200, 130, 200, 131)]
+        [Theory]
+        [InlineData(200, 150, 200, 150)]
+        [InlineData(230, 130, 230, 130)]
+        [InlineData(200, 130, 201, 130)]
+        [InlineData(200, 130, 200, 131)]
         public void Should_Throw_AreaRemovedException_When_Markup_Covers_Image(int iw, int ih, int mw, int mh)
         {
             // Arrange
@@ -72,7 +73,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
             act.ShouldThrow<AreaRemovedException>();
         }
 
-        [Test]
+        [Fact]
         public void Should_Return_1_When_Markup_IsEmpty()
         {
             // Arrange
@@ -88,7 +89,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenLevelsDetector
             levelsAmount.ShouldBe((byte)1);
         }
 
-        [Test]
+        [Fact]
         public void Should_Return_1_When_Markup_IsEmpty_Inside_Image_Area()
         {
             // Arrange

@@ -1,14 +1,14 @@
 ﻿using System;
 using Moq;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 {
-    [TestFixture]
     public class WhenAddDonor
     {
-        [Test]
+        [Fact]
         public void Shoud_Throw_MapIsNotInitializedException_When_Called_Before_InitMap_Call()
         {
             var mock = new Mock<IArea2DMapBuilder>();
@@ -17,10 +17,10 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
             var donorArea = Area2D.Create(3, 3, 5, 5);
-            Assert.Throws<MapIsNotInitializedException>(()=>inpaintMapBuilder.AddDonor(donorArea));
+            Should.Throw<MapIsNotInitializedException>(() => inpaintMapBuilder.AddDonor(donorArea));
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentNullException_When_DonorArea_IsNull()
         {
             var mock = new Mock<IArea2DMapBuilder>();
@@ -30,10 +30,10 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 
             Area2D donorArea = null;
             inpaintMapBuilder.InitNewMap(Area2D.Create(0, 0, 15, 15));
-            Assert.Throws<ArgumentNullException>(() => inpaintMapBuilder.AddDonor(donorArea));
+            Should.Throw<ArgumentNullException>(() => inpaintMapBuilder.AddDonor(donorArea));
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_EmptyAreaException_When_DonorArea_IsEmpty()
         {
             var mock = new Mock<IArea2DMapBuilder>();
@@ -43,7 +43,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 
             Area2D donorArea = Area2D.Empty;
             inpaintMapBuilder.InitNewMap(Area2D.Create(0, 0, 15, 15));
-            Assert.Throws<EmptyAreaException>(()=>inpaintMapBuilder.AddDonor(donorArea));
+            Should.Throw<EmptyAreaException>(() => inpaintMapBuilder.AddDonor(donorArea));
         }
     }
 }

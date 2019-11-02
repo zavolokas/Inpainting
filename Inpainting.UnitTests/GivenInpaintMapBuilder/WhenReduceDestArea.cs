@@ -1,14 +1,14 @@
 ﻿using System;
 using Moq;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 {
-    [TestFixture]
     public class WhenReduceDestArea
     {
-        [Test]
+        [Fact]
         public void Shoud_Throw_MapIsNotInitializedException_When_Called_Before_InitMap_Call()
         {
             var mock = new Mock<IArea2DMapBuilder>();
@@ -17,10 +17,10 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
             var reduceArea = Area2D.Create(2, 2, 10, 10);
-            Assert.Throws<MapIsNotInitializedException>(()=>inpaintMapBuilder.ReduceDestArea(reduceArea));
+            Should.Throw<MapIsNotInitializedException>(() => inpaintMapBuilder.ReduceDestArea(reduceArea));
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentNullException_When_Area_IsNull()
         {
             var mock = new Mock<IArea2DMapBuilder>();
@@ -30,10 +30,10 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 
             Area2D reduceArea = null;
             inpaintMapBuilder.InitNewMap(Area2D.Create(0, 0, 15, 15));
-            Assert.Throws<ArgumentNullException>(() => inpaintMapBuilder.ReduceDestArea(reduceArea));
+            Should.Throw<ArgumentNullException>(() => inpaintMapBuilder.ReduceDestArea(reduceArea));
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_EmptyAreaException_When_Area_IsEmpty()
         {
             var mock = new Mock<IArea2DMapBuilder>();
@@ -43,10 +43,10 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 
             Area2D reduceArea = Area2D.Empty;
             inpaintMapBuilder.InitNewMap(Area2D.Create(0, 0, 15, 15));
-            Assert.Throws<EmptyAreaException>(()=>inpaintMapBuilder.ReduceDestArea(reduceArea));
+            Should.Throw<EmptyAreaException>(() => inpaintMapBuilder.ReduceDestArea(reduceArea));
         }
 
-        [Test]
+        [Fact]
         public void Should_Delegate_ReduceDestArea_To_MapBuilder()
         {
             var mock = new Mock<IArea2DMapBuilder>();
