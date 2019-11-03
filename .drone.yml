@@ -25,19 +25,4 @@ steps:
       - dotnet nuget push Inpainting/bin/Release/Zavolokas.ImageProcessing.Inpainting.$${DRONE_TAG}.nupkg -s https://api.nuget.org/v3/index.json -k $${NUGETKEY}
     when:
       event: [tag]
-      branch: [master] 
-
-  - name: publish-docker-image
-    image: plugins/docker
-    username: 
-      from_secret: DOCKER_USERNAME  # we will inject your dockerhub username using drone secrets. 
-    password: 
-      from_secret: DOCKER_PASSWORD # we will inject your dockerhub password using drone secrets.
-    repo: zavolokas/inpainter # refer to dockerhub documentation for repo naming conventions
-    tag: 
-      - latest
-      - ${DRONE_TAG}
-    file: Dockerfile
-    when:
-      branch: [ master ]
-      event: [ tag ] # step only triggers on push events
+      branch: [master]
