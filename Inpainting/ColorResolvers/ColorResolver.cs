@@ -19,9 +19,10 @@
         /// </summary>
         public static readonly ColorResolver Simple = new SimpleColorResolver();
 
-        /// <summary>
-        /// Uses mean shift method in order to calculate a result color. 
-        /// </summary>
-        public static readonly ColorResolver MeanShift = new MeanShiftColorResolver();
+        // TODO: uncomment this when Accord have .NET Standard support. This method it more precise.
+        ///// <summary>
+        ///// Uses mean shift method in order to calculate a result color. 
+        ///// </summary>
+        //public static readonly ColorResolver MeanShift = new MeanShiftColorResolver();
     }
 }
