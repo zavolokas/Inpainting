@@ -36,7 +36,6 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
         [InlineData(500, 400, 4)]
         [InlineData(256, 127, 2)]
         [InlineData(256, 128, 9)]
-        [InlineData(256, 128, 9)]
         public void Should_Throw_WrongImageSizeException_When_Cant_Be_Divided_Levels_Amount_Times(int width, int height, byte levelsAmount)
         {
             // Arrange
