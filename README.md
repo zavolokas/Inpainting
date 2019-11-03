@@ -17,10 +17,10 @@ Content aware fill is used to fill in unwanted or missing areas of photographs. 
 ## Try in Docker
 
 ```bash
-docker run -d -p 8069:8069 zavolokas/inpainter:latest
+docker run -p 5000:80 -it --rm zavolokas/inpainter:latest
 ```
 
-Navigate to http://localhost:8069
+Navigate to http://localhost:5000
 
 ## How to use it?
 
