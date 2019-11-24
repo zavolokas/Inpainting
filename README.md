@@ -1,6 +1,7 @@
 # Inpainting
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)]()
 [![Build Status](https://travis-ci.org/zavolokas/Inpainting.svg?branch=master)](https://travis-ci.org/zavolokas/Inpainting)
+[![Drone Status](https://cloud.drone.io/api/badges/zavolokas/Inpainting/status.svg)](https://cloud.drone.io/zavolokas/Inpainting)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/zavolokas)
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=CSharp+project+that+allows+to+remove+an+unwanted+object+from+photo+smartly+as+it+never+was+there&url=https://github.com/zavolokas/Inpainting&hashtags=contentawarefill,csharp,inpainting,imageprocessing,opensource)
 
@@ -16,10 +17,10 @@ Content aware fill is used to fill in unwanted or missing areas of photographs. 
 ## Try in Docker
 
 ```bash
-docker run -d -p 8069:8069 zavolokas/inpainter:1.0
+docker run -p 5000:80 -it --rm zavolokas/inpainter:latest
 ```
 
-Navigate to http://localhost:8069
+Navigate to http://localhost:5000
 
 ## How to use it?
 

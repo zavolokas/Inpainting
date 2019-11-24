@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+﻿<!DOCTYPE HTML>
 <html>
 <head>
 	<title>Inpainting API test</title>
@@ -123,6 +123,40 @@
 			outline: none;
 			opacity: 0;
 		}
+		#mask {
+		    object-fit: contain;
+			width: 100%;
+			height: 100%;
+		}
+		.img-busy
+		{
+			filter: blur(8px);
+			animation-name: scanning;
+			animation-duration: 1s;
+			animation-direction: alternate;
+			animation-iteration-count: infinite;
+			animation-timing-function: ease-in-out
+		}
+		@keyframes scanning {
+			from {filter: blur(8px);}
+			to {filter: blur(14px);}
+		}
+		@keyframes mask-fade {
+			from {opacity: 1;}
+			to {opacity: 0;}
+		}
+		.mask-finished
+		{
+			animation-name: mask-fade;
+			animation-duration: 4s;
+			animation-iteration-count: 1;
+			animation-timing-function: ease-in-out;
+			animation-fill-mode: forwards;
+		}
+		.btn-hide
+		{
+			visibility: hidden;
+		}
 	</style>
 </head>
 <body>
@@ -159,6 +193,7 @@ function UpdateImg(input, isMask) {
 				}
 				else
 				{
+
 					var img = new Image();
 					img.onload = function(){
 						//initialize Canvas
@@ -189,12 +224,12 @@ function UpdateImg(input, isMask) {
 					
 					$('#preview')
 						.css("background-image", "url('" + e.target.result + "')");
-
 				}
 			};
 		reader.readAsDataURL(input.files[0]);
 	}
 }
+
 $(function(){
 	$('#Image').change(function () {
 		$('#preview-note').text("");
@@ -214,7 +249,7 @@ $(function(){
 			$('#mask')
 				.removeClass("mask-finished")
 				.attr('src', CanvasDataUrl);
-			
+
 			//Clear all previus marks & canvas itself
 			clickX.length = 0;
 			clickY.length = 0;
@@ -335,6 +370,5 @@ $(function(){
 		return window.btoa( binary );
 	}
 </script>
-
 </body>
 </html>

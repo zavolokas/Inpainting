@@ -11,7 +11,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
         public Bitmap RemoveMarkup;
         public List<Bitmap> Donors;
 
-        private TestSet(){}
+        private TestSet() { }
 
         public static TestSet Init(string size)
         {

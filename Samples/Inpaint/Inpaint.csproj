@@ -1,81 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F541908F-ADAD-4EEB-B0BD-3A56F51930FB}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Inpaint</RootNamespace>
-    <AssemblyName>Inpaint</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Zavolokas.GdiExtensions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Zavolokas.GdiExtensions.1.0.0\lib\net462\Zavolokas.GdiExtensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Zavolokas.ImageProcessing.PatchMatch, Version=1.0.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Zavolokas.ImageProcessing.PatchMatch.1.0.7\lib\net462\Zavolokas.ImageProcessing.PatchMatch.dll</HintPath>
-    </Reference>
-    <Reference Include="Zavolokas.Math, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Zavolokas.Math.1.0.0\lib\net462\Zavolokas.Math.dll</HintPath>
-    </Reference>
-    <Reference Include="Zavolokas.Structures, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Zavolokas.Structures.1.0.2\lib\net462\Zavolokas.Structures.dll</HintPath>
-    </Reference>
-    <Reference Include="Zavolokas.Structures.Gdi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Zavolokas.Structures.Gdi.1.0.0\lib\net462\Zavolokas.Structures.Gdi.dll</HintPath>
-    </Reference>
-    <Reference Include="Zavolokas.Utils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Zavolokas.Utils.1.0.0\lib\net452\Zavolokas.Utils.dll</HintPath>
-    </Reference>
+    <PackageReference Include="System.Drawing.Common" Version="4.6.0" />
+    <PackageReference Include="Zavolokas.GdiExtensions" Version="2.0.0.5" />
+    <PackageReference Include="Zavolokas.Structures.Gdi" Version="2.0.0.13" />
+    <PackageReference Include="Zavolokas.Utils" Version="2.0.0.7" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <ProjectReference Include="..\..\Inpainting\Inpainting.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Inpainting\Inpainting.csproj">
-      <Project>{DE1E1F2A-3446-4267-8F76-518F29DE58A0}</Project>
-      <Name>Inpainting</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

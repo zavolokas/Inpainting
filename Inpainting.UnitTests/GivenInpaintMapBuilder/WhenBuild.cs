@@ -2,43 +2,39 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using NUnit.Framework;
-using Rhino.Mocks;
+using Moq;
+using Shouldly;
+using Xunit;
 using Zavolokas.Structures;
 
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
 {
-    [TestFixture]
     public class WhenBuild
     {
-        [Test]
+        [Fact]
         public void Shoud_Throw_MapIsNotInitializedException_When_Called_Before_InitMap_Call()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.Stub<IArea2DMapBuilder>();
-
-            mocks.ReplayAll();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
-            Assert.Throws<MapIsNotInitializedException>(() => inpaintMapBuilder.Build());
+            Should.Throw<MapIsNotInitializedException>(() => inpaintMapBuilder.Build());
         }
 
-        [Test]
+        [Fact]
         public void Should_Call_Build_Of_MapBuilder()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.Stub<IArea2DMapBuilder>();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
             var imageArea = Area2D.Create(0, 0, 15, 15);
             var inpaint = Area2D.Create(3, 3, 3, 3);
-            mapBuilder.Expect(mb => mb.InitNewMap(imageArea, imageArea))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x => x.IsSameAs(inpaint))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.Build())
-                      .Return(null);
-
-            mocks.ReplayAll();
+            mock.Setup(mb => mb.InitNewMap(imageArea, imageArea))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(inpaint))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.Build())
+                      .Returns(default(Area2DMap));
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -46,14 +42,15 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             inpaintMapBuilder.SetInpaintArea(inpaint);
             inpaintMapBuilder.Build();
 
-            mapBuilder.AssertWasCalled(x => x.Build());
+            mock.Verify(x => x.Build());
+            mock.VerifyAll();
         }
 
-        [Test]
+        [Fact]
         public void Should_Extract_Source_And_Dest_Areas_From_Donor()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.StrictMock<IArea2DMapBuilder>();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
             var imageArea = Area2D.Create(0, 0, 15, 15);
 
             var donor1 = Area2D.Create(0, 3, 8, 3);
@@ -62,17 +59,15 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             var srcArea = Area2D.Create(0, 3, 3, 3).Join(Area2D.Create(6, 3, 2, 3));
             var dstArea = Area2D.Create(3, 3, 3, 3);
 
-            mapBuilder.Expect(mb => mb.InitNewMap(imageArea, imageArea))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x => x.IsSameAs(inpaint))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(dstArea)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(srcArea))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.Build())
-                      .Return(null);
-
-            mocks.ReplayAll();
+            mock.Setup(mb => mb.InitNewMap(imageArea, imageArea))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(inpaint))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(dstArea)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(srcArea))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.Build())
+                      .Returns(default(Area2DMap));
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -80,23 +75,21 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             inpaintMapBuilder.AddDonor(donor1);
             inpaintMapBuilder.SetInpaintArea(inpaint);
             inpaintMapBuilder.Build();
+
+            mock.VerifyAll();
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_InpaintAreaIsNotSetException_When_InpaintArea_Is_Not_Set()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.StrictMock<IArea2DMapBuilder>();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
             var imageArea = Area2D.Create(0, 0, 15, 15);
 
             var donor1 = Area2D.Create(0, 3, 8, 3);
 
-            mapBuilder.Expect(mb => mb.InitNewMap(imageArea, imageArea))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.Build())
-                      .Return(null);
-
-            mocks.ReplayAll();
+            mock.Setup(mb => mb.InitNewMap(imageArea, imageArea))
+                      .Returns(mapBuilder);
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -104,27 +97,26 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             inpaintMapBuilder.AddDonor(donor1);
             //do not set inpaint area
             //inpaintMapBuilder.SetInpaintArea(inpaint);
-            Assert.Throws<InpaintAreaIsNotSetException>(() => inpaintMapBuilder.Build());
+            Should.Throw<InpaintAreaIsNotSetException>(() => inpaintMapBuilder.Build());
+            mock.VerifyAll();
         }
 
-        [Test]
+        [Fact]
         public void Should_Ignore_Donor_That_Doesnt_Intersect_Inpaint_Area()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.StrictMock<IArea2DMapBuilder>();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
             var imageArea = Area2D.Create(0, 0, 15, 15);
 
             var donor1 = Area2D.Create(0, 0, 2, 2);
             var inpaint = Area2D.Create(3, 3, 3, 3);
 
-            mapBuilder.Expect(mb => mb.InitNewMap(imageArea, imageArea))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x => x.IsSameAs(inpaint))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.Build())
-                      .Return(null);
-
-            mocks.ReplayAll();
+            mock.Setup(mb => mb.InitNewMap(imageArea, imageArea))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(inpaint))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.Build())
+                      .Returns((Area2DMap)null);
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -133,14 +125,14 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             inpaintMapBuilder.SetInpaintArea(inpaint);
             inpaintMapBuilder.Build();
 
-            mocks.VerifyAll();
+            mock.VerifyAll();
         }
 
-        [Test]
+        [Fact]
         public void Should_Ignore_Donor_That_Doesnt_Intersect_Last_Set_Inpaint_Area()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.StrictMock<IArea2DMapBuilder>();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var imageArea = Area2D.Create(0, 0, 15, 15);
 
@@ -148,16 +140,14 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             var inpaint1 = Area2D.Create(3, 3, 3, 3);
             var inpaint2 = Area2D.Create(0, 0, 2, 2);
 
-            mapBuilder.Expect(mb => mb.InitNewMap(imageArea, imageArea))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x => x.IsSameAs(inpaint1))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x => x.IsSameAs(inpaint2))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.Build())
-                      .Return(null);
-
-            mocks.ReplayAll();
+            mock.Setup(mb => mb.InitNewMap(imageArea, imageArea))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(inpaint1))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(inpaint2))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.Build())
+                      .Returns((Area2DMap)null);
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -167,28 +157,26 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             inpaintMapBuilder.SetInpaintArea(inpaint2);
             inpaintMapBuilder.Build();
 
-            mocks.VerifyAll();
+            mock.VerifyAll();
         }
 
-        [Test]
+        [Fact]
         public void Should_Ignore_Donor_That_Reside_Within_Inpaint_Area()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.StrictMock<IArea2DMapBuilder>();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var imageArea = Area2D.Create(0, 0, 15, 15);
 
             var donor1 = Area2D.Create(3, 3, 2, 2);
             var inpaint1 = Area2D.Create(3, 3, 3, 3);
 
-            mapBuilder.Expect(mb => mb.InitNewMap(imageArea, imageArea))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x => x.IsSameAs(inpaint1))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.Build())
-                      .Return(null);
-
-            mocks.ReplayAll();
+            mock.Setup(mb => mb.InitNewMap(imageArea, imageArea))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(inpaint1))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.Build())
+                      .Returns((Area2DMap)null);
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -197,15 +185,15 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             inpaintMapBuilder.SetInpaintArea(inpaint1);
             inpaintMapBuilder.Build();
 
-            mocks.VerifyAll();
+            mock.VerifyAll();
         }
 
 
-        [Test]
+        [Fact]
         public void Should_Ignore_Set_Donors_That_Were_Set_Before_Initialization()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.StrictMock<IArea2DMapBuilder>();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var imageArea = Area2D.Create(0, 0, 15, 15);
             var donor1 = Area2D.Create(2, 3, 8, 3);
@@ -215,19 +203,17 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             var srcArea = Area2D.Create(0, 3, 3, 3).Join(Area2D.Create(6, 3, 2, 3));
             var dstArea = Area2D.Create(3, 3, 3, 3);
 
-            mapBuilder.Expect(mb => mb.InitNewMap(imageArea, imageArea))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.InitNewMap(imageArea, imageArea))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x => x.IsSameAs(inpaint))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(dstArea)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(srcArea))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.Build())
-                      .Return(null);
-
-            mocks.ReplayAll();
+            mock.Setup(mb => mb.InitNewMap(imageArea, imageArea))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.InitNewMap(imageArea, imageArea))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(inpaint))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(dstArea)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(srcArea))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.Build())
+                      .Returns((Area2DMap)null);
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -238,14 +224,14 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             inpaintMapBuilder.SetInpaintArea(inpaint);
             inpaintMapBuilder.Build();
 
-            mocks.VerifyAll();
+            mock.VerifyAll();
         }
 
-        [Test]
+        [Fact]
         public void Should_Add_Appropriate_Associated_Areas_For_Common_Parts_Of_Multiple_Donors()
         {
-            var mocks = new MockRepository();
-            var mapBuilder = mocks.StrictMock<IArea2DMapBuilder>();
+            var mock = new Mock<IArea2DMapBuilder>();
+            var mapBuilder = mock.Object;
 
             var imageArea = Area2D.Create(0, 0, 10, 10);
 
@@ -347,41 +333,39 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             var d4_src = donor4.Substract(markup);
             var d4_dest = Area2D.Create(6, 6, 2, 2);
 
-            mapBuilder.Expect(mb => mb.InitNewMap(imageArea, imageArea))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.SetIgnoredSourcedArea(Arg<Area2D>.Matches(x => x.IsSameAs(markup))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(d1d2d3d4_dest)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(d1d2d3d4_src))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(d1d2_dest)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(d1d2_src))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(d1d3_dest)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(d1d3_src))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(d2d4_dest)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(d2d4_src))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(d3d4_dest)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(d3d4_src))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(d1_dest)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(d1_src))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(d2_dest)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(d2_src))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(d3_dest)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(d3_src))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.AddAssociatedAreas(Arg<Area2D>.Matches(x => x.IsSameAs(d4_dest)),
-                                                          Arg<Area2D>.Matches(x => x.IsSameAs(d4_src))))
-                      .Return(mapBuilder);
-            mapBuilder.Expect(mb => mb.Build())
-                      .Return(null);
-
-            mocks.ReplayAll();
+            mock.Setup(mb => mb.InitNewMap(imageArea, imageArea))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.SetIgnoredSourcedArea(It.Is<Area2D>(d => d.IsSameAs(markup))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(d1d2d3d4_dest)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(d1d2d3d4_src))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(d1d2_dest)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(d1d2_src))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(d1d3_dest)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(d1d3_src))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(d2d4_dest)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(d2d4_src))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(d3d4_dest)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(d3d4_src))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(d1_dest)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(d1_src))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(d2_dest)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(d2_src))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(d3_dest)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(d3_src))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.AddAssociatedAreas(It.Is<Area2D>(d => d.IsSameAs(d4_dest)),
+                                                          It.Is<Area2D>(d => d.IsSameAs(d4_src))))
+                      .Returns(mapBuilder);
+            mock.Setup(mb => mb.Build())
+                      .Returns((Area2DMap)null);
 
             var inpaintMapBuilder = new InpaintMapBuilder(mapBuilder);
 
@@ -393,11 +377,10 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             inpaintMapBuilder.SetInpaintArea(markup);
             inpaintMapBuilder.Build();
 
-            mocks.VerifyAll();
+            mock.VerifyAll();
         }
 
-        [Test]
-        [Ignore("Don't know yet how to handle this properly on Travis CI")]
+        [Fact(Skip = "Don't know yet how to handle this properly on Travis CI")]
         public void Should_Build_Proper_Mapping()
         {
             var testName = "InpaintMapBuilderTest";
@@ -435,7 +418,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             string[] reffiles = Directory.GetFiles($"{ts.Path}\\{testName}\\refs", "*.*", SearchOption.TopDirectoryOnly);
             string[] outfiles = Directory.GetFiles($"{ts.Path}\\{testName}\\output", "*.*", SearchOption.TopDirectoryOnly);
 
-            Assert.That(reffiles.Length == outfiles.Length);
+            reffiles.Length.ShouldBe(outfiles.Length);
 
             if (reffiles.Length != outfiles.Length)
 
@@ -444,17 +427,16 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
                     var refFileName = Path.GetFileName(refFilePath);
                     var outFilePath = $"{ts.Path}\\{testName}\\output\\{refFileName}";
 
-                    Assert.That(File.Exists(outFilePath));
+                    File.Exists(outFilePath).ShouldBeTrue();
 
                     var refArea = new Bitmap(refFilePath).ToArea();
                     var outArea = new Bitmap(outFilePath).ToArea();
 
-                    Assert.That(refArea.IsSameAs(outArea));
+                    refArea.IsSameAs(outArea).ShouldBeTrue();
                 }
         }
 
-        [Test]
-        [Ignore("Don't know yet how to handle this properly on Travis CI")]
+        [Fact(Skip ="Don't know yet how to handle this properly on Travis CI")]
         public void Should_Build_Proper_Mapping_Fast()
         {
             var ts = TestSet.Init("1280x720");
@@ -477,7 +459,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenInpaintMapBuilder
             mapBuilder.Build();
             sw.Stop();
 
-            Assert.That(sw.ElapsedMilliseconds < 800);
+            sw.ElapsedMilliseconds.ShouldBeLessThan(800);
         }
 
         private static void SaveToOutput(Area2D area, string fileName, string testName, string testPath, Color color)

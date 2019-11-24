@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Zavolokas.ImageProcessing.PatchMatch;
 using System.Drawing;
 using System.IO;
-//using Zavolokas.Utils.Processes;
 
 //TODO: Cleanup the mess above & unused References
 
@@ -75,7 +74,7 @@ namespace InpaintHTTP
                 return Convert.ToBase64String(finalResult.GetBytes()); //this does the job ¯\_(ツ)_/¯
             });
 
-            Get("/", _ => View["TestWebsite/index"]);
+            Get("/ping", _ => "Ping is successful");
 
         }
 

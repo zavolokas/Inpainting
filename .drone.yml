@@ -1,0 +1,28 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: test
+    image: microsoft/dotnet:2.0-sdk
+    environment:
+      NUGETKEY:
+        from_secret: NUGET_KEY
+    commands:
+      - dotnet build Inpainting -c Release
+      - dotnet test Inpainting.UnitTests
+    when:
+      event: [push]
+
+  - name: publish-nuget
+    image: microsoft/dotnet:2.0-sdk
+    environment:
+      NUGETKEY:
+        from_secret: NUGET_KEY
+    commands:
+      - dotnet build Inpainting -c Release
+      - dotnet pack Inpainting -c Release -p:PackageVersion=$${DRONE_TAG}
+      - dotnet nuget push Inpainting/bin/Release/Zavolokas.ImageProcessing.Inpainting.$${DRONE_TAG}.nupkg -s https://api.nuget.org/v3/index.json -k $${NUGETKEY}
+    when:
+      event: [tag]
+      branch: [master]

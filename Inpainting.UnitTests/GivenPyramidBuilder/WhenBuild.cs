@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Linq;
-using NUnit.Framework;
 using Shouldly;
 using Zavolokas.Structures;
+using Xunit;
 
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
 {
-    [TestFixture]
     public class WhenBuild
     {
-        [Test]
+        [Fact]
         public void Should_Throw_InitializationException_When_No_Image_Was_Added()
         {
             // Arrange
@@ -20,7 +19,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<InitializationException>();
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentOutOfRangeException_When_Levels_Amount_Less_Then_1()
         {
             // Arrange
@@ -32,11 +31,11 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<ArgumentOutOfRangeException>();
         }
 
-        [TestCase(500, 400, 5)]
-        [TestCase(500, 400, 4)]
-        [TestCase(256, 127, 2)]
-        [TestCase(256, 128, 9)]
-        [TestCase(256, 128, 9)]
+        [Theory]
+        [InlineData(500, 400, 5)]
+        [InlineData(500, 400, 4)]
+        [InlineData(256, 127, 2)]
+        [InlineData(256, 128, 9)]
         public void Should_Throw_WrongImageSizeException_When_Cant_Be_Divided_Levels_Amount_Times(int width, int height, byte levelsAmount)
         {
             // Arrange
@@ -50,14 +49,15 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<WrongImageSizeException>();
         }
 
-        [TestCase(500, 1, 1)]
-        [TestCase(1, 127, 1)]
-        [TestCase(256, 128, 8)]
+        [Theory]
+        [InlineData(500, 1, 1)]
+        [InlineData(1, 127, 1)]
+        [InlineData(256, 128, 8)]
         public void Should_Throw_WrongImageSizeException_When_Image_Downscaled_To_1px_On_Any_Side(int width, int height, byte levelsAmount)
         {
             // Arrange
             var image = CreateImage(width, height);
-            var markup = CreateImage(width/2, height);
+            var markup = CreateImage(width / 2, height);
             var pyramidBuilder = new PyramidBuilder();
             pyramidBuilder.Init(image, markup);
             Action act = () => pyramidBuilder.Build(levelsAmount);
@@ -66,10 +66,11 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<WrongImageSizeException>();
         }
 
-        [TestCase(500, 400, 3)]
-        [TestCase(256, 127, 1)]
-        [TestCase(257, 127, 1)]
-        [TestCase(256, 128, 7)]
+        [Theory]
+        [InlineData(500, 400, 3)]
+        [InlineData(256, 127, 1)]
+        [InlineData(257, 127, 1)]
+        [InlineData(256, 128, 7)]
         public void Should_Not_Throw_When_Can_Be_Divided_Levels_Amount_Times(int width, int height, byte levelsAmount)
         {
             // Arrange
@@ -83,10 +84,11 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldNotThrow();
         }
 
-        [TestCase(2, 2, 1)]
-        [TestCase(11, 11, 1)]
-        [TestCase(20, 20, 2)]
-        [TestCase(500, 400, 3)]
+        [Theory]
+        [InlineData(2, 2, 1)]
+        [InlineData(11, 11, 1)]
+        [InlineData(20, 20, 2)]
+        [InlineData(500, 400, 3)]
         public void Should_Build_Pyramid_Of_Required_Level_High(int width, int height, byte levelsAmount)
         {
             // Arrange
@@ -102,8 +104,9 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             pyramid.LevelsAmount.ShouldBe<byte>(levelsAmount);
         }
 
-        [TestCase(500, 400, 256, 400, 5)]
-        [TestCase(256, 127, 400, 130, 2)]
+        [Theory]
+        [InlineData(500, 400, 256, 400, 5)]
+        [InlineData(256, 127, 400, 130, 2)]
         public void Should_Use_Last_Set_Image(int width1, int height1, int width2, int height2, byte levelsAmount)
         {
             // Arrange
@@ -122,7 +125,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             pyramid.LevelsAmount.ShouldBe<byte>(levelsAmount);
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_NoAreaToInpaintException_When_Markup_In_Image_Area_Empty()
         {
             // Arrange
@@ -140,7 +143,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<NoAreaToInpaintException>();
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_AreaRemovedException_When_Markup_Covers_Whole_Image()
         {
             // Arrange
@@ -158,7 +161,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramidBuilder
             act.ShouldThrow<AreaRemovedException>();
         }
 
-        [Test]
+        [Fact]
         public void Should_Use_Last_Set_Markup()
         {
             // Arrange

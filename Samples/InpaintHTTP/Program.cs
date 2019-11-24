@@ -1,25 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
-using Nancy;
-using Nancy.Hosting.Self;
-
-namespace InpaintHTTP
+﻿namespace InpaintHTTP
 {
+    using System.IO;
+    using Microsoft.AspNetCore.Hosting;
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Creating new server..");
-            NancyHost nancyHost = new NancyHost(new Uri("http://localhost:8069"));
-            nancyHost.Start();
-            Console.WriteLine("Initialized and started NancyHost");
+            var host = new WebHostBuilder()
+               .UseContentRoot(Directory.GetCurrentDirectory())
+               .UseKestrel()
+               .UseStartup<Startup>()
+               .UseUrls("http://localhost:8069")
+               .Build();
 
-            //inf sleep to avoid main thread from finishing/terminating
-            Thread.Sleep(-1); 
+            host.Run();
         }
     }
 }

@@ -18,8 +18,8 @@ namespace Inpaint
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            const string imagesPath = "../../../images";
-            const string outputPath = "../../out";
+            const string imagesPath = "../../../../images";
+            const string outputPath = "../../../out";
             string resultPath = Path.Combine(outputPath, "result.png");
 
             const string imageName = "t067.jpg";

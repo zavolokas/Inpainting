@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 using Shouldly;
+using Xunit;
 using Zavolokas.Structures;
+
 
 namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
 {
-    [TestFixture]
     public class WhenCtor : PyramidTestBase
     {
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentNullException_When_Images_Null()
         {
             // Arrange
@@ -25,7 +25,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             act.ShouldThrow<ArgumentNullException>();
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentNullException_When_InpaintAreas_Null()
         {
             // Arrange
@@ -41,7 +41,7 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             act.ShouldThrow<ArgumentNullException>();
         }
 
-        [Test]
+        [Fact]
         public void Should_Throw_ArgumentNullException_When_Mappings_Null()
         {
             // Arrange
@@ -57,14 +57,15 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             act.ShouldThrow<ArgumentNullException>();
         }
 
-        [TestCase(32, 32, 16, 16, 8, 7)]
-        [TestCase(32, 32, 16, 17, 8, 8)]
-        [TestCase(32, 32, 10, 16, 8, 8)]
-        [TestCase(32, 32, 17, 16, 8, 8)]
-        [TestCase(32, 32, 16, 15, 8, 8)]
-        [TestCase(32, 32, 16, 16, 8, 9)]
-        [TestCase(32, 32, 16, 16, 9, 8)]
-        [TestCase(32, 32, 16, 16, 7, 8)]
+        [Theory]
+        [InlineData(32, 32, 16, 16, 8, 7)]
+        [InlineData(32, 32, 16, 17, 8, 8)]
+        [InlineData(32, 32, 10, 16, 8, 8)]
+        [InlineData(32, 32, 17, 16, 8, 8)]
+        [InlineData(32, 32, 16, 15, 8, 8)]
+        [InlineData(32, 32, 16, 16, 8, 9)]
+        [InlineData(32, 32, 16, 16, 9, 8)]
+        [InlineData(32, 32, 16, 16, 7, 8)]
         public void Should_Throw_WrongImageSizeException_When_Images_Not_2_Times_Smaller(int w1, int h1, int w2, int h2,
             int w3, int h3)
         {
@@ -85,13 +86,14 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             act.ShouldThrow<WrongImageSizeException>();
         }
 
-        [TestCase(1, 1, 32, 32, 0, 0, 16, 16, 0, 0, 8, 8)]
-        [TestCase(2, 0, 32, 32, 0, 0, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 1, 1, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 0, 2, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 5, 0, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 0, 0, 16, 16, 2, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 0, 0, 16, 16, 0, 3, 8, 8)]
+        [Theory]
+        [InlineData(1, 1, 32, 32, 0, 0, 16, 16, 0, 0, 8, 8)]
+        [InlineData(2, 0, 32, 32, 0, 0, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 1, 1, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 0, 2, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 5, 0, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 0, 0, 16, 16, 2, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 0, 0, 16, 16, 0, 3, 8, 8)]
         public void Should_Throw_WrongMappingSizeException_When_Mapping_Outside_Of_Image(int x1, int y1, int w1, int h1,
             int x2, int y2, int w2, int h2, int x3, int y3, int w3, int h3)
         {
@@ -111,13 +113,14 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             act.ShouldThrow<WrongMappingSizeException>();
         }
 
-        [TestCase(1, 1, 32, 32, 0, 0, 16, 16, 0, 0, 8, 8)]
-        [TestCase(2, 0, 32, 32, 0, 0, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 1, 1, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 0, 2, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 5, 0, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 0, 0, 16, 16, 2, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 0, 0, 16, 16, 0, 3, 8, 8)]
+        [Theory]
+        [InlineData(1, 1, 32, 32, 0, 0, 16, 16, 0, 0, 8, 8)]
+        [InlineData(2, 0, 32, 32, 0, 0, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 1, 1, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 0, 2, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 5, 0, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 0, 0, 16, 16, 2, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 0, 0, 16, 16, 0, 3, 8, 8)]
         public void Should_Throw_WrongInpaintAreaSizeException_When_Area_Outside_Of_Image(int x1, int y1, int w1,
             int h1, int x2, int y2, int w2, int h2, int x3, int y3, int w3, int h3)
         {
@@ -138,12 +141,13 @@ namespace Zavolokas.ImageProcessing.Inpainting.UnitTests.GivenPyramid
             act.ShouldThrow<WrongInpaintAreaSizeException>();
         }
 
-        [TestCase(1, 1, 0, 0, 0, 0, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 0, 0, 1, 1, 16, 16, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 0, 2, 0, 0, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 5, 0, 0, 0, 0, 0, 8, 8)]
-        [TestCase(0, 0, 32, 32, 0, 0, 16, 16, 2, 0, 0, 0)]
-        [TestCase(0, 0, 32, 32, 0, 0, 16, 16, 0, 3, 0, 0)]
+        [Theory]
+        [InlineData(1, 1, 0, 0, 0, 0, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 0, 0, 1, 1, 16, 16, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 0, 2, 0, 0, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 5, 0, 0, 0, 0, 0, 8, 8)]
+        [InlineData(0, 0, 32, 32, 0, 0, 16, 16, 2, 0, 0, 0)]
+        [InlineData(0, 0, 32, 32, 0, 0, 16, 16, 0, 3, 0, 0)]
         public void Should_Throw_WrongInpaintAreaSizeException_When_Any_Area_Is_Empty(int x1, int y1, int w1, int h1,
             int x2, int y2, int w2, int h2, int x3, int y3, int w3, int h3)
         {
